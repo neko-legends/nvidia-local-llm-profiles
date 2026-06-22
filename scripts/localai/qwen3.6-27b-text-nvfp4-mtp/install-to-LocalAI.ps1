@@ -1,5 +1,9 @@
 param(
-    [string]$TargetDir = "D:\Tools\LocalAI"
+    # TargetDir: where the launcher scripts are copied.
+    # Default: an "installed" folder next to this script.
+    # Override to install somewhere else, e.g.:
+    #   .\install-to-LocalAI.ps1 -TargetDir "C:\LocalAI"
+    [string]$TargetDir = "$PSScriptRoot\..\installed"
 )
 
 $ErrorActionPreference = "Stop"
@@ -49,6 +53,7 @@ Write-Host "Updated shortcut:"
 Write-Host $shortcutPath
 Write-Host ""
 Write-Host "Next:"
-Write-Host "1. Run download-qwen3.6-27B-Text-NVFP4-MTP.bat"
-Write-Host "2. Run Launch Qwen Server.lnk"
+Write-Host "1. Run download-qwen3.6-27B-Text-NVFP4-MTP.bat (free HF account may be required)"
+Write-Host "2. Edit ModelDir in Start-Qwen3.6-27B-Text-NVFP4-MTP-vLLM.ps1 if you saved the model elsewhere"
+Write-Host "3. Double-click Launch Qwen Server.lnk (or run start-qwen3.6-27B-Text-NVFP4-MTP-server.bat)"
 Write-Host ""

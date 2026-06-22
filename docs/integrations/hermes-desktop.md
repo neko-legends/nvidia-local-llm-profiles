@@ -6,10 +6,10 @@ Hermes can use these LocalAI launchers through OpenAI-compatible `/v1` endpoints
 
 Use this when you want the ModelOpt NVFP4/vLLM path.
 
-Start:
+Start (from the installed folder):
 
 ```text
-D:\Tools\LocalAI\start-qwen3.6-27B-Text-NVFP4-MTP-server.bat
+start-qwen3.6-27B-Text-NVFP4-MTP-server.bat
 ```
 
 Hermes settings:
@@ -25,10 +25,10 @@ Model:        qwen3.6-27b-text-nvfp4-mtp
 
 Use this when you want the GGUF/llama.cpp CUDA path.
 
-Start:
+Start (from the installed folder):
 
 ```text
-D:\Tools\LocalAI\start-qwopus3.6-27b-coder-mtp-q5-server.bat
+start-qwopus3.6-27b-coder-mtp-q5-server.bat
 ```
 
 Hermes Desktop on the same machine:
@@ -40,18 +40,20 @@ API key:      none or any placeholder if required
 Model:        qwopus3.6-27b-coder-mtp-q5-k-m
 ```
 
-Hermes Client from another machine:
+Hermes Client from another machine on the same LAN:
 
 ```text
-LAN base URL:       http://192.168.68.73:39182/v1
-Tailscale base URL: http://100.64.131.86:39182/v1
-Model:              qwopus3.6-27b-coder-mtp-q5-k-m
+Base URL:  http://<your-server-lan-ip>:39182/v1
+Model:     qwopus3.6-27b-coder-mtp-q5-k-m
 ```
 
-If the client cannot connect, run this once as admin:
+Replace `<your-server-lan-ip>` with the LAN IP of the machine running the server
+(e.g. from `ipconfig`). If you use Tailscale, use the Tailscale IP instead.
+
+If the client cannot connect, run this once as admin on the server machine:
 
 ```text
-D:\Tools\LocalAI\allow-qwopus3.6-coder-mtp-server-firewall-admin.bat
+allow-qwopus3.6-coder-mtp-server-firewall-admin.bat
 ```
 
 ## Verify An Endpoint

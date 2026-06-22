@@ -11,7 +11,6 @@ The current targets are:
 - `sakamakismile/Qwen3.6-27B-Text-NVFP4-MTP`
 - `Jackrong/Qwopus3.6-27B-Coder-MTP-GGUF`
 - Runtime mix: vLLM Docker for ModelOpt NVFP4 safetensors, llama.cpp CUDA for GGUF
-- Local model folder: `D:\Tools\LocalAI\models`
 - Hermes integration: OpenAI-compatible `/v1` endpoints
 
 ## For AI Agents
@@ -34,7 +33,8 @@ Important behavior:
 - Do not assume this project is only for GGUF. NVIDIA local LLM profiling includes both GGUF/llama.cpp and NVFP4/vLLM paths.
 - The Qwen NVFP4 model is not a GGUF; use the vLLM launcher.
 - The Qwopus Coder MTP model is a GGUF; use the llama.cpp CUDA launcher.
-- Keep model payloads out of this repo. Store downloaded models in `D:\Tools\LocalAI\models`.
+- Keep model payloads out of this repo. Store downloaded models in a local folder of your choice; the download scripts default to a `models/` subfolder next to the installed launchers.
+- **Hugging Face account may be required.** Both models are hosted on Hugging Face. If a download fails with a 401 or authentication error, create a free account, accept any license on the model page, and log in with `huggingface-cli login`. Install the CLI with `pip install -U "huggingface_hub[cli]"`.
 - For RTX 5090 long runs, verify the Afterburner voltage/frequency curve is applied before starting benchmarks.
 - Benchmark results must record model, runtime, launch settings, GPU index, power/thermal state, prompt style/hash, requested prompt-token target, actual prompt tokens, generated tokens, and throughput.
 - Benchmark CSVs must include request start/end timestamps, and context ladder runs must write a summary CSV with start/end timestamps for each prompt-token target.
@@ -44,25 +44,31 @@ Important behavior:
 
 ## Quick Start
 
-Install both LocalAI launcher packs:
+Install both LocalAI launcher packs (defaults to `scripts/localai/installed/`):
 
 ```text
 scripts\localai\install-all-localai-launchers.bat
 ```
 
-For Qwen3.6 Text NVFP4 MTP:
+Or pass a custom target folder:
 
 ```text
-scripts\localai\qwen3.6-27b-text-nvfp4-mtp\download-to-LocalAI-models.bat
-D:\Tools\LocalAI\start-qwen3.6-27B-Text-NVFP4-MTP-server.bat
+powershell -NoProfile -ExecutionPolicy Bypass -File scripts\localai\install-all-localai-launchers.ps1 -TargetDir "C:\LocalAI"
 ```
 
-For Qwopus3.6 Coder MTP GGUF:
+For Qwen3.6 Text NVFP4 MTP (vLLM Docker):
 
 ```text
-D:\Tools\LocalAI\models\Qwopus3.6-27B-Coder-MTP-Q5_K_M.gguf
-D:\Tools\LocalAI\start-qwopus3.6-27b-coder-mtp-q5-server.bat
+download-qwen3.6-27B-Text-NVFP4-MTP.bat   (in installed folder)
+start-qwen3.6-27B-Text-NVFP4-MTP-server.bat
 ```
+
+For Qwopus3.6 Coder MTP GGUF (llama.cpp CUDA):
+
+1. Edit `LLAMA_DIR` in `start-qwopus3.6-27b-coder-mtp-q5-server.bat` to your llama.cpp build.
+   Download llama.cpp CUDA releases: https://github.com/ggml-org/llama.cpp/releases
+2. Run `download-qwopus3.6-27B-Coder-MTP-Q5.bat` to download the model.
+3. Run `start-qwopus3.6-27b-coder-mtp-q5-server.bat`.
 
 ## Hermes Endpoints
 
@@ -74,8 +80,7 @@ Qwen NVFP4 vLLM:
 Qwopus Coder MTP GGUF:
 
 - Desktop base URL: `http://127.0.0.1:39182/v1`
-- LAN base URL: `http://192.168.68.73:39182/v1`
-- Tailscale base URL: `http://100.64.131.86:39182/v1`
+- LAN base URL: `http://<your-server-lan-ip>:39182/v1`
 - Model: `qwopus3.6-27b-coder-mtp-q5-k-m`
 
 See `docs/integrations/hermes-desktop.md` for the combined setup notes.

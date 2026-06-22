@@ -2,16 +2,20 @@
 setlocal
 
 rem ============================================================
-rem  CONFIGURE: MODEL_DIR is where the model folder will be saved.
-rem  Default: models\Qwen3.6-27B-Text-NVFP4-MTP relative to this script.
+rem  CONFIGURE: MODEL_DIR is where the .gguf file will be saved.
+rem  Default: models\ subfolder relative to this script's location.
+rem  If this script was installed via install-to-LocalAI.bat, that
+rem  puts the model alongside the launcher in your LocalAI folder.
 rem  Edit MODEL_DIR below to use a different location.
 rem ============================================================
-set "MODEL_DIR=%~dp0models\Qwen3.6-27B-Text-NVFP4-MTP"
-set "REPO_ID=sakamakismile/Qwen3.6-27B-Text-NVFP4-MTP"
+set "MODEL_DIR=%~dp0models"
+set "FILENAME=Qwopus3.6-27B-Coder-MTP-Q5_K_M.gguf"
+set "REPO_ID=Jackrong/Qwopus3.6-27B-Coder-MTP-GGUF"
 
 echo ============================================================
 echo  Downloading: %REPO_ID%
-echo  Destination: %MODEL_DIR%
+echo  File:        %FILENAME%
+echo  Destination: %MODEL_DIR%\%FILENAME%
 echo ============================================================
 echo.
 echo NOTE: A free Hugging Face account may be required to download
@@ -35,7 +39,7 @@ rem Try huggingface-cli from PATH first
 where huggingface-cli >nul 2>&1
 if %ERRORLEVEL% == 0 (
     echo Using huggingface-cli ...
-    huggingface-cli download %REPO_ID% --local-dir "%MODEL_DIR%"
+    huggingface-cli download %REPO_ID% %FILENAME% --local-dir "%MODEL_DIR%"
     goto :check
 )
 
@@ -43,13 +47,13 @@ rem Try hf CLI from PATH
 where hf >nul 2>&1
 if %ERRORLEVEL% == 0 (
     echo Using hf CLI ...
-    hf download %REPO_ID% --local-dir "%MODEL_DIR%"
+    hf download %REPO_ID% %FILENAME% --local-dir "%MODEL_DIR%"
     goto :check
 )
 
 rem Fall back to Python huggingface_hub
 echo huggingface-cli / hf not found in PATH. Trying Python huggingface_hub ...
-python -c "from huggingface_hub import snapshot_download; snapshot_download(repo_id='%REPO_ID%', local_dir=r'%MODEL_DIR%')"
+python -c "from huggingface_hub import hf_hub_download; hf_hub_download(repo_id='%REPO_ID%', filename='%FILENAME%', local_dir=r'%MODEL_DIR%')"
 
 :check
 if errorlevel 1 (
@@ -66,14 +70,12 @@ if errorlevel 1 (
     exit /b 1
 )
 
-echo 262144>"%MODEL_DIR%\.recommended-max-model-len"
-
 echo.
 echo Download complete.
 echo Model saved to:
-echo   %MODEL_DIR%
+echo   %MODEL_DIR%\%FILENAME%
 echo.
 echo Start the server with:
-echo   start-qwen3.6-27B-Text-NVFP4-MTP-server.bat
+echo   start-qwopus3.6-27b-coder-mtp-q5-server.bat
 echo.
 pause

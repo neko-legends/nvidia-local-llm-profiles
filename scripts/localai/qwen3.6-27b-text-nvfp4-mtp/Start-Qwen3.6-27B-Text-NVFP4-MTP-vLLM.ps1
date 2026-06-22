@@ -1,4 +1,7 @@
 param(
+    # ModelDir: full path to the downloaded Qwen3.6-27B-Text-NVFP4-MTP folder.
+    # Default assumes the model is in a "models" subfolder next to this script
+    # (which is where the download scripts save it). Edit if you store it elsewhere.
     [string]$ModelDir = "$PSScriptRoot\models\Qwen3.6-27B-Text-NVFP4-MTP",
     [string]$Image = "vllm/vllm-openai:latest",
     [string]$ContainerName = "qwen36-text-nvfp4-mtp-vllm",

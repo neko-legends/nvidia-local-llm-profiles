@@ -13,7 +13,7 @@ Goal: give future agents enough measured numbers and exact settings to choose th
 - RTX 5090 is GPU `0`.
 - MSI Afterburner voltage/frequency curve is applied.
 - Driver is recorded from `nvidia-smi`.
-- Model payloads live in `D:\Tools\LocalAI\models`.
+- Model payloads live in your configured models folder (the download scripts default to a `models/` subfolder next to the installed launchers).
 - Results are written under `results/rtx-5090/`.
 
 ## Metrics To Record
@@ -53,11 +53,12 @@ The ladder must run against one already-loaded model server. Do not restart or r
 
 ## First Sweep
 
-For `Qwopus3.6-27B-Coder-MTP-Q5_K_M.gguf`, start with the current launcher:
+For `Qwopus3.6-27B-Coder-MTP-Q5_K_M.gguf`, start with:
 
 ```text
-D:\Tools\LocalAI\start-qwopus3.6-27b-coder-mtp-q5-server.bat
+start-qwopus3.6-27b-coder-mtp-q5-server.bat
 ```
+(installed via `scripts\localai\qwopus3.6-27b-coder-mtp-gguf\install-to-LocalAI.bat`)
 
 Then benchmark the endpoint:
 

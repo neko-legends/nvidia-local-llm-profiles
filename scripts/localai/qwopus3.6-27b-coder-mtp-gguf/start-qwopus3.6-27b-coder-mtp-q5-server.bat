@@ -1,42 +1,64 @@
 @echo off
 setlocal
 
+rem ============================================================
+rem  CONFIGURE: Set LLAMA_DIR to your llama.cpp CUDA build folder.
+rem  It must contain llama-server.exe.
+rem
+rem  Set MODEL_PATH to the full path of your downloaded .gguf file.
+rem
+rem  The defaults below match the layout installed by install-to-LocalAI.bat
+rem  (model in a "models" subfolder next to this script).
+rem  Edit if you store things differently.
+rem ============================================================
+set "SCRIPT_DIR=%~dp0"
 set "LLAMA_DIR=D:\Tools\llama.cpp-b9267-cuda13.1"
-set "MODEL_PATH=D:\Tools\LocalAI\models\Qwopus3.6-27B-Coder-MTP-Q5_K_M.gguf"
+set "MODEL_PATH=%SCRIPT_DIR%models\Qwopus3.6-27B-Coder-MTP-Q5_K_M.gguf"
 set "MODEL_ALIAS=qwopus3.6-27b-coder-mtp-q5-k-m"
 set "HOST=0.0.0.0"
 set "PORT=39182"
-rem RTX 5090 benchmark profile: leave room for 200K prompt-token tests plus generation.
+rem RTX 5090 benchmark profile: leaves room for 200K+ prompt-token tests plus generation.
+rem Lower CTX_SIZE (e.g. 32768 or 65536) if startup fails or you have less VRAM.
 set "CTX_SIZE=262144"
 
 if not exist "%LLAMA_DIR%\llama-server.exe" (
-  echo Missing llama-server.exe at "%LLAMA_DIR%\llama-server.exe"
+  echo.
+  echo ERROR: llama-server.exe not found at:
+  echo   %LLAMA_DIR%
+  echo.
+  echo Edit LLAMA_DIR at the top of this script to point at your
+  echo llama.cpp CUDA build. Download llama.cpp pre-built binaries from:
+  echo   https://github.com/ggml-org/llama.cpp/releases
+  echo Choose the win-cuda build matching your CUDA version.
+  echo.
   pause
   exit /b 1
 )
 
 if not exist "%MODEL_PATH%" (
-  echo Missing model at "%MODEL_PATH%"
   echo.
-  echo Put Qwopus3.6-27B-Coder-MTP-Q5_K_M.gguf in:
-  echo D:\Tools\LocalAI\models
+  echo ERROR: Model file not found at:
+  echo   %MODEL_PATH%
+  echo.
+  echo Edit MODEL_PATH at the top of this script, or download the model with:
+  echo   download-qwopus3.6-27B-Coder-MTP-Q5.bat
+  echo.
   pause
   exit /b 1
 )
 
 echo Starting llama.cpp server for %MODEL_ALIAS%
 echo.
-echo Hermes Desktop base URL:  http://127.0.0.1:%PORT%/v1
-echo Hermes Client LAN:        http://192.168.68.73:%PORT%/v1
-echo Hermes Client Tailscale:  http://100.64.131.86:%PORT%/v1
-echo Model id:                 %MODEL_ALIAS%
-echo Context:                  %CTX_SIZE% tokens
-echo MTP speculative decode:   ngram-mod + draft-mtp, draft max 2
+echo Desktop base URL:  http://127.0.0.1:%PORT%/v1
+echo LAN base URL:      http://<your-lan-ip>:%PORT%/v1
+echo Model id:          %MODEL_ALIAS%
+echo Context:           %CTX_SIZE% tokens
+echo MTP speculative:   ngram-mod + draft-mtp, draft max 2
 echo.
 echo In Hermes use:
-echo Provider/API: OpenAI-compatible chat completions
-echo API key:      none or any placeholder if required
-echo Model:        %MODEL_ALIAS%
+echo   Provider/API: OpenAI-compatible chat completions
+echo   API key:      none or any placeholder if required
+echo   Model:        %MODEL_ALIAS%
 echo.
 echo Press Ctrl+C in this window to stop the server.
 echo.

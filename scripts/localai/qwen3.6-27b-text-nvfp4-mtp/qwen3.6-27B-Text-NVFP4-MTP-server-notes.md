@@ -3,14 +3,31 @@
 Model:
 
 - Hugging Face repo: `sakamakismile/Qwen3.6-27B-Text-NVFP4-MTP`
-- Local folder: `D:\Tools\LocalAI\models\Qwen3.6-27B-Text-NVFP4-MTP`
 - Format: ModelOpt NVFP4 safetensors with bf16 MTP head
+- Runtime: vLLM Docker (`vllm/vllm-openai`)
 
-Start:
+Download the model:
 
-- Download first: `D:\Tools\LocalAI\download-qwen3.6-27B-Text-NVFP4-MTP.bat`
-- From this repo, use: `D:\forPublic\nvidia-local-llm-profiles\scripts\localai\qwen3.6-27b-text-nvfp4-mtp\download-to-LocalAI-models.bat`
-- Start Hermes server: `D:\Tools\LocalAI\start-qwen3.6-27B-Text-NVFP4-MTP-server.bat`
+```text
+download-qwen3.6-27B-Text-NVFP4-MTP.bat
+```
+
+> **Hugging Face account may be required.** If the download fails with a
+> 401 or authentication error, log in first with `huggingface-cli login`
+> and accept any license on the model page. Install the CLI with:
+> `pip install -U "huggingface_hub[cli]"`
+
+Start the server:
+
+```text
+start-qwen3.6-27B-Text-NVFP4-MTP-server.bat
+```
+
+Or directly with the PowerShell launcher (supports parameter overrides):
+
+```powershell
+powershell -NoProfile -ExecutionPolicy Bypass -File "Start-Qwen3.6-27B-Text-NVFP4-MTP-vLLM.ps1"
+```
 
 Hermes settings:
 
@@ -30,10 +47,11 @@ Current serving choices:
 - Reasoning parser: `--reasoning-parser qwen3`
 - MTP speculative decoding: `{"method":"qwen3_5_mtp","num_speculative_tokens":3}`
 
-Lower-context fallback:
+Lower-context fallback (if 256K startup fails):
 
 ```powershell
-powershell -NoProfile -ExecutionPolicy Bypass -File "D:\Tools\LocalAI\Start-Qwen3.6-27B-Text-NVFP4-MTP-vLLM.ps1" -MaxModelLen 32768
+powershell -NoProfile -ExecutionPolicy Bypass -File "Start-Qwen3.6-27B-Text-NVFP4-MTP-vLLM.ps1" -MaxModelLen 32768
 ```
 
-The default is the RTX 5090 256K context benchmark profile so the repo can test 100K and 200K prompt-token targets. Lower `-MaxModelLen` only when recording a lower-context comparison or if startup fails.
+The default is the RTX 5090 256K context benchmark profile. Lower `-MaxModelLen`
+only when recording a lower-context comparison or if startup fails.

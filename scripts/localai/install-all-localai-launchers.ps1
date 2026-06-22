@@ -1,5 +1,9 @@
 param(
-    [string]$TargetDir = "D:\Tools\LocalAI"
+    # TargetDir: where the launcher scripts are copied.
+    # Default: an "installed" folder next to this script.
+    # Override to install somewhere else, e.g.:
+    #   .\install-all-localai-launchers.ps1 -TargetDir "C:\LocalAI"
+    [string]$TargetDir = "$PSScriptRoot\installed"
 )
 
 $ErrorActionPreference = "Stop"
