@@ -82,7 +82,7 @@ function Stop-VllmContainer {
 function Start-VllmContainer {
     param([int]$N)
 
-    $specCfg = "{`"method`":`"qwen3_5_mtp`",`"num_speculative_tokens`":$N}"
+    $specCfg = "--speculative-config={`"method`":`"qwen3_5_mtp`",`"num_speculative_tokens`":$N}"
 
     $dockerArgs = @(
         "run", "--rm",
@@ -107,7 +107,8 @@ function Start-VllmContainer {
         "--gpu-memory-utilization", "$GpuMemUtil",
         "--reasoning-parser", "qwen3",
         "--kv-cache-dtype", $KvCacheDtype,
-        "--speculative-config", $specCfg
+        # Combined --flag=value form preserves JSON quotes through PowerShell→Docker→WSL
+        $specCfg
     )
 
     Write-Step "Starting vLLM (MTP n=$N, ctx=$MaxModelLen, kv=$KvCacheDtype, gpu-mem=$GpuMemUtil)"
