@@ -82,7 +82,8 @@ function Stop-VllmContainer {
 function Start-VllmContainer {
     param([int]$N)
 
-    $specCfg = "--speculative-config={`"method`":`"qwen3_5_mtp`",`"num_speculative_tokens`":$N}"
+    # Single-quoted base preserves literal " chars; interpolate $N via concatenation
+    $specCfg = '--speculative-config={"method":"qwen3_5_mtp","num_speculative_tokens":' + $N + '}'
 
     $dockerArgs = @(
         "run",
