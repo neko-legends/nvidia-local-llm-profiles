@@ -77,13 +77,26 @@ function Stop-VllmContainer {
     if ($old -eq $ContainerName) {
         docker rm $ContainerName | Out-Null
     }
-    # Poll until the name is fully released (docker rm can lag)
+    # Poll until the container name is fully released
     for ($i = 0; $i -lt 15; $i++) {
         Start-Sleep -Seconds 1
         $still = docker ps -a --filter "name=^/$ContainerName$" --format "{{.Names}}" 2>$null
-        if (-not $still) { return }
+        if (-not $still) { break }
     }
-    Write-Warning "Container $ContainerName still visible after 15s -- continuing anyway"
+    # Also wait until the port is actually free (docker can release the name before the port)
+    Write-Host "Waiting for port $Port to be released..."
+    for ($i = 0; $i -lt 20; $i++) {
+        Start-Sleep -Seconds 1
+        try {
+            $l = [System.Net.Sockets.TcpListener]::new(
+                [System.Net.IPAddress]::Parse($HostAddress), $Port)
+            $l.Start()
+            $l.Stop()
+            Write-Host "Port $Port is free."
+            return
+        } catch { }
+    }
+    Write-Warning "Port $Port still in use after 20s -- continuing anyway"
 }
 
 function Start-VllmContainer {
