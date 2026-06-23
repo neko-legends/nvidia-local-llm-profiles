@@ -31,8 +31,11 @@ function Test-DockerImage($ImageName) {
 }
 
 function Test-ModelReady($Path) {
-    return (Test-Path -LiteralPath (Join-Path $Path "config.json")) -and
-           (Test-Path -LiteralPath (Join-Path $Path "model.safetensors.index.json"))
+    if (-not (Test-Path -LiteralPath (Join-Path $Path "config.json"))) { return $false }
+    # Accept either a single-shard model.safetensors or a multi-shard index file
+    $hasSingle = Test-Path -LiteralPath (Join-Path $Path "model.safetensors")
+    $hasIndex  = Test-Path -LiteralPath (Join-Path $Path "model.safetensors.index.json")
+    return ($hasSingle -or $hasIndex)
 }
 
 $ModelDir = [System.IO.Path]::GetFullPath($ModelDir)
@@ -60,7 +63,7 @@ if (-not (Get-Command docker -ErrorAction SilentlyContinue)) {
     throw "Docker was not found. Install or start Docker Desktop, then run this launcher again."
 }
 
-docker info *> $null
+try { docker info 2>&1 | Out-Null } catch {}
 
 if (-not (Test-ModelReady $ModelDir)) {
     throw "The model is not fully downloaded yet. Run download-qwen3.6-27B-Text-NVFP4-MTP.bat, then start this launcher again."
