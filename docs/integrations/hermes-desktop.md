@@ -1,90 +1,62 @@
-# Hermes Desktop And Client
+# Hermes Desktop Integration
 
-Hermes can use these LocalAI launchers through OpenAI-compatible `/v1` endpoints.
+Hermes can use the Qwopus local server through its OpenAI-compatible `/v1` endpoint.
 
-## Qwen3.6 Text NVFP4 MTP
+## Qwopus3.6-27B-Coder-MTP Q5_K_M
 
-Use this when you want the ModelOpt NVFP4/vLLM path.
+Start the server (from the installed folder):
 
-Start (from the installed folder):
-
-```text
-start-qwen3.6-27B-Text-NVFP4-MTP-server.bat
-```
-
-Hermes settings:
-
-```text
-Provider/API: OpenAI-compatible chat completions
-Base URL:     http://127.0.0.1:8892/v1
-API key:      none or any placeholder if required
-Model:        qwen3.6-27b-text-nvfp4-mtp
-```
-
-## Qwopus3.6 Coder MTP GGUF
-
-Use this when you want the GGUF/llama.cpp CUDA path.
-
-Start (from the installed folder):
-
-```text
+```bat
 start-qwopus3.6-27b-coder-mtp-q5-server.bat
 ```
 
-Hermes Desktop on the same machine:
+Wire into Hermes (same machine):
 
 ```text
 Provider/API: OpenAI-compatible chat completions
 Base URL:     http://127.0.0.1:39182/v1
-API key:      none or any placeholder if required
+API key:      none (or any placeholder)
 Model:        qwopus3.6-27b-coder-mtp-q5-k-m
 ```
 
-Hermes Client from another machine on the same LAN:
+Hermes CLI shortcut:
+
+```
+/provider add custom:qwopus-local http://127.0.0.1:39182/v1 local
+/model custom:qwopus-local:qwopus3.6-27b-coder-mtp-q5-k-m
+```
+
+Remote access from another machine on the LAN:
 
 ```text
 Base URL:  http://<your-server-lan-ip>:39182/v1
 Model:     qwopus3.6-27b-coder-mtp-q5-k-m
 ```
 
-Replace `<your-server-lan-ip>` with the LAN IP of the machine running the server
-(e.g. from `ipconfig`). If you use Tailscale, use the Tailscale IP instead.
+If the client cannot connect, run once as admin on the server:
 
-If the client cannot connect, run this once as admin on the server machine:
-
-```text
+```bat
 allow-qwopus3.6-coder-mtp-server-firewall-admin.bat
 ```
 
-## Verify An Endpoint
-
-With a server running:
+## Verify the Endpoint
 
 ```powershell
 Invoke-RestMethod http://127.0.0.1:39182/v1/models
-```
 
-Minimal chat request:
-
-```powershell
 $body = @{
   model = "qwopus3.6-27b-coder-mtp-q5-k-m"
   messages = @(@{ role = "user"; content = "Reply with only: OK" })
   max_tokens = 8
 } | ConvertTo-Json -Depth 8
 
-Invoke-RestMethod `
-  -Uri http://127.0.0.1:39182/v1/chat/completions `
-  -Method Post `
-  -ContentType "application/json" `
-  -Body $body
+Invoke-RestMethod -Uri http://127.0.0.1:39182/v1/chat/completions `
+  -Method Post -ContentType "application/json" -Body $body
 ```
-
-Swap the URL and model for the Qwen NVFP4 endpoint when testing that launcher.
 
 ## Notes
 
 - Start the model server before Hermes tries to use it.
 - Do not put a real API key in a local no-auth endpoint.
 - Restart Hermes Desktop after changing saved custom provider settings.
-- Keep provider names explicit so the UI makes it clear which backend is active.
+- Server takes ~30s to load and start accepting requests after launch.
