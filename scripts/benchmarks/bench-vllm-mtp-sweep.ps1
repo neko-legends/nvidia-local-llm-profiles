@@ -107,14 +107,17 @@ function Start-VllmContainer {
     # PowerShell array splatting (& docker @args) and Start-Process -ArgumentList @array
     # both mangle the JSON quotes through the PS -> docker.exe -> WSL2 chain on Windows.
     # cmd /c passes the string verbatim and lets docker.exe handle its own quoting.
-    $specJson = '{"method":"qwen3_5_mtp","num_speculative_tokens":' + $N + '}'
-    $modelVol = "${ModelDir}:/model:ro"
+    # Build the speculative-config value. Single-quote the whole --flag=value argument
+    # so Invoke-Expression passes it as one token with literal quotes intact.
+    # This is the only form that survives PS->docker.exe->WSL2 without mangling.
+    $specCfgArg = "'--speculative-config={" + '"method":"qwen3_5_mtp","num_speculative_tokens":' + $N + "}'"
+    $modelVol   = "${ModelDir}:/model:ro"
 
     $cmdStr = "docker run" +
         " --name $ContainerName" +
         " --gpus all --ipc host" +
         " -p ${HostAddress}:${Port}:8000" +
-        " -v `"$modelVol`"" +
+        " -v '$modelVol'" +
         " -e CUDA_DEVICE_ORDER=PCI_BUS_ID" +
         " -e CUDA_VISIBLE_DEVICES=0" +
         " -d $Image" +
@@ -125,12 +128,11 @@ function Start-VllmContainer {
         " --max-model-len $MaxModelLen --max-num-seqs 1" +
         " --gpu-memory-utilization $GpuMemUtil" +
         " --reasoning-parser qwen3 --kv-cache-dtype $KvCacheDtype" +
-        " --speculative-config `"$specJson`""
+        " $specCfgArg"
 
     Write-Step "Starting vLLM (MTP n=$N, ctx=$MaxModelLen, kv=$KvCacheDtype, gpu-mem=$GpuMemUtil)"
-    Write-Host "cmd: $cmdStr"
-    $result = cmd /c $cmdStr 2>&1
-    Write-Host "docker output: $result"
+    Write-Host "specCfgArg: $specCfgArg"
+    Invoke-Expression $cmdStr | Out-Null
 }
 
 function Wait-VllmReady {
