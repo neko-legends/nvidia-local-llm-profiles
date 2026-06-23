@@ -132,7 +132,7 @@ function Start-VllmContainer {
 
     Write-Step "Starting vLLM (MTP n=$N, ctx=$MaxModelLen, kv=$KvCacheDtype, gpu-mem=$GpuMemUtil)"
     Write-Host "specCfgArg: $specCfgArg"
-    Invoke-Expression $cmdStr | Out-Null
+    Invoke-Expression $cmdStr
 }
 
 function Wait-VllmReady {
