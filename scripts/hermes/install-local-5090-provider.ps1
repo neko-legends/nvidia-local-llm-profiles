@@ -1,0 +1,99 @@
+param(
+  [string]$ProviderName = "Local 5090",
+  [int]$RouterPort = 39190,
+  [string]$QwopusBaseUrl = "http://127.0.0.1:39182/v1",
+  [string]$DiffusionGemmaBaseUrl = "http://127.0.0.1:8890/v1",
+  [switch]$NoStartRouter
+)
+
+$ErrorActionPreference = "Stop"
+
+$ScriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
+$RepoRoot = Resolve-Path (Join-Path $ScriptDir "..\..")
+$HermesDir = Join-Path $env:LOCALAPPDATA "hermes"
+$ConfigPath = Join-Path $HermesDir "config.yaml"
+$RouterDir = Join-Path $HermesDir "local-5090-router"
+$RouterSource = Join-Path $ScriptDir "local-5090-router.py"
+$RouterTarget = Join-Path $RouterDir "local-5090-router.py"
+$ConfigureScript = Join-Path $ScriptDir "configure-hermes-local-5090.py"
+
+if (-not (Test-Path $HermesDir)) {
+  New-Item -ItemType Directory -Path $HermesDir | Out-Null
+}
+
+if (-not (Test-Path $ConfigPath)) {
+  "custom_providers: []" | Set-Content -Path $ConfigPath -Encoding UTF8
+}
+
+New-Item -ItemType Directory -Path $RouterDir -Force | Out-Null
+Copy-Item -Path $RouterSource -Destination $RouterTarget -Force
+
+$PythonCandidates = @(
+  (Join-Path $HermesDir ".venv\Scripts\python.exe"),
+  (Join-Path $HermesDir "hermes-agent\.venv\Scripts\python.exe"),
+  (Join-Path $env:LOCALAPPDATA "Programs\Python\Python312\python.exe"),
+  (Join-Path $env:LOCALAPPDATA "Programs\Python\Python311\python.exe"),
+  "python"
+)
+
+$Python = $null
+foreach ($Candidate in $PythonCandidates) {
+  $ResolvedPython = $null
+  try {
+    $Command = Get-Command $Candidate -ErrorAction Stop
+    $ResolvedPython = $Command.Source
+  } catch {
+    if (Test-Path $Candidate) {
+      $ResolvedPython = $Candidate
+    }
+  }
+
+  if ($ResolvedPython) {
+    & $ResolvedPython -c "import yaml" 2>$null
+    if ($LASTEXITCODE -eq 0) {
+      $Python = $ResolvedPython
+      break
+    }
+  }
+}
+
+if (-not $Python) {
+  throw "Python with PyYAML was not found. Install PyYAML with 'pip install pyyaml' or run from Hermes' Python environment."
+}
+
+& $Python $ConfigureScript `
+  --config $ConfigPath `
+  --provider-name $ProviderName `
+  --router-port $RouterPort `
+  --qwopus-base-url $QwopusBaseUrl `
+  --diffusiongemma-base-url $DiffusionGemmaBaseUrl
+
+if (-not $NoStartRouter) {
+  $OutLog = Join-Path $RouterDir "local-5090-router.out.log"
+  $ErrLog = Join-Path $RouterDir "local-5090-router.err.log"
+
+  $Existing = Get-NetTCPConnection -LocalPort $RouterPort -State Listen -ErrorAction SilentlyContinue
+  if (-not $Existing) {
+    Start-Process -FilePath $Python `
+      -ArgumentList @(
+        $RouterTarget,
+        "--port", "$RouterPort",
+        "--qwopus-base-url", $QwopusBaseUrl,
+        "--diffusiongemma-base-url", $DiffusionGemmaBaseUrl
+      ) `
+      -WorkingDirectory $RouterDir `
+      -RedirectStandardOutput $OutLog `
+      -RedirectStandardError $ErrLog `
+      -WindowStyle Hidden
+  }
+}
+
+Write-Host ""
+Write-Host "Hermes provider '$ProviderName' is configured."
+Write-Host "Router: http://127.0.0.1:$RouterPort/v1"
+Write-Host "Models:"
+Write-Host "  - qwopus3.6-27b-coder-mtp-q5-k-m -> $QwopusBaseUrl"
+Write-Host "  - diffusiongemma -> $DiffusionGemmaBaseUrl"
+Write-Host ""
+Write-Host "Restart Hermes Desktop, then open the model menu and choose '$ProviderName'."
+Write-Host "Start the model servers separately before using them."

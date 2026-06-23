@@ -6,6 +6,8 @@ integration for running high-performance local inference on NVIDIA Blackwell.
 Hand this repo to a coding agent and it can download the model, start a local
 OpenAI-compatible endpoint, wire Hermes, run benchmarks, and collect the proof.
 
+![RTX 5090 long-context throughput comparison](assets/images/rtx-5090-context-ladder-comparison.png)
+
 **Current focus:** Qwopus3.6-27B-Coder-MTP Q5_K_M via llama.cpp, plus AEON
 Qwen3.6 27B Multimodal NVFP4 MTP-XS via vLLM.
 
@@ -87,7 +89,7 @@ notes and serving assumptions.
 
 BookContext prompt ladder — gen=1024 tok — temperature=0 — 3 measured runs
 
-![RTX 5090 long-context throughput comparison](assets/images/rtx-5090-context-ladder-comparison.svg)
+![RTX 5090 long-context throughput comparison](assets/images/rtx-5090-context-ladder-comparison.png)
 
 ### Qwopus3.6-27B-Coder-MTP-Q5_K_M
 
@@ -162,12 +164,31 @@ start-qwopus3.6-27b-coder-mtp-q5-server.bat
 
 Serves OpenAI-compatible endpoint at `http://127.0.0.1:39182/v1`
 
-**4. Wire into Hermes**
+**4. Add to Hermes Desktop**
 
+Run the Local 5090 installer:
+
+```bat
+scripts\hermes\install-local-5090-provider.bat
 ```
-/provider add custom:qwopus-local http://127.0.0.1:39182/v1 <any-key>
-/model custom:qwopus-local:qwopus3.6-27b-coder-mtp-q5-k-m
-```
+
+This updates Hermes Desktop with a single `Local 5090` provider:
+
+- `qwopus3.6-27b-coder-mtp-q5-k-m` routes to `http://127.0.0.1:39182/v1`
+- `diffusiongemma` routes to `http://127.0.0.1:8890/v1`
+- Hermes talks to the local router at `http://127.0.0.1:39190/v1`
+- The script backs up `%LOCALAPPDATA%\hermes\config.yaml` before editing it.
+
+Hermes uses one base URL per provider, so the tiny router lets both local model
+servers appear together under `Local 5090`.
+
+Restart Hermes Desktop after running the script, then pick the model from the
+menu:
+
+![Hermes Desktop Local 5090 provider](assets/images/hermes-local-5090-provider.png)
+
+See `docs/integrations/hermes-desktop.md` for the exact config shape and router
+details.
 
 ---
 
@@ -185,6 +206,9 @@ Render the benchmark chart:
 python scripts\benchmarks\render-rtx5090-context-chart.py
 ```
 
+Requires Matplotlib (`pip install matplotlib`) if your Python environment does
+not already include it.
+
 Run a single endpoint bench:
 
 ```powershell
@@ -201,6 +225,9 @@ powershell -ExecutionPolicy Bypass -File scripts\benchmarks\bench-openai-chat-en
 
 ```
 scripts/
+  hermes/
+    install-local-5090-provider.bat    add the Local 5090 Hermes provider
+    local-5090-router.py               local model router used by Hermes
   localai/
     qwopus3.6-27b-coder-mtp-gguf/   launchers, download, install
   vllm/

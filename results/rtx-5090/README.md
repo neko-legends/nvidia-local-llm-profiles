@@ -6,7 +6,7 @@
 - **Prompt style:** BookContext (synthetic long-document with continuity sections)
 - **Generation:** 1024 tokens, temperature=0, seed=1234, 3 measured runs per context
 
-![RTX 5090 long-context throughput comparison](../../assets/images/rtx-5090-context-ladder-comparison.svg)
+![RTX 5090 long-context throughput comparison](../../assets/images/rtx-5090-context-ladder-comparison.png)
 
 ---
 

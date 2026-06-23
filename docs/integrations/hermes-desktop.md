@@ -3,6 +3,65 @@
 Hermes can use these local model servers through their OpenAI-compatible `/v1`
 endpoints.
 
+## Local 5090 Provider
+
+The recommended desktop setup is one Hermes provider named `Local 5090` that
+lists both local models:
+
+- `qwopus3.6-27b-coder-mtp-q5-k-m`
+- `diffusiongemma`
+
+![Hermes Desktop Local 5090 provider](../../assets/images/hermes-local-5090-provider.png)
+
+Hermes custom providers are anchored to one base URL. Since Qwopus and
+DiffusionGemma are served by different local endpoints, this repo includes a
+small local router that exposes one `/v1` endpoint for Hermes and routes each
+request by the `model` field.
+
+Run:
+
+```bat
+scripts\hermes\install-local-5090-provider.bat
+```
+
+What it does:
+
+- Backs up `%LOCALAPPDATA%\hermes\config.yaml`.
+- Copies `scripts\hermes\local-5090-router.py` into
+  `%LOCALAPPDATA%\hermes\local-5090-router\`.
+- Starts the router at `http://127.0.0.1:39190/v1`.
+- Replaces old `diffusiongemma-local` or `qwopus-local` custom providers with
+  one `Local 5090` provider.
+
+Installed Hermes config shape:
+
+```yaml
+custom_providers:
+- api_mode: chat_completions
+  base_url: http://127.0.0.1:39190/v1
+  discover_models: true
+  model: qwopus3.6-27b-coder-mtp-q5-k-m
+  models:
+    diffusiongemma:
+      context_length: 64000
+      supports_vision: false
+    qwopus3.6-27b-coder-mtp-q5-k-m:
+      context_length: 262144
+      supports_vision: false
+  name: Local 5090
+```
+
+Default local routes:
+
+```text
+Hermes -> http://127.0.0.1:39190/v1
+  diffusiongemma                     -> http://127.0.0.1:8890/v1
+  qwopus3.6-27b-coder-mtp-q5-k-m     -> http://127.0.0.1:39182/v1
+```
+
+Restart Hermes Desktop after running the installer so the model menu refreshes.
+Start the actual model server before selecting that model.
+
 ## Qwopus3.6-27B-Coder-MTP Q5_K_M
 
 Start the server (from the installed folder):
@@ -79,6 +138,14 @@ allow-aeon-qwen36-vllm-firewall-admin.bat
 
 ## Verify the Endpoint
 
+Local 5090 router:
+
+```powershell
+Invoke-RestMethod http://127.0.0.1:39190/v1/models
+```
+
+Direct Qwopus endpoint:
+
 ```powershell
 Invoke-RestMethod http://127.0.0.1:39182/v1/models
 
@@ -100,5 +167,6 @@ For AEON, use port `39183` and model
 - Start the model server before Hermes tries to use it.
 - Do not put a real API key in a local no-auth endpoint.
 - Restart Hermes Desktop after changing saved custom provider settings.
+- Keep the `Local 5090` router running when using the consolidated provider.
 - llama.cpp/GGUF startup is usually much faster than vLLM safetensors startup;
   wait for the server log to show that requests are being accepted.
