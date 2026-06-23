@@ -60,6 +60,29 @@ Full per-run CSVs: `results/rtx-5090/`
 
 ---
 
+## Windows Stability Note
+
+Apply a conservative MSI Afterburner voltage/frequency curve before long
+Windows inference runs on the RTX 5090.
+
+![RTX 5090 MSI Afterburner voltage/frequency curve](assets/images/rtx-5090-msi-afterburner-vf-curve.png)
+
+Why this matters:
+
+- Sustained local LLM inference is a VRAM-heavy load, not a short gaming burst.
+- On this Windows test box, stock boost behavior could crash during sustained
+  high-VRAM usage.
+- Some cards cannot hold aggressive core clocks while the VRAM stays heavily
+  occupied for long-context runs.
+- The goal is stable model and KV-cache residency in 32GB VRAM; max core clock is
+  less important than avoiding crashes and throttling.
+- A lower, flatter curve also saves electricity because it avoids spending power
+  on core boost that does not materially improve this profile.
+
+See `docs/hardware/rtx-5090-power-and-thermal.md` for the full checklist.
+
+---
+
 ## Quick Start
 
 **1. Download the model**
