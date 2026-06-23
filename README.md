@@ -3,7 +3,11 @@
 RTX 5090 local LLM optimization profiles — benchmarks, launchers, and Hermes
 integration for running high-performance local inference on NVIDIA Blackwell.
 
-**Current focus: Qwopus3.6-27B-Coder-MTP Q5_K_M via llama.cpp**
+Hand this repo to a coding agent and it can download the model, start a local
+OpenAI-compatible endpoint, wire Hermes, run benchmarks, and collect the proof.
+
+**Current focus:** Qwopus3.6-27B-Coder-MTP Q5_K_M via llama.cpp, plus AEON
+Qwen3.6 27B Multimodal NVFP4 MTP-XS via vLLM.
 
 ---
 
@@ -39,13 +43,55 @@ Why this profile uses it:
 
 ---
 
+## Additional Model Support
+
+### AEON Qwen3.6 27B Multimodal NVFP4 MTP-XS
+
+This repo also includes a vLLM/Docker support folder for
+[AEON-7/Qwen3.6-27B-AEON-Ultimate-Uncensored-Multimodal-NVFP4-MTP-XS](https://huggingface.co/AEON-7/Qwen3.6-27B-AEON-Ultimate-Uncensored-Multimodal-NVFP4-MTP-XS).
+
+Use this when you want to test the AEON XS safetensors/modelopt NVFP4 path on
+RTX 5090-class hardware. It is not a GGUF/llama.cpp profile; the tested Windows
+launcher serves it with `vllm/vllm-openai:latest`, fp8 KV cache, and a 200k
+context cap.
+
+Launcher folder:
+
+```text
+scripts\vllm\aeon-qwen36-27b-multimodal-nvfp4-mtp-xs\
+```
+
+Quick path:
+
+```bat
+download-aeon-qwen36-27b-multimodal-nvfp4-mtp-xs.bat
+start-aeon-qwen36-27b-multimodal-nvfp4-mtp-xs-vllm-docker.bat
+bench-aeon-qwen36-27b-multimodal-nvfp4-mtp-xs-context-ladder.bat
+```
+
+Endpoint defaults:
+
+- Base URL: `http://127.0.0.1:39183/v1`
+- Model: `aeon-qwen36-27b-multimodal-nvfp4-mtp-xs`
+- Benchmark case prefix: `aeon-qwen36-27b-multimodal-nvfp4-mtp-xs-vllm-fp8kv-ctx200k`
+
+See `docs/models/aeon-qwen36-27b-multimodal-nvfp4-mtp-xs.md` for the model
+notes and serving assumptions.
+
+---
+
 ## RTX 5090 Benchmark Results
 
-**GPU:** RTX 5090 32GB — **Driver:** 610.62 — **Date:** 2026-06-22
+**GPU:** RTX 5090 32GB — **Driver:** 610.62 — **Dates:** 2026-06-22 to
+2026-06-23
 
-llama.cpp b9761 — ctx=256k — MTP n=2 — gen=1024 tok — 3 measured runs
+BookContext prompt ladder — gen=1024 tok — temperature=0 — 3 measured runs
 
-![RTX 5090 Qwopus context ladder bar chart](assets/images/rtx-5090-qwopus-context-ladder.svg)
+![RTX 5090 long-context throughput comparison](assets/images/rtx-5090-context-ladder-comparison.svg)
+
+### Qwopus3.6-27B-Coder-MTP-Q5_K_M
+
+llama.cpp b9761 — ctx=256k — MTP n=2
 
 | Context | avg tok/s | Power | Temp |
 | ---: | ---: | ---: | ---: |
@@ -56,6 +102,18 @@ llama.cpp b9761 — ctx=256k — MTP n=2 — gen=1024 tok — 3 measured runs
 | 200k | 51 tok/s | 340W | 67C |
 | 256k | 65 tok/s | 340W | 64C |
 
+### AEON Qwen3.6 27B Multimodal NVFP4 MTP-XS
+
+vLLM OpenAI — modelopt NVFP4 — fp8 KV — ctx=200k — qwen3_5_mtp
+
+| Context | avg tok/s | Power | Temp |
+| ---: | ---: | ---: | ---: |
+| 8k | 48 tok/s | 162W | 47C |
+| 33k | 45 tok/s | 170W | 50C |
+| 66k | 41 tok/s | 176W | 53C |
+| 131k | 39 tok/s | 187W | 57C |
+| 200k | 36 tok/s | 216W | 59C |
+
 Full per-run CSVs: `results/rtx-5090/`
 
 ---
@@ -63,16 +121,15 @@ Full per-run CSVs: `results/rtx-5090/`
 ## Windows Stability Note
 
 Apply a conservative MSI Afterburner voltage/frequency curve before long
-Windows inference runs on the RTX 5090.
+Windows inference runs on the RTX 5090. On this Windows test box, leaving stock
+boost behavior in place can crash during sustained high-VRAM LLM runs.
 
 ![RTX 5090 MSI Afterburner voltage/frequency curve](assets/images/rtx-5090-msi-afterburner-vf-curve.png)
 
 Why this matters:
 
 - Sustained local LLM inference is a VRAM-heavy load, not a short gaming burst.
-- On this Windows test box, stock boost behavior could crash during sustained
-  high-VRAM usage.
-- Some cards cannot hold aggressive core clocks while the VRAM stays heavily
+- Some cards cannot hold aggressive core clocks while VRAM stays heavily
   occupied for long-context runs.
 - The goal is stable model and KV-cache residency in 32GB VRAM; max core clock is
   less important than avoiding crashes and throttling.
@@ -146,12 +203,15 @@ powershell -ExecutionPolicy Bypass -File scripts\benchmarks\bench-openai-chat-en
 scripts/
   localai/
     qwopus3.6-27b-coder-mtp-gguf/   launchers, download, install
+  vllm/
+    aeon-qwen36-27b-multimodal-nvfp4-mtp-xs/  Docker vLLM launcher
   benchmarks/
     bench-context-ladder.ps1         full context ladder sweep
     bench-openai-chat-endpoint.ps1   single endpoint benchmark
     download-hf-artifact.py          HF download helper
 docs/
   models/qwopus3.6-27b-coder-mtp-gguf.md   model notes
+  models/aeon-qwen36-27b-multimodal-nvfp4-mtp-xs.md   AEON vLLM notes
   hardware/rtx-5090-power-and-thermal.md    GPU tuning notes
   integrations/hermes-desktop.md            Hermes wiring guide
 results/

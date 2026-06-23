@@ -6,11 +6,18 @@ The RTX 5090 is the first max-performance tuning target for this repo. Agents sh
 
 ## Required Before Long Runs
 
-Apply the saved MSI Afterburner voltage/frequency curve before long inference, benchmark sweeps, or unattended Hermes usage on the RTX 5090.
+Apply the saved MSI Afterburner voltage/frequency curve before long inference,
+benchmark sweeps, or unattended Hermes usage on the RTX 5090. On this Windows
+test box, sustained high-VRAM LLM runs can crash if the card is left at stock
+boost behavior.
 
 Why this matters:
 
 - Long inference is a sustained load, unlike short gaming bursts.
+- The scarce resource is stable VRAM residency for model weights and KV cache,
+  not peak core clock.
+- Some cards cannot hold aggressive core clocks while VRAM remains heavily
+  occupied for long-context runs.
 - Stock boost behavior can waste power for little throughput gain.
 - This machine has seen long-run overheating or shutdown behavior without a controlled curve.
 - Stable power behavior makes benchmark CSVs comparable across runs.

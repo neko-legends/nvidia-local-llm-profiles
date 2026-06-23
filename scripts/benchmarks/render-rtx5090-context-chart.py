@@ -4,15 +4,15 @@ import csv
 import math
 from pathlib import Path
 
+import matplotlib.patheffects as pe
 import matplotlib.pyplot as plt
 import matplotlib.ticker as mticker
-import matplotlib.patheffects as pe
 
 
 ROOT = Path(__file__).resolve().parents[2]
 RESULTS_DIR = ROOT / "results" / "rtx-5090"
 OUTPUT_DIR = ROOT / "assets" / "images"
-OUTPUT_BASENAME = "rtx-5090-qwopus-context-ladder"
+OUTPUT_BASENAME = "rtx-5090-context-ladder-comparison"
 
 TARGET_LABELS = {
     8192: "8k",
@@ -23,15 +23,31 @@ TARGET_LABELS = {
     262144: "256k",
 }
 
-COLORS = ["#38d5c4", "#48d17f", "#f1c84b", "#ff9f45", "#ff6b6b", "#a78bfa"]
+SERIES = [
+    {
+        "name": "Qwopus Coder Q5",
+        "runtime": "llama.cpp b9761, ctx 256k, MTP n=2",
+        "glob": "qwopus-coder-mtp-q5-ctx256k-mtp-prompt*-gen1024-*.csv",
+        "color": "#39d6c7",
+        "edge": "#bff8f1",
+    },
+    {
+        "name": "AEON NVFP4 XS",
+        "runtime": "vLLM, fp8 KV, ctx 200k, qwen3_5_mtp",
+        "glob": "aeon-qwen36-27b-multimodal-nvfp4-mtp-xs-vllm-fp8kv-ctx200k-prompt*-gen1024-*.csv",
+        "color": "#ffbc42",
+        "edge": "#ffe2a3",
+    },
+]
+
 TEXT = "#eef3f6"
-MUTED = "#9da8b2"
+MUTED = "#a8b2bc"
 GRID = "#303741"
-BACKGROUND = "#111419"
+BACKGROUND = "#101318"
 PANEL = "#171b22"
 
 
-def fnum(value: str) -> float:
+def fnum(value: str | None) -> float:
     return float(value) if value not in ("", None) else math.nan
 
 
@@ -39,10 +55,10 @@ def context_label(tokens: int) -> str:
     return TARGET_LABELS.get(tokens, f"{round(tokens / 1000):.0f}k")
 
 
-def load_rows() -> list[dict[str, float | int | str]]:
-    candidates = sorted(RESULTS_DIR.glob("qwopus-coder-mtp-q5-ctx256k-mtp-prompt*-gen1024-*.csv"))
+def load_series(pattern: str) -> dict[int, dict[str, float | int]]:
+    candidates = sorted(RESULTS_DIR.glob(pattern))
     if not candidates:
-        raise FileNotFoundError(f"No per-context benchmark CSVs found in {RESULTS_DIR}")
+        raise FileNotFoundError(f"No benchmark CSVs matched {pattern!r} in {RESULTS_DIR}")
 
     latest_by_target: dict[int, Path] = {}
     for path in candidates:
@@ -51,38 +67,40 @@ def load_rows() -> list[dict[str, float | int | str]]:
         target = int(first["target_prompt_tokens"])
         latest_by_target[target] = path
 
-    rows: list[dict[str, float | int | str]] = []
+    rows: dict[int, dict[str, float | int]] = {}
     for per_run in latest_by_target.values():
         with per_run.open(newline="", encoding="utf-8-sig") as handle:
             measured = [
-                r
-                for r in csv.DictReader(handle)
-                if r.get("warmup", "").lower() not in ("true", "1", "yes")
+                row
+                for row in csv.DictReader(handle)
+                if row.get("warmup", "").lower() not in ("true", "1", "yes")
             ]
 
-        tps = [fnum(r["wall_completion_tps"]) for r in measured]
-        power = [fnum(r["power_after_w"]) for r in measured]
-        temps = [fnum(r["temp_after_c"]) for r in measured]
+        tps = [fnum(row["wall_completion_tps"]) for row in measured]
+        power = [fnum(row["power_after_w"]) for row in measured]
+        temps = [fnum(row["temp_after_c"]) for row in measured]
         target = int(measured[0]["target_prompt_tokens"])
-        actual = max(int(r["prompt_tokens"]) for r in measured)
-        rows.append(
-            {
-                "label": context_label(target),
-                "target": target,
-                "actual": actual,
-                "avg": sum(tps) / len(tps),
-                "min": min(tps),
-                "max": max(tps),
-                "power": sum(power) / len(power),
-                "temp": sum(temps) / len(temps),
-            }
-        )
+        rows[target] = {
+            "target": target,
+            "actual": max(int(row["prompt_tokens"]) for row in measured),
+            "avg": sum(tps) / len(tps),
+            "min": min(tps),
+            "max": max(tps),
+            "power": sum(power) / len(power),
+            "temp": sum(temps) / len(temps),
+        }
 
-    return sorted(rows, key=lambda d: int(d["target"]))
+    return rows
+
+
+def strip_trailing_whitespace(path: Path) -> None:
+    cleaned = "\n".join(line.rstrip() for line in path.read_text(encoding="utf-8").splitlines())
+    path.write_text(cleaned + "\n", encoding="utf-8")
 
 
 def draw_chart() -> tuple[Path, Path]:
-    rows = load_rows()
+    series_rows = [load_series(series["glob"]) for series in SERIES]
+    targets = sorted(set().union(*(rows.keys() for rows in series_rows)))
     OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
 
     plt.rcParams.update(
@@ -94,142 +112,112 @@ def draw_chart() -> tuple[Path, Path]:
     )
 
     fig = plt.figure(figsize=(16, 9), dpi=180, facecolor=BACKGROUND)
-    ax = fig.add_axes([0.12, 0.19, 0.78, 0.56], facecolor=PANEL)
+    ax = fig.add_axes([0.12, 0.19, 0.79, 0.57], facecolor=PANEL)
 
-    y_positions = list(range(len(rows)))
-    avgs = [float(row["avg"]) for row in rows]
+    group_gap = 1.28
+    bar_height = 0.33
+    y_centers = [idx * group_gap for idx, _ in enumerate(targets)]
+    offsets = [-bar_height / 1.7, bar_height / 1.7]
 
-    ax.barh(
-        y_positions,
-        avgs,
-        height=0.62,
-        color=COLORS[: len(rows)],
-        edgecolor="#f7fbff",
-        linewidth=0.8,
-        alpha=0.96,
-        zorder=3,
-    )
+    for series_index, series in enumerate(SERIES):
+        rows = series_rows[series_index]
+        color = series["color"]
+        edge = series["edge"]
+        for target_index, target in enumerate(targets):
+            row = rows.get(target)
+            if row is None:
+                continue
 
-    for idx, row in enumerate(rows):
-        y = y_positions[idx]
-        color = COLORS[idx]
-        low = float(row["min"])
-        high = float(row["max"])
-        avg = float(row["avg"])
+            y = y_centers[target_index] + offsets[series_index]
+            avg = float(row["avg"])
+            low = float(row["min"])
+            high = float(row["max"])
 
-        ax.hlines(y, low, high, color="#f8fbff", linewidth=2.2, alpha=0.78, zorder=5)
-        ax.scatter([low, high], [y, y], s=34, color=PANEL, edgecolor="#f8fbff", linewidth=1.2, zorder=6)
-        ax.scatter([avg], [y], s=58, color=color, edgecolor="#111419", linewidth=1.4, zorder=7)
+            ax.barh(
+                y,
+                avg,
+                height=bar_height,
+                color=color,
+                edgecolor=edge,
+                linewidth=0.9,
+                alpha=0.94,
+                zorder=3,
+            )
+            ax.hlines(y, low, high, color="#f8fbff", linewidth=1.7, alpha=0.72, zorder=5)
+            ax.scatter([low, high], [y, y], s=20, color=PANEL, edgecolor="#f8fbff", linewidth=0.9, zorder=6)
+            ax.text(
+                avg + 2.0,
+                y,
+                f"{avg:.1f}",
+                va="center",
+                ha="left",
+                color=TEXT,
+                fontsize=11.5,
+                fontweight="bold",
+                path_effects=[pe.withStroke(linewidth=3, foreground=PANEL)],
+                zorder=8,
+            )
 
-        ax.text(
-            avg + 2.0,
-            y,
-            f"{avg:.1f} tok/s",
-            va="center",
-            ha="left",
-            color=TEXT,
-            fontsize=13,
-            fontweight="bold",
-            path_effects=[pe.withStroke(linewidth=3, foreground=PANEL)],
-            zorder=8,
-        )
+    y_labels = []
+    for target in targets:
+        actuals = [rows[target]["actual"] for rows in series_rows if target in rows]
+        actual = max(int(value) for value in actuals)
+        y_labels.append(f"{context_label(target)}\n{actual:,} prompt toks")
 
-        ax.text(
-            135.5,
-            y,
-            f"{round(float(row['power']))}W  {round(float(row['temp']))}C",
-            va="center",
-            ha="left",
-            color="#dce6ed",
-            fontsize=10.5,
-            bbox={
-                "boxstyle": "round,pad=0.25,rounding_size=0.12",
-                "facecolor": "#222833",
-                "edgecolor": "#3b4652",
-                "linewidth": 0.7,
-            },
-            zorder=9,
-        )
-
-    y_labels = [
-        f"{row['label']}\n{int(row['actual']):,} prompt toks"
-        for row in rows
-    ]
-    ax.set_yticks(y_positions)
-    ax.set_yticklabels(y_labels, fontsize=11.5, color=TEXT)
+    ax.set_yticks(y_centers)
+    ax.set_yticklabels(y_labels, fontsize=11.2, color=TEXT)
     ax.invert_yaxis()
 
-    ax.set_xlim(0, 150)
+    ax.set_xlim(0, 135)
     ax.xaxis.set_major_locator(mticker.MultipleLocator(25))
     ax.xaxis.set_major_formatter(mticker.StrMethodFormatter("{x:.0f}"))
     ax.tick_params(axis="x", colors=MUTED, labelsize=10.5)
     ax.tick_params(axis="y", length=0)
     ax.grid(axis="x", color=GRID, alpha=0.75, linewidth=0.8, zorder=1)
-    ax.set_axisbelow(True)
     for spine in ax.spines.values():
         spine.set_visible(False)
 
-    ax.text(
-        0,
-        -0.86,
-        "Run min-max rail",
-        color="#c7d0d9",
-        fontsize=10.5,
-        ha="left",
-        va="center",
-    )
-    ax.hlines(-0.86, 27, 43, color="#f8fbff", linewidth=2.2, alpha=0.78, zorder=5)
-    ax.scatter([27, 43], [-0.86, -0.86], s=24, color=PANEL, edgecolor="#f8fbff", linewidth=1.0, zorder=6)
-    ax.text(135.5, -0.86, "Avg power / temp", color="#c7d0d9", fontsize=10.5, ha="left", va="center")
+    legend_x = 0.065
+    for idx, series in enumerate(SERIES):
+        y = 0.806 - idx * 0.043
+        fig.text(
+            legend_x,
+            y,
+            "  ",
+            ha="left",
+            va="center",
+            bbox={
+                "boxstyle": "round,pad=0.22,rounding_size=0.10",
+                "facecolor": series["color"],
+                "edgecolor": series["edge"],
+            },
+        )
+        fig.text(legend_x + 0.029, y, series["name"], ha="left", va="center", color=TEXT, fontsize=12.0, fontweight="bold")
+        fig.text(legend_x + 0.178, y, series["runtime"], ha="left", va="center", color=MUTED, fontsize=11.0)
 
     fig.text(
         0.065,
         0.91,
-        "RTX 5090 long-context throughput: Qwopus Q5 stays usable to 256k",
+        "RTX 5090 long-context throughput",
         ha="left",
         va="center",
         color=TEXT,
-        fontsize=27,
+        fontsize=29,
         fontweight="bold",
     )
     fig.text(
         0.065,
         0.858,
-        "Qwopus3.6-27B-Coder-MTP Q5_K_M - llama.cpp b9761 - ctx=256k - MTP n=2 - 1024 generated tokens",
+        "1024 generated tokens, temperature 0, 3 measured runs per context. Bars are averages; rails show min/max.",
         ha="left",
         va="center",
         color="#cad5de",
-        fontsize=13.5,
+        fontsize=13.0,
     )
     fig.text(
         0.065,
-        0.796,
-        "Higher is better",
-        ha="left",
-        va="center",
-        color=BACKGROUND,
-        fontsize=11,
-        fontweight="bold",
-        bbox={
-            "boxstyle": "round,pad=0.32,rounding_size=0.18",
-            "facecolor": "#f1c84b",
-            "edgecolor": "#f1c84b",
-        },
-    )
-    fig.text(
-        0.205,
-        0.796,
-        "Bars show average completion throughput. Rails show measured min/max across runs.",
-        ha="left",
-        va="center",
-        color=MUTED,
-        fontsize=11.5,
-    )
-    fig.text(
-        0.065,
-        0.093,
-        "Source: results/rtx-5090 CSVs, 2026-06-22. Prompt style: BookContext. "
-        "Run 1 includes prefill overhead except the separately warmed 256k run.",
+        0.094,
+        "Source: results/rtx-5090 CSVs, 2026-06-22 to 2026-06-23. AEON was served with max_model_len=200k.",
         ha="left",
         va="center",
         color="#89939e",
@@ -237,7 +225,7 @@ def draw_chart() -> tuple[Path, Path]:
     )
     fig.text(
         0.94,
-        0.093,
+        0.094,
         "neko-legends/nvidia-local-llm-profiles",
         ha="right",
         va="center",
@@ -250,6 +238,7 @@ def draw_chart() -> tuple[Path, Path]:
     fig.savefig(png_path, facecolor=fig.get_facecolor(), dpi=180)
     fig.savefig(svg_path, facecolor=fig.get_facecolor())
     plt.close(fig)
+    strip_trailing_whitespace(svg_path)
     return png_path, svg_path
 
 
