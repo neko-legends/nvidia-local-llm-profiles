@@ -14,8 +14,8 @@ param(
     [double]$GpuMemUtil     = 0.93,
     [string]$KvCacheDtype   = "fp8",
 
-    # Bench settings
-    [int]$TargetPromptTokens = 262144,
+    # Bench settings — use max-model-len as the prompt target so we exercise the full context
+    [int]$TargetPromptTokens = 200000,
     [int]$MaxTokens          = 1024,
     [int]$Runs               = 3,
     [int]$WarmupRuns         = 1,
