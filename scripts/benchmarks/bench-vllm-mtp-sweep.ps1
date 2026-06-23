@@ -1,6 +1,7 @@
 param(
-    # MTP speculative token counts to sweep
-    [int[]]$SpecN = @(1, 2, 3, 4, 5),
+    # MTP speculative token counts to sweep — pass as space-separated or comma-separated
+    # e.g. -SpecN 1,3,4,5  or  -SpecN @(1,3,4,5)
+    [string[]]$SpecN = @("1", "2", "3", "4", "5"),
 
     # vLLM / Docker settings
     [string]$ModelDir       = "D:/Tools/LocalAI/models/Qwen3.6-27B-Text-NVFP4-MTP",
@@ -33,6 +34,9 @@ param(
 )
 
 $ErrorActionPreference = "Stop"
+
+# Normalise $SpecN: split on commas/spaces so "-SpecN 1,3,4,5" and "-SpecN 1 3 4 5" both work
+$SpecN = @($SpecN | ForEach-Object { $_ -split '[,\s]+' } | Where-Object { $_ -match '^\d+$' } | ForEach-Object { [int]$_ })
 
 # Suppress MSYS/Git-bash path conversion that turns /model → C:/Program Files/Git/model
 # when PowerShell invokes docker through the WSL/bash layer.
