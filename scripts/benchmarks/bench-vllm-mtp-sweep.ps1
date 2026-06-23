@@ -85,7 +85,7 @@ function Start-VllmContainer {
     $specCfg = "--speculative-config={`"method`":`"qwen3_5_mtp`",`"num_speculative_tokens`":$N}"
 
     $dockerArgs = @(
-        "run", "--rm",
+        "run",
         "--name", $ContainerName,
         "--gpus", "all",
         "--ipc", "host",
@@ -122,16 +122,21 @@ function Wait-VllmReady {
     Write-Host "Waiting for vLLM to become healthy (timeout ${StartupTimeoutSec}s)..."
     for ($i = 0; $i -lt $StartupTimeoutSec; $i++) {
         Start-Sleep -Seconds 1
-        $dead = docker ps --filter "name=^/$ContainerName$" --format "{{.Names}}" 2>$null
-        if ($dead -ne $ContainerName) {
-            # Grab logs from the stopped container (it still exists briefly with --rm)
-            $lastLogs = docker logs $ContainerName 2>&1 | Select-Object -Last 30
-            throw "Container exited unexpectedly during startup for MTP n=$N`nLast logs:`n$($lastLogs -join "`n")"
+        # Check running containers only — if not there, check if it exited
+        $running = docker ps --filter "name=^/$ContainerName$" --format "{{.Names}}" 2>$null
+        if ($running -ne $ContainerName) {
+            $exited = docker ps -a --filter "name=^/$ContainerName$" --format "{{.Names}} {{.Status}}" 2>$null
+            if ($exited) {
+                $lastLogs = docker logs $ContainerName 2>&1 | Select-Object -Last 20
+                throw "Container exited unexpectedly during startup for MTP n=$N`nStatus: $exited`nLast logs:`n$($lastLogs -join "`n")"
+            }
+            # Container not found at all yet — still starting, keep waiting
+            Start-Sleep -Seconds 2
+            continue
         }
         try {
-            $r = Invoke-RestMethod -Uri $url -TimeoutSec 3
-            # vLLM 0.23 returns {} (empty object) on healthy, older versions return {status:"ok"}
-            # Either way: if the call didn't throw, the server is up
+            Invoke-RestMethod -Uri $url -TimeoutSec 3 | Out-Null
+            # vLLM 0.23 returns {} (empty) on healthy — any non-throwing 200 means ready
             Write-Host "vLLM ready after $i seconds."
             return
         } catch { }
