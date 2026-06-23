@@ -48,6 +48,9 @@ Notes:
   `--quantization modelopt`, `--kv-cache-dtype fp8`, `--max-model-len 200000`,
   `--max-num-seqs 1`, and `qwen3_5_mtp` speculative decoding with
   `num_speculative_tokens=3`.
+- The Windows benchmark completed, but throughput was lower than hoped. Treat
+  these numbers as a compatibility baseline for this Windows driver/container
+  setup, not as the model's likely performance ceiling.
 - The launcher copies the downloaded snapshot into a Docker named volume before
   serving. This avoids slow or stuck safetensors loading through a Windows bind
   mount.

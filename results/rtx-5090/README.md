@@ -48,7 +48,9 @@ the tighter spread.
 
 Notes on serving: the model loaded reliably from a Docker named volume on this
 Windows host. The server reported a 200k max context and about 214k GPU KV-cache
-tokens available.
+tokens available. Throughput was lower than hoped for NVFP4 on this Windows
+setup, so these results should be read as a Windows driver/container/NVFP4
+compatibility baseline rather than the model's likely ceiling.
 
 ---
 
@@ -61,12 +63,15 @@ tokens available.
 - The 256k run was benched separately with one warmup run, which explains the
   tighter spread there.
 
-**AEON NVFP4 XS via vLLM fits the RTX 5090 and completed the 8k-200k ladder.**
+**AEON NVFP4 XS via vLLM loaded and completed the 8k-200k ladder, but did not
+show high throughput on this Windows setup.**
 
 - The tested vLLM profile used about 31.8GiB of the card's reported 32.6GiB
   during serving, mostly from model plus reserved KV-cache memory.
 - Long-context generation stayed stable through the 200k target at
   **35.5 tok/s** average.
+- The low observed throughput may point to modelopt NVFP4 maturity,
+  driver/runtime compatibility, or container-stack behavior on Windows.
 - Prompt prefill can briefly drive the core clock and power very high, which is
   why the Windows underclock profile matters even when VRAM is the real limiter.
 

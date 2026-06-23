@@ -6,7 +6,7 @@ integration for running high-performance local inference on NVIDIA Blackwell.
 Hand this repo to a coding agent and it can download the model, start a local
 OpenAI-compatible endpoint, wire Hermes, run benchmarks, and collect the proof.
 
-![RTX 5090 long-context throughput comparison](assets/images/rtx-5090-context-ladder-comparison.png)
+![RTX 5090 Qwopus long-context throughput](assets/images/rtx-5090-qwopus-context-ladder.png)
 
 **Current focus:** Qwopus3.6-27B-Coder-MTP Q5_K_M via llama.cpp, plus AEON
 Qwen3.6 27B Multimodal NVFP4 MTP-XS via vLLM.
@@ -56,6 +56,10 @@ Use this when you want to test the AEON XS safetensors/modelopt NVFP4 path on
 RTX 5090-class hardware. It is not a GGUF/llama.cpp profile; the tested Windows
 launcher serves it with `vllm/vllm-openai:latest`, fp8 KV cache, and a 200k
 context cap.
+
+Observed Windows note: AEON NVFP4 loaded and completed the benchmark ladder, but
+throughput was lower than hoped on this setup. Treat these numbers as a Windows
+driver/container/NVFP4 compatibility baseline, not as the model's likely ceiling.
 
 Launcher folder:
 
@@ -115,6 +119,10 @@ vLLM OpenAI — modelopt NVFP4 — fp8 KV — ctx=200k — qwen3_5_mtp
 | 66k | 41 tok/s | 176W | 53C |
 | 131k | 39 tok/s | 187W | 57C |
 | 200k | 36 tok/s | 216W | 59C |
+
+AEON completed the 8k-200k ladder, but this Windows setup did not produce high
+NVFP4 throughput. A possible culprit is the modelopt NVFP4 path on this specific
+Windows/container/driver stack rather than a simple VRAM limit.
 
 Full per-run CSVs: `results/rtx-5090/`
 
