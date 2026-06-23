@@ -102,22 +102,23 @@ function Stop-VllmContainer {
 function Start-VllmContainer {
     param([int]$N)
 
-    # Build spec JSON -- single-quote concat keeps literal " chars intact.
-    # IMPORTANT: pass the whole docker run as a single cmd string.
-    # PowerShell array splatting (& docker @args) and Start-Process -ArgumentList @array
-    # both mangle the JSON quotes through the PS -> docker.exe -> WSL2 chain on Windows.
-    # cmd /c passes the string verbatim and lets docker.exe handle its own quoting.
-    # Build the speculative-config value. Single-quote the whole --flag=value argument
-    # so Invoke-Expression passes it as one token with literal quotes intact.
-    # This is the only form that survives PS->docker.exe->WSL2 without mangling.
-    $specCfgArg = "'--speculative-config={" + '"method":"qwen3_5_mtp","num_speculative_tokens":' + $N + "}'"
-    $modelVol   = "${ModelDir}:/model:ro"
+    # Build speculative config JSON
+    $specJson = '{"method":"qwen3_5_mtp","num_speculative_tokens":' + $N + '}'
 
-    $cmdStr = "docker run" +
+    # Write a temporary .bat file with the docker run command.
+    # This completely bypasses PowerShell's quoting/escaping for subprocess args.
+    # PS splatting, Start-Process, cmd /c, and Invoke-Expression all mangle the
+    # JSON quotes through the PS->docker.exe->WSL2 chain on Windows Docker Desktop.
+    # A .bat file written via [IO.File]::WriteAllText has no quote mangling.
+    $batFile  = [System.IO.Path]::GetTempFileName() -replace '\.tmp$', '.bat'
+    $modelVol = "${ModelDir}:/model:ro"
+
+    $batContent = "@echo off`r`n" +
+        "docker run" +
         " --name $ContainerName" +
         " --gpus all --ipc host" +
         " -p ${HostAddress}:${Port}:8000" +
-        " -v '$modelVol'" +
+        " -v `"$modelVol`"" +
         " -e CUDA_DEVICE_ORDER=PCI_BUS_ID" +
         " -e CUDA_VISIBLE_DEVICES=0" +
         " -d $Image" +
@@ -128,11 +129,15 @@ function Start-VllmContainer {
         " --max-model-len $MaxModelLen --max-num-seqs 1" +
         " --gpu-memory-utilization $GpuMemUtil" +
         " --reasoning-parser qwen3 --kv-cache-dtype $KvCacheDtype" +
-        " $specCfgArg"
+        " --speculative-config `"$specJson`""
+
+    [System.IO.File]::WriteAllText($batFile, $batContent, [System.Text.Encoding]::ASCII)
 
     Write-Step "Starting vLLM (MTP n=$N, ctx=$MaxModelLen, kv=$KvCacheDtype, gpu-mem=$GpuMemUtil)"
-    Write-Host "specCfgArg: $specCfgArg"
-    Invoke-Expression $cmdStr
+    Write-Host "speculative-config: $specJson"
+    Write-Host "bat contents: $batContent"
+    & cmd /c $batFile
+    Remove-Item $batFile -ErrorAction SilentlyContinue
 }
 
 function Wait-VllmReady {
