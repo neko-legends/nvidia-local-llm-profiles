@@ -102,8 +102,10 @@ function Stop-VllmContainer {
 function Start-VllmContainer {
     param([int]$N)
 
-    # Build speculative config JSON
-    $specJson = '{"method":"qwen3_5_mtp","num_speculative_tokens":' + $N + '}'
+    # Build speculative config JSON for the bat file.
+    # In the bat file, the value must be wrapped in outer "..." and inner quotes
+    # escaped as \" so cmd.exe passes them as literal chars to docker.exe.
+    $specJsonBat = '{\"method\":\"qwen3_5_mtp\",\"num_speculative_tokens\":' + $N + '}'
 
     # Write a temporary .bat file with the docker run command.
     # This completely bypasses PowerShell's quoting/escaping for subprocess args.
@@ -129,12 +131,12 @@ function Start-VllmContainer {
         " --max-model-len $MaxModelLen --max-num-seqs 1" +
         " --gpu-memory-utilization $GpuMemUtil" +
         " --reasoning-parser qwen3 --kv-cache-dtype $KvCacheDtype" +
-        " --speculative-config `"$specJson`""
+        " --speculative-config `"$specJsonBat`""
 
     [System.IO.File]::WriteAllText($batFile, $batContent, [System.Text.Encoding]::ASCII)
 
     Write-Step "Starting vLLM (MTP n=$N, ctx=$MaxModelLen, kv=$KvCacheDtype, gpu-mem=$GpuMemUtil)"
-    Write-Host "speculative-config: $specJson"
+    Write-Host "speculative-config bat value: $specJsonBat"
     Write-Host "bat contents: $batContent"
     & cmd /c $batFile
     Remove-Item $batFile -ErrorAction SilentlyContinue
