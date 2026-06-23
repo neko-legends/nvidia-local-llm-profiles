@@ -71,12 +71,18 @@ function Stop-VllmContainer {
     if ($running -eq $ContainerName) {
         Write-Step "Stopping container: $ContainerName"
         docker stop $ContainerName | Out-Null
-        Start-Sleep -Seconds 4
     }
     $old = docker ps -a --filter "name=^/$ContainerName$" --format "{{.Names}}" 2>$null
     if ($old -eq $ContainerName) {
         docker rm $ContainerName | Out-Null
     }
+    # Wait until the name is fully released (docker rm can lag)
+    for ($i = 0; $i -lt 15; $i++) {
+        Start-Sleep -Seconds 1
+        $still = docker ps -a --filter "name=^/$ContainerName$" --format "{{.Names}}" 2>$null
+        if (-not $still) { return }
+    }
+    Write-Warning "Container $ContainerName still visible after 15s wait — continuing anyway"
 }
 
 function Start-VllmContainer {
