@@ -102,38 +102,35 @@ function Stop-VllmContainer {
 function Start-VllmContainer {
     param([int]$N)
 
-    # Single-quoted base keeps literal " chars; $N interpolated via concatenation.
-    # Combined --flag=value form preserves JSON quotes through PowerShell -> Docker -> WSL.
-    $specCfg = '--speculative-config={"method":"qwen3_5_mtp","num_speculative_tokens":' + $N + '}'
+    # Build spec JSON -- single-quote concat keeps literal " chars intact.
+    # IMPORTANT: pass the whole docker run as a single cmd string.
+    # PowerShell array splatting (& docker @args) and Start-Process -ArgumentList @array
+    # both mangle the JSON quotes through the PS -> docker.exe -> WSL2 chain on Windows.
+    # cmd /c passes the string verbatim and lets docker.exe handle its own quoting.
+    $specJson = '{"method":"qwen3_5_mtp","num_speculative_tokens":' + $N + '}'
+    $modelVol = "${ModelDir}:/model:ro"
 
-    $dockerArgs = @(
-        "run",
-        "--name", $ContainerName,
-        "--gpus", "all",
-        "--ipc", "host",
-        "-p", "${HostAddress}:${Port}:8000",
-        "-v", "${ModelDir}:/model:ro",
-        "-e", "CUDA_DEVICE_ORDER=PCI_BUS_ID",
-        "-e", "CUDA_VISIBLE_DEVICES=0",
-        "-d",
-        $Image,
-        "/model",
-        "--served-model-name", $ServedModelName,
-        "--host", "0.0.0.0",
-        "--port", "8000",
-        "--trust-remote-code",
-        "--quantization", "modelopt",
-        "--language-model-only",
-        "--max-model-len", "$MaxModelLen",
-        "--max-num-seqs", "1",
-        "--gpu-memory-utilization", "$GpuMemUtil",
-        "--reasoning-parser", "qwen3",
-        "--kv-cache-dtype", $KvCacheDtype,
-        $specCfg
-    )
+    $cmdStr = "docker run" +
+        " --name $ContainerName" +
+        " --gpus all --ipc host" +
+        " -p ${HostAddress}:${Port}:8000" +
+        " -v `"$modelVol`"" +
+        " -e CUDA_DEVICE_ORDER=PCI_BUS_ID" +
+        " -e CUDA_VISIBLE_DEVICES=0" +
+        " -d $Image" +
+        " /model" +
+        " --served-model-name $ServedModelName" +
+        " --host 0.0.0.0 --port 8000" +
+        " --trust-remote-code --quantization modelopt --language-model-only" +
+        " --max-model-len $MaxModelLen --max-num-seqs 1" +
+        " --gpu-memory-utilization $GpuMemUtil" +
+        " --reasoning-parser qwen3 --kv-cache-dtype $KvCacheDtype" +
+        " --speculative-config `"$specJson`""
 
     Write-Step "Starting vLLM (MTP n=$N, ctx=$MaxModelLen, kv=$KvCacheDtype, gpu-mem=$GpuMemUtil)"
-    & docker @dockerArgs | Out-Null
+    Write-Host "cmd: $cmdStr"
+    $result = cmd /c $cmdStr 2>&1
+    Write-Host "docker output: $result"
 }
 
 function Wait-VllmReady {
