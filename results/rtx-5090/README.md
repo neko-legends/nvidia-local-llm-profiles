@@ -4,7 +4,9 @@
 **Driver:** 610.62  
 **Date:** 2026-06-22  
 **Prompt style:** BookContext (synthetic long-document with continuity sections)  
-**Generation:** 1024 tokens, temperature=0, seed=1234, 1 warmup + 3 measured runs
+**Generation:** 1024 tokens, temperature=0, seed=1234, 3 measured runs per context
+
+![RTX 5090 Qwopus context ladder bar chart](../../assets/images/rtx-5090-qwopus-context-ladder.svg)
 
 ---
 
@@ -32,46 +34,22 @@ the tighter spread.
 
 ---
 
-### Qwen3.6-27B-Text-NVFP4-MTP — vLLM 0.23 Docker — ctx=200k — MTP n=2
-
-| Context | Prompt tokens | avg tok/s | min | max | Power | Temp |
-| ---: | ---: | ---: | ---: | ---: | ---: | ---: |
-| 200k | 174,588 | 12.6 | 12.5 | 12.6 | 209W | 64C |
-
-**Stack:** Docker (vllm/vllm-openai:latest) → OpenAI-compatible endpoint at 127.0.0.1:8892  
-**Model:** `Qwen3.6-27B-Text-NVFP4-MTP` safetensors (ModelOpt FP4 quantization)  
-**Flags:** `--quantization modelopt --language-model-only --max-model-len 200000 --gpu-memory-utilization 0.93 --kv-cache-dtype fp8 --speculative-config {"method":"qwen3_5_mtp","num_speculative_tokens":2}`  
-**Kernel:** FlashInferCutlassNvFp4LinearKernel (Blackwell FP4 GEMM)
-
-MTP n sweep (n=1,3,4,5) was aborted after system crash from thermal load during
-the 20-minute vLLM startup cycle. Only n=2 result is confirmed.
-
----
-
 ## Key Findings
 
-**Qwopus Q5 GGUF via llama.cpp is 4x faster than Qwen NVFP4 via vLLM at 200k context.**
+**Qwopus Q5 GGUF via llama.cpp stays interactive across the full 8k-256k ladder.**
 
-- Qwopus: **50.6 tok/s** @ 200k, **109 tok/s** @ 8k, runs at 340–355W
-- Qwen NVFP4: **12.6 tok/s** @ 200k (only context tested), runs at 209W
-
-The NVFP4 path uses less power but produces ~4x lower throughput at long context.
-Likely causes:
-1. 200k context = ~6-8 GB fp8 KV cache + 19 GB model = tight against 32 GB ceiling, memory bandwidth dominated
-2. vLLM + Docker + 9P VirtioFS bind mount adds overhead llama.cpp avoids
-3. MTP n=2 may not be optimal for this model/context combination
-
-**The MTP sweep is incomplete.** n=1 (no draft overhead) at a shorter context
-(e.g. 8k–32k) would likely show a very different result for the NVFP4 path since
-FP4 tensor cores should dominate at short context where KV cache is not the bottleneck.
+- Short context peaks at **109.2 tok/s** @ 8k.
+- Long context remains usable at **50.6 tok/s** @ 200k and **65.0 tok/s** @ 256k.
+- The 256k run was benched separately with one warmup run, which explains the
+  tighter spread there.
 
 ---
 
 ## Thermal Note
 
-The RTX 5090 reached 67C under sustained Qwopus load (340W). The vLLM startup
-cycle (20 min of weight loading + torch.compile + CUDA graph capture, repeated
-per MTP value) caused a system crash from thermal overload. For future sweeps:
-- Ensure adequate case airflow before running vLLM startup cycles
-- Consider `--safetensors-load-strategy=prefetch` to speed up the 9P VirtioFS load
-- Cap sweep to 2–3 MTP values max per session
+The RTX 5090 reached 67C under sustained Qwopus load while drawing roughly
+340-355W. For future sweeps:
+
+- Record ambient temperature and fan profile alongside the CSVs.
+- Keep airflow stable before running long-context sessions.
+- Re-run the 200k/256k contexts after any driver, llama.cpp, or launch-flag change.

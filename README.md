@@ -13,9 +13,27 @@ integration for running high-performance local inference on NVIDIA Blackwell.
 embedded MTP draft head, quantized to Q5_K_M GGUF. Runs via llama.cpp with
 `--spec-type draft-mtp` for speculative decoding.
 
-HuggingFace: `unsloth/Qwopus3.6-27B-Coder-MTP-GGUF`
+Hugging Face model: [Jackrong/Qwopus3.6-27B-Coder-MTP-GGUF](https://huggingface.co/Jackrong/Qwopus3.6-27B-Coder-MTP-GGUF)
 
-> Note: A HuggingFace account may be required to download. Run
+Credit and lineage:
+
+- Primary GGUF release: [Jackrong/Qwopus3.6-27B-Coder-MTP-GGUF](https://huggingface.co/Jackrong/Qwopus3.6-27B-Coder-MTP-GGUF)
+- Base model card: [Jackrong/Qwopus3.6-27B-v2](https://huggingface.co/Jackrong/Qwopus3.6-27B-v2)
+- The model card credits the Qwen team for the Qwen3.6-27B base, Jackrong for
+  the Qwopus training work, and the MTP/GGUF release for local speculative
+  decoding.
+
+Why this profile uses it:
+
+- It is a current best-fit coding model for RTX 5090-class local inference:
+  large enough for strong repository-level coding and tool-use behavior, while
+  still fitting on a 32GB Blackwell card as a Q5_K_M GGUF.
+- The MTP draft head lets llama.cpp use speculative decoding for much higher
+  interactive throughput.
+- With the 256k llama.cpp profile here, it keeps full long-context operation on
+  the 5090 without dropping to a smaller coding model.
+
+> Note: A Hugging Face account may be required to download. Run
 > `huggingface-cli login` and set up a token at huggingface.co/settings/tokens
 > if you get a 401 error.
 
@@ -26,6 +44,8 @@ HuggingFace: `unsloth/Qwopus3.6-27B-Coder-MTP-GGUF`
 **GPU:** RTX 5090 32GB — **Driver:** 610.62 — **Date:** 2026-06-22
 
 llama.cpp b9761 — ctx=256k — MTP n=2 — gen=1024 tok — 3 measured runs
+
+![RTX 5090 Qwopus context ladder bar chart](assets/images/rtx-5090-qwopus-context-ladder.svg)
 
 | Context | avg tok/s | Power | Temp |
 | ---: | ---: | ---: | ---: |
@@ -77,6 +97,12 @@ Run a context ladder:
 
 ```powershell
 powershell -ExecutionPolicy Bypass -File scripts\benchmarks\bench-context-ladder.ps1
+```
+
+Render the benchmark chart:
+
+```powershell
+python scripts\benchmarks\render-rtx5090-context-chart.py
 ```
 
 Run a single endpoint bench:
