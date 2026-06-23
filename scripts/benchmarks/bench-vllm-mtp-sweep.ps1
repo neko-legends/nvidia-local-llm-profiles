@@ -1,21 +1,21 @@
 param(
-    # MTP speculative token counts to sweep — pass as space-separated or comma-separated
-    # e.g. -SpecN 1,3,4,5  or  -SpecN @(1,3,4,5)
+    # MTP speculative token counts to sweep -- pass as comma-separated string
+    # e.g. -SpecN "1,3,4,5"  or  -SpecN "1 3 4 5"
     [string[]]$SpecN = @("1", "2", "3", "4", "5"),
 
     # vLLM / Docker settings
-    [string]$ModelDir       = "D:/Tools/LocalAI/models/Qwen3.6-27B-Text-NVFP4-MTP",
-    [string]$Image          = "vllm/vllm-openai:latest",
-    [string]$ContainerName  = "qwen36-text-nvfp4-mtp-vllm",
-    [string]$HostAddress    = "127.0.0.1",
-    [int]$Port              = 8892,
+    [string]$ModelDir        = "D:/Tools/LocalAI/models/Qwen3.6-27B-Text-NVFP4-MTP",
+    [string]$Image           = "vllm/vllm-openai:latest",
+    [string]$ContainerName   = "qwen36-text-nvfp4-mtp-vllm",
+    [string]$HostAddress     = "127.0.0.1",
+    [int]$Port               = 8892,
     [string]$ServedModelName = "qwen3.6-27b-text-nvfp4-mtp",
     # 200000 matches the known-working run; 262144 blows KV cache budget at 0.93 gpu-mem
-    [int]$MaxModelLen       = 200000,
-    [double]$GpuMemUtil     = 0.93,
-    [string]$KvCacheDtype   = "fp8",
+    [int]$MaxModelLen        = 200000,
+    [double]$GpuMemUtil      = 0.93,
+    [string]$KvCacheDtype    = "fp8",
 
-    # Bench settings — use max-model-len as the prompt target so we exercise the full context
+    # Bench settings -- use max-model-len as the prompt target
     [int]$TargetPromptTokens = 200000,
     [int]$MaxTokens          = 1024,
     [int]$Runs               = 3,
@@ -24,8 +24,8 @@ param(
     [int]$Seed               = 1234,
     [int]$GpuIndex           = 0,
 
-    # How long to wait for vLLM to become healthy (seconds)
-    # NOTE: startup takes ~20 min on this machine — two 18GB weight loads over Docker 9P FS
+    # How long to wait for vLLM to become healthy (seconds).
+    # Startup takes ~20 min: two 18GB weight loads over Docker 9P FS
     # + torch.compile (~110s) + CUDA graph capture. 2400s = 40 min ceiling.
     [int]$StartupTimeoutSec  = 2400,
 
@@ -35,15 +35,16 @@ param(
 
 $ErrorActionPreference = "Stop"
 
-# Normalise $SpecN: split on commas/spaces so "-SpecN 1,3,4,5" and "-SpecN 1 3 4 5" both work
-$SpecN = @($SpecN | ForEach-Object { $_ -split '[,\s]+' } | Where-Object { $_ -match '^\d+$' } | ForEach-Object { [int]$_ })
+# Normalise $SpecN: split on commas/spaces so "-SpecN 1,3,4,5" works correctly
+$SpecN = @($SpecN | ForEach-Object { $_ -split '[,\s]+' } |
+           Where-Object { $_ -match '^\d+$' } |
+           ForEach-Object { [int]$_ })
 
-# Suppress MSYS/Git-bash path conversion that turns /model → C:/Program Files/Git/model
-# when PowerShell invokes docker through the WSL/bash layer.
-$env:MSYS_NO_PATHCONV = "1"
+# Suppress MSYS/Git-bash path conversion that can mangle /model paths
+$env:MSYS_NO_PATHCONV  = "1"
 $env:MSYS2_ARG_CONV_EXCL = "*"
 
-$repoRoot  = (Resolve-Path -LiteralPath (Join-Path $PSScriptRoot "..\..")).Path
+$repoRoot    = (Resolve-Path -LiteralPath (Join-Path $PSScriptRoot "..\..")).Path
 $benchScript = Join-Path $PSScriptRoot "bench-openai-chat-endpoint.ps1"
 
 if (-not $ResultDir) {
@@ -53,8 +54,8 @@ if (-not (Test-Path -LiteralPath $ResultDir)) {
     New-Item -ItemType Directory -Force -Path $ResultDir | Out-Null
 }
 
-$stamp      = Get-Date -Format "yyyyMMdd-HHmmss"
-$summaryCsv = Join-Path $ResultDir "qwen-nvfp4-vllm-mtp-sweep-summary-$stamp.csv"
+$stamp       = Get-Date -Format "yyyyMMdd-HHmmss"
+$summaryCsv  = Join-Path $ResultDir "qwen-nvfp4-vllm-mtp-sweep-summary-$stamp.csv"
 $summaryRows = @()
 
 function Write-Step($msg) {
@@ -76,19 +77,20 @@ function Stop-VllmContainer {
     if ($old -eq $ContainerName) {
         docker rm $ContainerName | Out-Null
     }
-    # Wait until the name is fully released (docker rm can lag)
+    # Poll until the name is fully released (docker rm can lag)
     for ($i = 0; $i -lt 15; $i++) {
         Start-Sleep -Seconds 1
         $still = docker ps -a --filter "name=^/$ContainerName$" --format "{{.Names}}" 2>$null
         if (-not $still) { return }
     }
-    Write-Warning "Container $ContainerName still visible after 15s wait — continuing anyway"
+    Write-Warning "Container $ContainerName still visible after 15s -- continuing anyway"
 }
 
 function Start-VllmContainer {
     param([int]$N)
 
-    # Single-quoted base preserves literal " chars; interpolate $N via concatenation
+    # Single-quoted base keeps literal " chars; $N interpolated via concatenation.
+    # Combined --flag=value form preserves JSON quotes through PowerShell -> Docker -> WSL.
     $specCfg = '--speculative-config={"method":"qwen3_5_mtp","num_speculative_tokens":' + $N + '}'
 
     $dockerArgs = @(
@@ -100,7 +102,7 @@ function Start-VllmContainer {
         "-v", "${ModelDir}:/model:ro",
         "-e", "CUDA_DEVICE_ORDER=PCI_BUS_ID",
         "-e", "CUDA_VISIBLE_DEVICES=0",
-        "-d",  # detached
+        "-d",
         $Image,
         "/model",
         "--served-model-name", $ServedModelName,
@@ -114,7 +116,6 @@ function Start-VllmContainer {
         "--gpu-memory-utilization", "$GpuMemUtil",
         "--reasoning-parser", "qwen3",
         "--kv-cache-dtype", $KvCacheDtype,
-        # Combined --flag=value form preserves JSON quotes through PowerShell→Docker→WSL
         $specCfg
     )
 
@@ -125,25 +126,26 @@ function Start-VllmContainer {
 function Wait-VllmReady {
     param([int]$N)
 
-    $url = "http://$HostAddress`:$Port/health"
+    $url = "http://${HostAddress}:${Port}/health"
     Write-Host "Waiting for vLLM to become healthy (timeout ${StartupTimeoutSec}s)..."
     for ($i = 0; $i -lt $StartupTimeoutSec; $i++) {
         Start-Sleep -Seconds 1
-        # Check running containers only — if not there, check if it exited
+        # Check if still running
         $running = docker ps --filter "name=^/$ContainerName$" --format "{{.Names}}" 2>$null
         if ($running -ne $ContainerName) {
+            # Not running -- check if it exited (vs never started yet)
             $exited = docker ps -a --filter "name=^/$ContainerName$" --format "{{.Names}} {{.Status}}" 2>$null
             if ($exited) {
                 $lastLogs = docker logs $ContainerName 2>&1 | Select-Object -Last 20
-                throw "Container exited unexpectedly during startup for MTP n=$N`nStatus: $exited`nLast logs:`n$($lastLogs -join "`n")"
+                throw "Container exited during startup for MTP n=$N`nStatus: $exited`nLast logs:`n$($lastLogs -join "`n")"
             }
-            # Container not found at all yet — still starting, keep waiting
+            # Not yet created -- still starting, keep waiting
             Start-Sleep -Seconds 2
             continue
         }
         try {
             Invoke-RestMethod -Uri $url -TimeoutSec 3 | Out-Null
-            # vLLM 0.23 returns {} (empty) on healthy — any non-throwing 200 means ready
+            # vLLM 0.23 returns {} on healthy -- any non-throwing 200 means ready
             Write-Host "vLLM ready after $i seconds."
             return
         } catch { }
@@ -163,28 +165,28 @@ Write-Host "GPU mem util  : $GpuMemUtil"
 Write-Host "Summary CSV   : $summaryCsv"
 
 foreach ($n in $SpecN) {
-    $caseName = "qwen-nvfp4-mtp-n$n-ctx256k-prompt256k-gen$MaxTokens"
+    $caseName = "qwen-nvfp4-mtp-n$n-ctx200k-prompt200k-gen$MaxTokens"
     $outCsv   = Join-Path $ResultDir "$caseName-$stamp.csv"
 
     Write-Step "=== MTP n=$n ==="
 
     $row = [pscustomobject]@{
-        case                  = $caseName
-        spec_n                = $n
-        max_model_len         = $MaxModelLen
-        kv_cache_dtype        = $KvCacheDtype
-        gpu_mem_util          = $GpuMemUtil
-        target_prompt_tokens  = $TargetPromptTokens
-        max_tokens            = $MaxTokens
-        runs                  = $Runs
-        warmup_runs           = $WarmupRuns
-        started_at            = ""
-        ended_at              = ""
-        elapsed_seconds       = $null
+        case                    = $caseName
+        spec_n                  = $n
+        max_model_len           = $MaxModelLen
+        kv_cache_dtype          = $KvCacheDtype
+        gpu_mem_util            = $GpuMemUtil
+        target_prompt_tokens    = $TargetPromptTokens
+        max_tokens              = $MaxTokens
+        runs                    = $Runs
+        warmup_runs             = $WarmupRuns
+        started_at              = ""
+        ended_at                = ""
+        elapsed_seconds         = $null
         avg_wall_completion_tps = $null
-        status                = "running"
-        exit_code             = $null
-        result_csv            = $outCsv
+        status                  = "running"
+        exit_code               = $null
+        result_csv              = $outCsv
     }
     $summaryRows += $row
     Save-Summary
@@ -192,7 +194,7 @@ foreach ($n in $SpecN) {
     Stop-VllmContainer
     Start-VllmContainer -N $n
 
-    $timer = [System.Diagnostics.Stopwatch]::StartNew()
+    $timer     = [System.Diagnostics.Stopwatch]::StartNew()
     $startedAt = Get-Date
     $row.started_at = $startedAt.ToString("o")
     Save-Summary
@@ -200,9 +202,8 @@ foreach ($n in $SpecN) {
     try {
         Wait-VllmReady -N $n
 
-        # vLLM only opens /health after CUDA graphs and warmup are done — no extra sleep needed
         & powershell -NoProfile -ExecutionPolicy Bypass -File $benchScript `
-            -BaseUrl "http://$HostAddress`:$Port/v1" `
+            -BaseUrl "http://${HostAddress}:${Port}/v1" `
             -Model $ServedModelName `
             -CaseName $caseName `
             -GpuIndex $GpuIndex `
@@ -223,12 +224,11 @@ foreach ($n in $SpecN) {
 
     $timer.Stop()
     $endedAt = Get-Date
-    $row.ended_at         = $endedAt.ToString("o")
-    $row.elapsed_seconds  = [math]::Round($timer.Elapsed.TotalSeconds, 3)
-    $row.exit_code        = $exitCode
-    $row.status           = if ($exitCode -eq 0) { "ok" } else { "failed" }
+    $row.ended_at        = $endedAt.ToString("o")
+    $row.elapsed_seconds = [math]::Round($timer.Elapsed.TotalSeconds, 3)
+    $row.exit_code       = $exitCode
+    $row.status          = if ($exitCode -eq 0) { "ok" } else { "failed" }
 
-    # Pull avg tps from the individual bench CSV
     if ((Test-Path -LiteralPath $outCsv) -and $exitCode -eq 0) {
         $measured = @(Import-Csv -LiteralPath $outCsv | Where-Object { $_.warmup -ne "True" })
         if ($measured.Count -gt 0) {
@@ -242,7 +242,6 @@ foreach ($n in $SpecN) {
     Write-Host "n=$n done: status=$($row.status) avg_tps=$($row.avg_wall_completion_tps)" -ForegroundColor Green
 }
 
-# Final container teardown
 Stop-VllmContainer
 
 Write-Step "Sweep complete"
