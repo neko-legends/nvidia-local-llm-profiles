@@ -9,7 +9,8 @@ param(
     [string]$HostAddress    = "127.0.0.1",
     [int]$Port              = 8892,
     [string]$ServedModelName = "qwen3.6-27b-text-nvfp4-mtp",
-    [int]$MaxModelLen       = 262144,
+    # 200000 matches the known-working run; 262144 blows KV cache budget at 0.93 gpu-mem
+    [int]$MaxModelLen       = 200000,
     [double]$GpuMemUtil     = 0.93,
     [string]$KvCacheDtype   = "fp8",
 
@@ -23,13 +24,20 @@ param(
     [int]$GpuIndex           = 0,
 
     # How long to wait for vLLM to become healthy (seconds)
-    [int]$StartupTimeoutSec  = 360,
+    # NOTE: startup takes ~20 min on this machine — two 18GB weight loads over Docker 9P FS
+    # + torch.compile (~110s) + CUDA graph capture. 2400s = 40 min ceiling.
+    [int]$StartupTimeoutSec  = 2400,
 
     # Where to write individual bench CSVs + summary
     [string]$ResultDir       = ""
 )
 
 $ErrorActionPreference = "Stop"
+
+# Suppress MSYS/Git-bash path conversion that turns /model → C:/Program Files/Git/model
+# when PowerShell invokes docker through the WSL/bash layer.
+$env:MSYS_NO_PATHCONV = "1"
+$env:MSYS2_ARG_CONV_EXCL = "*"
 
 $repoRoot  = (Resolve-Path -LiteralPath (Join-Path $PSScriptRoot "..\..")).Path
 $benchScript = Join-Path $PSScriptRoot "bench-openai-chat-endpoint.ps1"
@@ -95,7 +103,7 @@ function Start-VllmContainer {
         "--gpu-memory-utilization", "$GpuMemUtil",
         "--reasoning-parser", "qwen3",
         "--kv-cache-dtype", $KvCacheDtype,
-        "--speculative-config=$specCfg"
+        "--speculative-config", $specCfg
     )
 
     Write-Step "Starting vLLM (MTP n=$N, ctx=$MaxModelLen, kv=$KvCacheDtype, gpu-mem=$GpuMemUtil)"
@@ -111,14 +119,16 @@ function Wait-VllmReady {
         Start-Sleep -Seconds 1
         $dead = docker ps --filter "name=^/$ContainerName$" --format "{{.Names}}" 2>$null
         if ($dead -ne $ContainerName) {
-            throw "Container exited unexpectedly during startup for MTP n=$N"
+            # Grab logs from the stopped container (it still exists briefly with --rm)
+            $lastLogs = docker logs $ContainerName 2>&1 | Select-Object -Last 30
+            throw "Container exited unexpectedly during startup for MTP n=$N`nLast logs:`n$($lastLogs -join "`n")"
         }
         try {
             $r = Invoke-RestMethod -Uri $url -TimeoutSec 3
-            if ($r.status -eq "ok") {
-                Write-Host "vLLM ready after $i seconds."
-                return
-            }
+            # vLLM 0.23 returns {} (empty object) on healthy, older versions return {status:"ok"}
+            # Either way: if the call didn't throw, the server is up
+            Write-Host "vLLM ready after $i seconds."
+            return
         } catch { }
     }
     throw "vLLM did not become healthy within ${StartupTimeoutSec}s for MTP n=$N"
@@ -173,9 +183,7 @@ foreach ($n in $SpecN) {
     try {
         Wait-VllmReady -N $n
 
-        # Give it 10 more seconds to fully settle after /health returns ok
-        Start-Sleep -Seconds 10
-
+        # vLLM only opens /health after CUDA graphs and warmup are done — no extra sleep needed
         & powershell -NoProfile -ExecutionPolicy Bypass -File $benchScript `
             -BaseUrl "http://$HostAddress`:$Port/v1" `
             -Model $ServedModelName `
