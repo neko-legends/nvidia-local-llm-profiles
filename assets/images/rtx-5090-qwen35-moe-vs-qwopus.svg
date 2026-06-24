@@ -1,61 +1,80 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="1780" height="825" viewBox="0 0 1780 825">
+<svg xmlns="http://www.w3.org/2000/svg" width="1780" height="1067" viewBox="0 0 1780 1067">
 <style>
 text{font-family:Segoe UI,Arial,sans-serif;letter-spacing:0}
 .title{fill:#edf3f7;font-size:42px;font-weight:750}
 .subtitle{fill:#b5bec8;font-size:20px}
 .label{fill:#e8eef4;font-size:21px;font-weight:650}
 .small{fill:#9aa5b1;font-size:16px}
+.detail{fill:#7f8b98;font-size:14px}
 .value{fill:#edf3f7;font-size:21px;font-weight:750}
 .axis{fill:#9aa5b1;font-size:15px}
 </style>
-<rect width="1780" height="825" fill="#111418"/>
-<rect x="594" y="168" width="1116" height="533" rx="10" fill="#181e25"/>
+<rect width="1780" height="1067" fill="#111418"/>
+<rect x="594" y="168" width="1116" height="775" rx="10" fill="#181e25"/>
 <text x="72.0" y="82.0" class="title">RTX 5090: local Qwen-family throughput</text>
-<text x="72.0" y="122.0" class="subtitle">Average completion tokens per second. Labels use repo/model names plus tested quantization.</text>
-<line x1="620.0" y1="182" x2="620.0" y2="727" stroke="#2f3742" stroke-width="1"/>
-<text x="620.0" y="755.0" class="axis" text-anchor="middle">0</text>
-<line x1="832.0" y1="182" x2="832.0" y2="727" stroke="#2f3742" stroke-width="1"/>
-<text x="832.0" y="755.0" class="axis" text-anchor="middle">25</text>
-<line x1="1044.0" y1="182" x2="1044.0" y2="727" stroke="#2f3742" stroke-width="1"/>
-<text x="1044.0" y="755.0" class="axis" text-anchor="middle">50</text>
-<line x1="1256.0" y1="182" x2="1256.0" y2="727" stroke="#2f3742" stroke-width="1"/>
-<text x="1256.0" y="755.0" class="axis" text-anchor="middle">75</text>
-<line x1="1468.0" y1="182" x2="1468.0" y2="727" stroke="#2f3742" stroke-width="1"/>
-<text x="1468.0" y="755.0" class="axis" text-anchor="middle">100</text>
-<line x1="1680.0" y1="182" x2="1680.0" y2="727" stroke="#2f3742" stroke-width="1"/>
-<text x="1680.0" y="755.0" class="axis" text-anchor="middle">125</text>
+<text x="72.0" y="122.0" class="subtitle">Average completion tokens per second. Purple bars compare the same Unsloth MTP GGUF with and without display output on the 5090.</text>
+<line x1="620.0" y1="182" x2="620.0" y2="969" stroke="#2f3742" stroke-width="1"/>
+<text x="620.0" y="997.0" class="axis" text-anchor="middle">0</text>
+<line x1="832.0" y1="182" x2="832.0" y2="969" stroke="#2f3742" stroke-width="1"/>
+<text x="832.0" y="997.0" class="axis" text-anchor="middle">25</text>
+<line x1="1044.0" y1="182" x2="1044.0" y2="969" stroke="#2f3742" stroke-width="1"/>
+<text x="1044.0" y="997.0" class="axis" text-anchor="middle">50</text>
+<line x1="1256.0" y1="182" x2="1256.0" y2="969" stroke="#2f3742" stroke-width="1"/>
+<text x="1256.0" y="997.0" class="axis" text-anchor="middle">75</text>
+<line x1="1468.0" y1="182" x2="1468.0" y2="969" stroke="#2f3742" stroke-width="1"/>
+<text x="1468.0" y="997.0" class="axis" text-anchor="middle">100</text>
+<line x1="1680.0" y1="182" x2="1680.0" y2="969" stroke="#2f3742" stroke-width="1"/>
+<text x="1680.0" y="997.0" class="axis" text-anchor="middle">125</text>
 <text x="72.0" y="176.0" class="label">Short context</text>
-<text x="592.0" y="227.0" class="small" text-anchor="end">Jackrong/Qwopus3.6-27B-Coder-MTP-GGUF Q5_K_M (8k)</text>
+<text x="592.0" y="216.0" class="small" text-anchor="end">Jackrong/Qwopus3.6-27B-Coder-MTP-GGUF</text>
+<text x="592.0" y="237.0" class="detail" text-anchor="end">Q5_K_M - 8k</text>
 <rect x="620" y="196" width="925.6" height="34" rx="5" fill="#46d3c7" opacity="0.95"/>
 <rect x="620" y="196" width="925.6" height="34" rx="5" fill="none" stroke="#d9fff8" stroke-opacity="0.55"/>
 <text x="1557.6" y="222.0" class="value">109.2</text>
 <text x="1615.6" y="222.0" class="small">tok/s</text>
-<text x="592.0" y="295.0" class="small" text-anchor="end">unsloth/Qwen3.6-35B-A3B-MTP-GGUF UD-Q4_K_XL (10k)</text>
-<rect x="620" y="264" width="817.0" height="34" rx="5" fill="#9d82ff" opacity="0.95"/>
-<rect x="620" y="264" width="817.0" height="34" rx="5" fill="none" stroke="#d9fff8" stroke-opacity="0.55"/>
-<text x="1449.0" y="290.0" class="value">96.3</text>
-<text x="1507.0" y="290.0" class="small">tok/s</text>
-<text x="592.0" y="363.0" class="small" text-anchor="end">nvidia/Qwen3.6-35B-A3B-NVFP4 (10k)</text>
-<rect x="620" y="332" width="649.3" height="34" rx="5" fill="#f2b846" opacity="0.95"/>
-<rect x="620" y="332" width="649.3" height="34" rx="5" fill="none" stroke="#d9fff8" stroke-opacity="0.55"/>
-<text x="1281.3" y="358.0" class="value">76.6</text>
-<text x="1339.3" y="358.0" class="small">tok/s</text>
-<text x="72.0" y="442.0" class="label">Long context</text>
-<text x="592.0" y="493.0" class="small" text-anchor="end">Jackrong/Qwopus3.6-27B-Coder-MTP-GGUF Q5_K_M (200k)</text>
-<rect x="620" y="462" width="429.0" height="34" rx="5" fill="#46d3c7" opacity="0.95"/>
-<rect x="620" y="462" width="429.0" height="34" rx="5" fill="none" stroke="#d9fff8" stroke-opacity="0.55"/>
-<text x="1061.0" y="488.0" class="value">50.6</text>
-<text x="1119.0" y="488.0" class="small">tok/s</text>
-<text x="592.0" y="561.0" class="small" text-anchor="end">unsloth/Qwen3.6-35B-A3B-MTP-GGUF UD-Q4_K_XL (200k)</text>
-<rect x="620" y="530" width="120.4" height="34" rx="5" fill="#9d82ff" opacity="0.95"/>
-<rect x="620" y="530" width="120.4" height="34" rx="5" fill="none" stroke="#d9fff8" stroke-opacity="0.55"/>
-<text x="752.4" y="556.0" class="value">14.2</text>
-<text x="810.4" y="556.0" class="small">tok/s</text>
-<text x="592.0" y="629.0" class="small" text-anchor="end">nvidia/Qwen3.6-35B-A3B-NVFP4 (200k)</text>
-<rect x="620" y="598" width="286.1" height="34" rx="5" fill="#f2b846" opacity="0.95"/>
-<rect x="620" y="598" width="286.1" height="34" rx="5" fill="none" stroke="#d9fff8" stroke-opacity="0.55"/>
-<text x="918.1" y="624.0" class="value">33.7</text>
-<text x="976.1" y="624.0" class="small">tok/s</text>
-<text x="72.0" y="791.0" class="small">Source: results/rtx-5090 CSVs. Short context compares 10k Qwen runs against nearest Qwopus result.</text>
-<text x="1708.0" y="791.0" class="small" text-anchor="end">neko-legends/nvidia-local-llm-profiles</text>
+<text x="592.0" y="296.0" class="small" text-anchor="end">unsloth/Qwen3.6-35B-A3B-MTP-GGUF</text>
+<text x="592.0" y="317.0" class="detail" text-anchor="end">UD-Q4_K_XL - 10k - 5090 display attached</text>
+<rect x="620" y="276" width="817.0" height="34" rx="5" fill="#9d82ff" opacity="0.95"/>
+<rect x="620" y="276" width="817.0" height="34" rx="5" fill="none" stroke="#d9fff8" stroke-opacity="0.55"/>
+<text x="1449.0" y="302.0" class="value">96.3</text>
+<text x="1507.0" y="302.0" class="small">tok/s</text>
+<text x="592.0" y="376.0" class="small" text-anchor="end">unsloth/Qwen3.6-35B-A3B-MTP-GGUF</text>
+<text x="592.0" y="397.0" class="detail" text-anchor="end">UD-Q4_K_XL - 10k - 5090 headless, display on 3090</text>
+<rect x="620" y="356" width="812.0" height="34" rx="5" fill="#b993ff" opacity="0.95"/>
+<rect x="620" y="356" width="812.0" height="34" rx="5" fill="none" stroke="#d9fff8" stroke-opacity="0.55"/>
+<text x="1444.0" y="382.0" class="value">95.8</text>
+<text x="1502.0" y="382.0" class="small">tok/s</text>
+<text x="592.0" y="456.0" class="small" text-anchor="end">nvidia/Qwen3.6-35B-A3B-NVFP4</text>
+<text x="592.0" y="477.0" class="detail" text-anchor="end">modelopt NVFP4 - 10k - vLLM nightly</text>
+<rect x="620" y="436" width="649.3" height="34" rx="5" fill="#f2b846" opacity="0.95"/>
+<rect x="620" y="436" width="649.3" height="34" rx="5" fill="none" stroke="#d9fff8" stroke-opacity="0.55"/>
+<text x="1281.3" y="462.0" class="value">76.6</text>
+<text x="1339.3" y="462.0" class="small">tok/s</text>
+<text x="72.0" y="568.0" class="label">Long context</text>
+<text x="592.0" y="608.0" class="small" text-anchor="end">Jackrong/Qwopus3.6-27B-Coder-MTP-GGUF</text>
+<text x="592.0" y="629.0" class="detail" text-anchor="end">Q5_K_M - 200k</text>
+<rect x="620" y="588" width="429.0" height="34" rx="5" fill="#46d3c7" opacity="0.95"/>
+<rect x="620" y="588" width="429.0" height="34" rx="5" fill="none" stroke="#d9fff8" stroke-opacity="0.55"/>
+<text x="1061.0" y="614.0" class="value">50.6</text>
+<text x="1119.0" y="614.0" class="small">tok/s</text>
+<text x="592.0" y="688.0" class="small" text-anchor="end">unsloth/Qwen3.6-35B-A3B-MTP-GGUF</text>
+<text x="592.0" y="709.0" class="detail" text-anchor="end">UD-Q4_K_XL - 200k - 5090 display attached</text>
+<rect x="620" y="668" width="120.4" height="34" rx="5" fill="#9d82ff" opacity="0.95"/>
+<rect x="620" y="668" width="120.4" height="34" rx="5" fill="none" stroke="#d9fff8" stroke-opacity="0.55"/>
+<text x="752.4" y="694.0" class="value">14.2</text>
+<text x="810.4" y="694.0" class="small">tok/s</text>
+<text x="592.0" y="768.0" class="small" text-anchor="end">unsloth/Qwen3.6-35B-A3B-MTP-GGUF</text>
+<text x="592.0" y="789.0" class="detail" text-anchor="end">UD-Q4_K_XL - 200k - 5090 headless, display on 3090</text>
+<rect x="620" y="748" width="124.8" height="34" rx="5" fill="#b993ff" opacity="0.95"/>
+<rect x="620" y="748" width="124.8" height="34" rx="5" fill="none" stroke="#d9fff8" stroke-opacity="0.55"/>
+<text x="756.8" y="774.0" class="value">14.7</text>
+<text x="814.8" y="774.0" class="small">tok/s</text>
+<text x="592.0" y="848.0" class="small" text-anchor="end">nvidia/Qwen3.6-35B-A3B-NVFP4</text>
+<text x="592.0" y="869.0" class="detail" text-anchor="end">modelopt NVFP4 - 200k - vLLM nightly</text>
+<rect x="620" y="828" width="286.1" height="34" rx="5" fill="#f2b846" opacity="0.95"/>
+<rect x="620" y="828" width="286.1" height="34" rx="5" fill="none" stroke="#d9fff8" stroke-opacity="0.55"/>
+<text x="918.1" y="854.0" class="value">33.7</text>
+<text x="976.1" y="854.0" class="small">tok/s</text>
+<text x="72.0" y="1033.0" class="small">Source: results/rtx-5090 CSVs. Headless = RTX 5090 display_active Disabled; display output moved to RTX 3090.</text>
+<text x="1708.0" y="1033.0" class="small" text-anchor="end">neko-legends/nvidia-local-llm-profiles</text>
 </svg>

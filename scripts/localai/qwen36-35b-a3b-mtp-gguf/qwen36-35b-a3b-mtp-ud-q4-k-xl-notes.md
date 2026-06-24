@@ -26,7 +26,13 @@ speculative decoding for this GGUF family.
 
 RTX 5090 quick benchmark:
 
-| Context target | Prompt tokens | tok/s | Power | Temp |
-| ---: | ---: | ---: | ---: | ---: |
-| 10k | 8,907 | 96.3 | 174W | 46C |
-| 200k | 174,590 | 14.2 | 222W | 57C |
+| Condition | Context target | Prompt tokens | tok/s | Power | Temp |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| 5090 display attached | 10k | 8,907 | 96.3 | 174W | 46C |
+| 5090 display attached | 200k | 174,590 | 14.2 | 222W | 57C |
+| 5090 headless, display on 3090 | 10k | 8,907 | 95.8 | 170W | 46C |
+| 5090 headless, display on 3090 | 200k | 174,590 | 14.7 | 213W | 55C |
+
+The headless check was run after moving display output to the RTX 3090. It did
+not materially improve throughput, but it did lower observed power and
+temperature on the 200k run.

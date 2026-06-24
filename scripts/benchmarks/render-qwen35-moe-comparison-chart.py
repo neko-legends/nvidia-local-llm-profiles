@@ -31,15 +31,23 @@ def read_measured(path: Path) -> list[dict[str, str]]:
         ]
 
 
-def latest_by_target(pattern: str) -> dict[int, Path]:
-    latest: dict[int, Path] = {}
+def paths_by_target(pattern: str) -> dict[int, list[Path]]:
+    matches: dict[int, list[Path]] = {}
     for path in sorted(RESULTS_DIR.glob(pattern)):
         rows = read_measured(path)
         if not rows:
             continue
         target = int(rows[0]["target_prompt_tokens"])
-        latest[target] = path
-    return latest
+        matches.setdefault(target, []).append(path)
+    return matches
+
+
+def earliest_by_target(pattern: str) -> dict[int, Path]:
+    return {target: paths[0] for target, paths in paths_by_target(pattern).items()}
+
+
+def latest_by_target(pattern: str) -> dict[int, Path]:
+    return {target: paths[-1] for target, paths in paths_by_target(pattern).items()}
 
 
 def avg_tps(path: Path) -> float:
@@ -73,33 +81,49 @@ def svg_text(x: float, y: float, text: str, **attrs: str) -> str:
 def load_rows() -> tuple[list[dict[str, object]], int]:
     qwopus = latest_by_target(QWOPUS_GLOB)
     moe = latest_by_target(MOE_GLOB)
-    gguf = latest_by_target(GGUF_GLOB)
+    gguf_display = earliest_by_target(GGUF_GLOB)
+    gguf_headless = latest_by_target(GGUF_GLOB)
 
     rows: list[dict[str, object]] = []
     for label, target in (("Short context", 10000), ("Long context", 200000)):
         q = nearest(qwopus, 8192 if target == 10000 else target)
         m = nearest(moe, target)
-        g = nearest(gguf, target)
+        gd = nearest(gguf_display, target)
+        gh = nearest(gguf_headless, target)
         if q:
             rows.append(
                 {
                     "group": label,
-                    "model": "Jackrong/Qwopus3.6-27B-Coder-MTP-GGUF Q5_K_M",
+                    "model": "Jackrong/Qwopus3.6-27B-Coder-MTP-GGUF",
+                    "detail": f"Q5_K_M - {context_label(q[0])}",
                     "target": q[0],
                     "tps": avg_tps(q[1]),
                     "path": q[1].name,
                     "color": "#46d3c7",
                 }
             )
-        if g:
+        if gd:
             rows.append(
                 {
                     "group": label,
-                    "model": "unsloth/Qwen3.6-35B-A3B-MTP-GGUF UD-Q4_K_XL",
-                    "target": g[0],
-                    "tps": avg_tps(g[1]),
-                    "path": g[1].name,
+                    "model": "unsloth/Qwen3.6-35B-A3B-MTP-GGUF",
+                    "detail": f"UD-Q4_K_XL - {context_label(gd[0])} - 5090 display attached",
+                    "target": gd[0],
+                    "tps": avg_tps(gd[1]),
+                    "path": gd[1].name,
                     "color": "#9d82ff",
+                }
+            )
+        if gh and (not gd or gh[1] != gd[1]):
+            rows.append(
+                {
+                    "group": label,
+                    "model": "unsloth/Qwen3.6-35B-A3B-MTP-GGUF",
+                    "detail": f"UD-Q4_K_XL - {context_label(gh[0])} - 5090 headless, display on 3090",
+                    "target": gh[0],
+                    "tps": avg_tps(gh[1]),
+                    "path": gh[1].name,
+                    "color": "#b993ff",
                 }
             )
         if m:
@@ -107,6 +131,7 @@ def load_rows() -> tuple[list[dict[str, object]], int]:
                 {
                     "group": label,
                     "model": "nvidia/Qwen3.6-35B-A3B-NVFP4",
+                    "detail": f"modelopt NVFP4 - {context_label(m[0])} - vLLM nightly",
                     "target": m[0],
                     "tps": avg_tps(m[1]),
                     "path": m[1].name,
@@ -128,8 +153,8 @@ def render_svg(rows: list[dict[str, object]], scale_max: int) -> Path:
     left = 620
     right = 100
     top = 220
-    row_gap = 68
-    group_gap = 62
+    row_gap = 80
+    group_gap = 72
     bar_h = 34
     plot_w = width - left - right
 
@@ -153,6 +178,7 @@ def render_svg(rows: list[dict[str, object]], scale_max: int) -> Path:
         ".subtitle{fill:#b5bec8;font-size:20px}",
         ".label{fill:#e8eef4;font-size:21px;font-weight:650}",
         ".small{fill:#9aa5b1;font-size:16px}",
+        ".detail{fill:#7f8b98;font-size:14px}",
         ".value{fill:#edf3f7;font-size:21px;font-weight:750}",
         ".axis{fill:#9aa5b1;font-size:15px}",
         "</style>",
@@ -161,7 +187,7 @@ def render_svg(rows: list[dict[str, object]], scale_max: int) -> Path:
     ]
 
     parts.append(svg_text(72, 82, "RTX 5090: local Qwen-family throughput", class_="title"))
-    parts.append(svg_text(72, 122, "Average completion tokens per second. Labels use repo/model names plus tested quantization.", class_="subtitle"))
+    parts.append(svg_text(72, 122, "Average completion tokens per second. Purple bars compare the same Unsloth MTP GGUF with and without display output on the 5090.", class_="subtitle"))
 
     for tick in range(0, scale_max + 1, 25):
         x = left + (tick / scale_max) * plot_w
@@ -177,14 +203,14 @@ def render_svg(rows: list[dict[str, object]], scale_max: int) -> Path:
 
         value = float(row["tps"])
         bar_w = (value / scale_max) * plot_w
-        label = f'{row["model"]} ({context_label(int(row["target"]))})'
-        parts.append(svg_text(left - 28, ypos + 7, label, class_="small", text_anchor="end"))
+        parts.append(svg_text(left - 28, ypos - 4, str(row["model"]), class_="small", text_anchor="end"))
+        parts.append(svg_text(left - 28, ypos + 17, str(row["detail"]), class_="detail", text_anchor="end"))
         parts.append(f'<rect x="{left}" y="{ypos - 24}" width="{bar_w:.1f}" height="{bar_h}" rx="5" fill="{row["color"]}" opacity="0.95"/>')
         parts.append(f'<rect x="{left}" y="{ypos - 24}" width="{bar_w:.1f}" height="{bar_h}" rx="5" fill="none" stroke="#d9fff8" stroke-opacity="0.55"/>')
         parts.append(svg_text(left + bar_w + 12, ypos + 2, f"{value:.1f}", class_="value"))
         parts.append(svg_text(left + bar_w + 70, ypos + 2, "tok/s", class_="small"))
 
-    footnote = "Source: results/rtx-5090 CSVs. Short context compares 10k Qwen runs against nearest Qwopus result."
+    footnote = "Source: results/rtx-5090 CSVs. Headless = RTX 5090 display_active Disabled; display output moved to RTX 3090."
     parts.append(svg_text(72, height - 34, footnote, class_="small"))
     parts.append(svg_text(width - 72, height - 34, "neko-legends/nvidia-local-llm-profiles", class_="small", text_anchor="end"))
     parts.append("</svg>")
@@ -206,8 +232,8 @@ def render_png(rows: list[dict[str, object]], scale_max: int) -> Path:
     left = 620
     right = 100
     top = 220
-    row_gap = 68
-    group_gap = 62
+    row_gap = 80
+    group_gap = 72
     bar_h = 34
     plot_w = width - left - right
 
@@ -237,6 +263,7 @@ def render_png(rows: list[dict[str, object]], scale_max: int) -> Path:
     subtitle_font = font("segoeui.ttf", 20)
     label_font = font("segoeuib.ttf", 21)
     small_font = font("segoeui.ttf", 16)
+    detail_font = font("segoeui.ttf", 14)
     value_font = font("segoeuib.ttf", 21)
 
     draw.rounded_rectangle(
@@ -247,7 +274,7 @@ def render_png(rows: list[dict[str, object]], scale_max: int) -> Path:
     draw.text((72, 48), "RTX 5090: local Qwen-family throughput", fill="#edf3f7", font=title_font)
     draw.text(
         (72, 104),
-        "Average completion tokens per second. Labels use repo/model names plus tested quantization.",
+        "Average completion tokens per second. Purple bars compare the same Unsloth MTP GGUF with and without display output on the 5090.",
         fill="#b5bec8",
         font=subtitle_font,
     )
@@ -268,9 +295,12 @@ def render_png(rows: list[dict[str, object]], scale_max: int) -> Path:
 
         value = float(row["tps"])
         bar_w = (value / scale_max) * plot_w
-        label = f'{row["model"]} ({context_label(int(row["target"]))})'
+        label = str(row["model"])
+        detail = str(row["detail"])
         bbox = draw.textbbox((0, 0), label, font=small_font)
-        draw.text((left - 28 - (bbox[2] - bbox[0]), ypos - 18), label, fill="#9aa5b1", font=small_font)
+        draw.text((left - 28 - (bbox[2] - bbox[0]), ypos - 27), label, fill="#9aa5b1", font=small_font)
+        bbox = draw.textbbox((0, 0), detail, font=detail_font)
+        draw.text((left - 28 - (bbox[2] - bbox[0]), ypos - 6), detail, fill="#7f8b98", font=detail_font)
         draw.rounded_rectangle(
             [left, ypos - 24, left + bar_w, ypos - 24 + bar_h],
             radius=5,
@@ -281,7 +311,7 @@ def render_png(rows: list[dict[str, object]], scale_max: int) -> Path:
         draw.text((left + bar_w + 12, ypos - 23), f"{value:.1f}", fill="#edf3f7", font=value_font)
         draw.text((left + bar_w + 70, ypos - 18), "tok/s", fill="#9aa5b1", font=small_font)
 
-    footnote = "Source: results/rtx-5090 CSVs. Short context compares 10k Qwen runs against nearest Qwopus result."
+    footnote = "Source: results/rtx-5090 CSVs. Headless = RTX 5090 display_active Disabled; display output moved to RTX 3090."
     draw.text((72, height - 54), footnote, fill="#9aa5b1", font=small_font)
     repo = "neko-legends/nvidia-local-llm-profiles"
     bbox = draw.textbbox((0, 0), repo, font=small_font)
