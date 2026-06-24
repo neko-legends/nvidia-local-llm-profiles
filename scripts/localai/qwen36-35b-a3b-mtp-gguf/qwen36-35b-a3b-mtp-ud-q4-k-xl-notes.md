@@ -31,5 +31,11 @@ RTX 5090 quick benchmark:
 | 10k | 8,907 | 96.3 | 174W | 46C |
 | 200k | 174,590 | 14.2 | 222W | 57C |
 
+Token accounting: the benchmark sends the generated BookContext prompt inline as
+the user message. The reported tok/s is completion tokens divided by full
+request wall time, including prompt ingestion and prefill. Dragging the prompt
+file into a UI can invoke attachment/RAG behavior, so it may not test the same
+number of prompt tokens.
+
 The headless check was run after moving display output to the RTX 3090. It did
 not materially improve throughput: 95.8 tok/s at 10k and 14.7 tok/s at 200k.

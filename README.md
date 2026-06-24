@@ -157,7 +157,7 @@ Two-point smoke benchmarks only, one measured run per context.
 
 ![RTX 5090 local Qwen-family throughput with full model labels](assets/images/rtx-5090-qwen35-moe-vs-qwopus.png)
 
-| Model / condition | Context | Actual prompt tokens | avg tok/s | Power | Temp |
+| Model | Context | Actual prompt tokens | avg tok/s | Power | Temp |
 | --- | ---: | ---: | ---: | ---: | ---: |
 | nvidia/Qwen3.6-35B-A3B-NVFP4 | 10k target | 8,905 | 76.6 tok/s | 172W | 47C |
 | nvidia/Qwen3.6-35B-A3B-NVFP4 | 200k target | 174,588 | 33.7 tok/s | 228W | 55C |
@@ -167,6 +167,13 @@ Two-point smoke benchmarks only, one measured run per context.
 The GGUF profile was fast at short context, but this 200k-profile run was slow
 at long context. The NVIDIA NVFP4 vLLM profile loaded with a 200k max context and
 used roughly 30GB VRAM while idle.
+
+Token accounting note: these benchmark prompts are sent inline as the user
+message in an OpenAI-compatible chat completion request. The `tok/s` value is
+`completion_tokens / full request wall time`, so it includes prompt ingestion and
+prefill for the inline context. UI tests that drag in a file may use attachment
+or RAG behavior instead of putting the whole file into the model context, and UI
+tok/s counters may report decode-only speed.
 
 A follow-up run with display output moved from the RTX 5090 to the RTX 3090 did
 not materially change Unsloth GGUF throughput: 95.8 tok/s at 10k and 14.7 tok/s
@@ -272,6 +279,10 @@ powershell -ExecutionPolicy Bypass -File scripts\benchmarks\bench-openai-chat-en
   -TargetPromptTokens 8192 `
   -MaxTokens 1024
 ```
+
+For manual UI comparisons, paste the generated benchmark prompt as plain text
+instead of dragging it in as a file. File attachment modes can route through RAG
+or document retrieval, which changes the actual prompt tokens seen by the model.
 
 ---
 

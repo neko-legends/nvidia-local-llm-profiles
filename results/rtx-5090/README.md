@@ -5,6 +5,10 @@
 - **Dates:** 2026-06-22 to 2026-06-24
 - **Prompt style:** BookContext (synthetic long-document with continuity sections)
 - **Generation:** 1024 tokens, temperature=0, seed=1234, 3 measured runs per context
+- **Token accounting:** prompts are inline chat messages; tok/s is completion
+  tokens divided by full request wall time, including prompt ingestion and
+  prefill. UI file attachments may use RAG/retrieval and are not equivalent to
+  pasting the whole prompt into context.
 
 ![RTX 5090 long-context throughput comparison](../../assets/images/rtx-5090-context-ladder-comparison.png)
 
