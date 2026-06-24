@@ -97,6 +97,18 @@ Launcher folder:
 scripts\vllm\qwen36-35b-a3b-nvfp4\
 ```
 
+### Unsloth Qwen3.6 35B A3B MTP GGUF
+
+Minimal llama.cpp support for
+[unsloth/Qwen3.6-35B-A3B-MTP-GGUF](https://huggingface.co/unsloth/Qwen3.6-35B-A3B-MTP-GGUF),
+using `Qwen3.6-35B-A3B-UD-Q4_K_XL.gguf`.
+
+Launcher folder:
+
+```text
+scripts\localai\qwen36-35b-a3b-mtp-gguf\
+```
+
 ---
 
 ## RTX 5090 Benchmark Results
@@ -139,19 +151,22 @@ Windows/container/driver stack rather than a simple VRAM limit.
 
 Full per-run CSVs: `results/rtx-5090/`
 
-### NVIDIA Qwen3.6 35B A3B NVFP4 MoE
+### Qwen3.6 35B Local Variants
 
-vLLM nightly — modelopt NVFP4 — fp8 KV — ctx=200k — one measured run
+Two-point smoke benchmarks only, one measured run per context.
 
-![RTX 5090 Qwen 35B MoE NVFP4 vs Qwopus Q5](assets/images/rtx-5090-qwen35-moe-vs-qwopus.png)
+![RTX 5090 Qwen 35B local variants vs Qwopus Q5](assets/images/rtx-5090-qwen35-moe-vs-qwopus.png)
 
-| Context | Actual prompt tokens | avg tok/s | Power | Temp |
-| ---: | ---: | ---: | ---: | ---: |
-| 10k target | 8,905 | 76.6 tok/s | 172W | 47C |
-| 200k target | 174,588 | 33.7 tok/s | 228W | 55C |
+| Model | Context | Actual prompt tokens | avg tok/s | Power | Temp |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| NVIDIA Qwen3.6 35B A3B NVFP4 | 10k target | 8,905 | 76.6 tok/s | 172W | 47C |
+| NVIDIA Qwen3.6 35B A3B NVFP4 | 200k target | 174,588 | 33.7 tok/s | 228W | 55C |
+| Unsloth Qwen3.6 35B A3B GGUF Q4 | 10k target | 8,907 | 96.3 tok/s | 174W | 46C |
+| Unsloth Qwen3.6 35B A3B GGUF Q4 | 200k target | 174,590 | 14.2 tok/s | 222W | 57C |
 
-This was a quick smoke benchmark, not a full ladder. It loaded on the RTX 5090
-with a 200k max context and used roughly 30GB VRAM while idle.
+The GGUF profile was fast at short context, but this 200k-profile run was slow
+at long context. The NVIDIA NVFP4 vLLM profile loaded with a 200k max context and
+used roughly 30GB VRAM while idle.
 
 ---
 
@@ -265,6 +280,7 @@ scripts/
     local-5090-router.py               local model router used by Hermes
   localai/
     qwopus3.6-27b-coder-mtp-gguf/   launchers, download, install
+    qwen36-35b-a3b-mtp-gguf/        Unsloth Qwen 35B GGUF launcher
   vllm/
     aeon-qwen36-27b-multimodal-nvfp4-mtp-xs/  Docker vLLM launcher
     qwen36-35b-a3b-nvfp4/            NVIDIA MoE NVFP4 two-point bench

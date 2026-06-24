@@ -15,6 +15,7 @@ OUTPUT_PNG_PATH = OUTPUT_DIR / "rtx-5090-qwen35-moe-vs-qwopus.png"
 
 QWOPUS_GLOB = "qwopus-coder-mtp-q5-ctx256k-mtp-prompt*-gen1024-*.csv"
 MOE_GLOB = "qwen36-35b-a3b-nvfp4-vllm-fp8kv-ctx200k-prompt*-gen1024-*.csv"
+GGUF_GLOB = "qwen36-35b-a3b-mtp-ud-q4-k-xl-llamacpp-ctx200k-prompt*-gen1024-*.csv"
 
 
 def fnum(value: str | None) -> float:
@@ -72,11 +73,13 @@ def svg_text(x: float, y: float, text: str, **attrs: str) -> str:
 def load_rows() -> tuple[list[dict[str, object]], int]:
     qwopus = latest_by_target(QWOPUS_GLOB)
     moe = latest_by_target(MOE_GLOB)
+    gguf = latest_by_target(GGUF_GLOB)
 
     rows: list[dict[str, object]] = []
     for label, target in (("Short context", 10000), ("Long context", 200000)):
         q = nearest(qwopus, 8192 if target == 10000 else target)
         m = nearest(moe, target)
+        g = nearest(gguf, target)
         if q:
             rows.append(
                 {
@@ -86,6 +89,17 @@ def load_rows() -> tuple[list[dict[str, object]], int]:
                     "tps": avg_tps(q[1]),
                     "path": q[1].name,
                     "color": "#46d3c7",
+                }
+            )
+        if g:
+            rows.append(
+                {
+                    "group": label,
+                    "model": "Qwen 35B GGUF Q4",
+                    "target": g[0],
+                    "tps": avg_tps(g[1]),
+                    "path": g[1].name,
+                    "color": "#9d82ff",
                 }
             )
         if m:
@@ -101,7 +115,7 @@ def load_rows() -> tuple[list[dict[str, object]], int]:
             )
 
     if not rows:
-        raise SystemExit("No Qwopus or Qwen 35B MoE benchmark CSVs found.")
+        raise SystemExit("No Qwopus or Qwen 35B benchmark CSVs found.")
 
     max_value = max(float(row["tps"]) for row in rows)
     scale_max = max(25, math.ceil(max_value / 25) * 25)
@@ -146,8 +160,8 @@ def render_svg(rows: list[dict[str, object]], scale_max: int) -> Path:
         f'<rect x="{left - 26}" y="{top - 52}" width="{plot_w + 56}" height="{height - top - 72}" rx="10" fill="#181e25"/>',
     ]
 
-    parts.append(svg_text(72, 82, "RTX 5090: Qwen 35B MoE NVFP4 vs Qwopus Q5", class_="title"))
-    parts.append(svg_text(72, 122, "Average completion tokens per second. One measured MoE run per requested context; Qwopus uses existing repo CSVs.", class_="subtitle"))
+    parts.append(svg_text(72, 82, "RTX 5090: Qwen 35B local variants vs Qwopus Q5", class_="title"))
+    parts.append(svg_text(72, 122, "Average completion tokens per second. Qwen 35B variants use one measured run per requested context.", class_="subtitle"))
 
     for tick in range(0, scale_max + 1, 25):
         x = left + (tick / scale_max) * plot_w
@@ -170,7 +184,7 @@ def render_svg(rows: list[dict[str, object]], scale_max: int) -> Path:
         parts.append(svg_text(left + bar_w + 12, ypos + 2, f"{value:.1f}", class_="value"))
         parts.append(svg_text(left + bar_w + 70, ypos + 2, "tok/s", class_="small"))
 
-    footnote = "Source: results/rtx-5090 CSVs. Short context compares MoE 10k against nearest Qwopus result."
+    footnote = "Source: results/rtx-5090 CSVs. Short context compares 10k Qwen runs against nearest Qwopus result."
     parts.append(svg_text(72, height - 34, footnote, class_="small"))
     parts.append(svg_text(width - 72, height - 34, "neko-legends/nvidia-local-llm-profiles", class_="small", text_anchor="end"))
     parts.append("</svg>")
@@ -230,10 +244,10 @@ def render_png(rows: list[dict[str, object]], scale_max: int) -> Path:
         radius=10,
         fill="#181e25",
     )
-    draw.text((72, 48), "RTX 5090: Qwen 35B MoE NVFP4 vs Qwopus Q5", fill="#edf3f7", font=title_font)
+    draw.text((72, 48), "RTX 5090: Qwen 35B local variants vs Qwopus Q5", fill="#edf3f7", font=title_font)
     draw.text(
         (72, 104),
-        "Average completion tokens per second. One measured MoE run per requested context; Qwopus uses existing repo CSVs.",
+        "Average completion tokens per second. Qwen 35B variants use one measured run per requested context.",
         fill="#b5bec8",
         font=subtitle_font,
     )
@@ -267,7 +281,7 @@ def render_png(rows: list[dict[str, object]], scale_max: int) -> Path:
         draw.text((left + bar_w + 12, ypos - 23), f"{value:.1f}", fill="#edf3f7", font=value_font)
         draw.text((left + bar_w + 70, ypos - 18), "tok/s", fill="#9aa5b1", font=small_font)
 
-    footnote = "Source: results/rtx-5090 CSVs. Short context compares MoE 10k against nearest Qwopus result."
+    footnote = "Source: results/rtx-5090 CSVs. Short context compares 10k Qwen runs against nearest Qwopus result."
     draw.text((72, height - 54), footnote, fill="#9aa5b1", font=small_font)
     repo = "neko-legends/nvidia-local-llm-profiles"
     bbox = draw.textbbox((0, 0), repo, font=small_font)

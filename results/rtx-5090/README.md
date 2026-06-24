@@ -8,7 +8,7 @@
 
 ![RTX 5090 long-context throughput comparison](../../assets/images/rtx-5090-context-ladder-comparison.png)
 
-![RTX 5090 Qwen 35B MoE NVFP4 vs Qwopus Q5](../../assets/images/rtx-5090-qwen35-moe-vs-qwopus.png)
+![RTX 5090 Qwen 35B local variants vs Qwopus Q5](../../assets/images/rtx-5090-qwen35-moe-vs-qwopus.png)
 
 ---
 
@@ -66,6 +66,20 @@ Two-point smoke benchmark only, one measured run per context.
 - **Stack:** Docker `vllm/vllm-openai:nightly` -> OpenAI-compatible endpoint at 127.0.0.1:39184
 - **Model:** `nvidia/Qwen3.6-35B-A3B-NVFP4`
 - **Flags:** `--quantization modelopt --kv-cache-dtype fp8 --max-model-len 200000 --max-num-seqs 1 --max-num-batched-tokens 8192 --gpu-memory-utilization 0.93 --attention-backend flashinfer --moe-backend marlin`
+
+### Unsloth Qwen3.6 35B A3B MTP GGUF Q4 — llama.cpp b9267 — ctx=200k — MTP n=2
+
+Two-point smoke benchmark only, one measured run per context.
+
+| Context target | Prompt tokens | tok/s | Power | Temp |
+| ---: | ---: | ---: | ---: | ---: |
+| 10k | 8,907 | 96.3 | 174W | 46C |
+| 200k | 174,590 | 14.2 | 222W | 57C |
+
+- **Stack:** llama.cpp server -> OpenAI-compatible endpoint at 127.0.0.1:39185
+- **Model:** `unsloth/Qwen3.6-35B-A3B-MTP-GGUF`
+- **File:** `Qwen3.6-35B-A3B-UD-Q4_K_XL.gguf`
+- **Flags:** `--gpu-layers all --ctx-size 200000 --cache-type-k q4_0 --cache-type-v q4_0 --flash-attn on --reasoning off --spec-type draft-mtp --spec-draft-n-max 2`
 
 ---
 
