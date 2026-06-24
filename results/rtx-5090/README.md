@@ -8,6 +8,8 @@
 
 ![RTX 5090 long-context throughput comparison](../../assets/images/rtx-5090-context-ladder-comparison.png)
 
+![RTX 5090 Qwen 35B MoE NVFP4 vs Qwopus Q5](../../assets/images/rtx-5090-qwen35-moe-vs-qwopus.png)
+
 ---
 
 ## Results
@@ -51,6 +53,19 @@ Windows host. The server reported a 200k max context and about 214k GPU KV-cache
 tokens available. Throughput was lower than hoped for NVFP4 on this Windows
 setup, so these results should be read as a Windows driver/container/NVFP4
 compatibility baseline rather than the model's likely ceiling.
+
+### NVIDIA Qwen3.6 35B A3B NVFP4 MoE — vLLM nightly — ctx=200k — fp8 KV
+
+Two-point smoke benchmark only, one measured run per context.
+
+| Context target | Prompt tokens | tok/s | Power | Temp |
+| ---: | ---: | ---: | ---: | ---: |
+| 10k | 8,905 | 76.6 | 172W | 47C |
+| 200k | 174,588 | 33.7 | 228W | 55C |
+
+- **Stack:** Docker `vllm/vllm-openai:nightly` -> OpenAI-compatible endpoint at 127.0.0.1:39184
+- **Model:** `nvidia/Qwen3.6-35B-A3B-NVFP4`
+- **Flags:** `--quantization modelopt --kv-cache-dtype fp8 --max-model-len 200000 --max-num-seqs 1 --max-num-batched-tokens 8192 --gpu-memory-utilization 0.93 --attention-backend flashinfer --moe-backend marlin`
 
 ---
 

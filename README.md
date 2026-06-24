@@ -84,6 +84,19 @@ Endpoint defaults:
 See `docs/models/aeon-qwen36-27b-multimodal-nvfp4-mtp-xs.md` for the model
 notes and serving assumptions.
 
+### NVIDIA Qwen3.6 35B A3B NVFP4 MoE
+
+Minimal vLLM/Docker support for
+[nvidia/Qwen3.6-35B-A3B-NVFP4](https://huggingface.co/nvidia/Qwen3.6-35B-A3B-NVFP4).
+This profile only runs the quick two-point check requested here: about 10k and
+200k prompt tokens, one measured run each.
+
+Launcher folder:
+
+```text
+scripts\vllm\qwen36-35b-a3b-nvfp4\
+```
+
 ---
 
 ## RTX 5090 Benchmark Results
@@ -125,6 +138,20 @@ NVFP4 throughput. A possible culprit is the modelopt NVFP4 path on this specific
 Windows/container/driver stack rather than a simple VRAM limit.
 
 Full per-run CSVs: `results/rtx-5090/`
+
+### NVIDIA Qwen3.6 35B A3B NVFP4 MoE
+
+vLLM nightly — modelopt NVFP4 — fp8 KV — ctx=200k — one measured run
+
+![RTX 5090 Qwen 35B MoE NVFP4 vs Qwopus Q5](assets/images/rtx-5090-qwen35-moe-vs-qwopus.png)
+
+| Context | Actual prompt tokens | avg tok/s | Power | Temp |
+| ---: | ---: | ---: | ---: | ---: |
+| 10k target | 8,905 | 76.6 tok/s | 172W | 47C |
+| 200k target | 174,588 | 33.7 tok/s | 228W | 55C |
+
+This was a quick smoke benchmark, not a full ladder. It loaded on the RTX 5090
+with a 200k max context and used roughly 30GB VRAM while idle.
 
 ---
 
@@ -240,10 +267,12 @@ scripts/
     qwopus3.6-27b-coder-mtp-gguf/   launchers, download, install
   vllm/
     aeon-qwen36-27b-multimodal-nvfp4-mtp-xs/  Docker vLLM launcher
+    qwen36-35b-a3b-nvfp4/            NVIDIA MoE NVFP4 two-point bench
   benchmarks/
     bench-context-ladder.ps1         full context ladder sweep
     bench-openai-chat-endpoint.ps1   single endpoint benchmark
     download-hf-artifact.py          HF download helper
+    render-qwen35-moe-comparison-chart.py     MoE vs Qwopus chart
 docs/
   models/qwopus3.6-27b-coder-mtp-gguf.md   model notes
   models/aeon-qwen36-27b-multimodal-nvfp4-mtp-xs.md   AEON vLLM notes
