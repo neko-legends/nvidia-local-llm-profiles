@@ -52,6 +52,13 @@ Serving choices:
 - KV cache: `--cache-type-k q4_0 --cache-type-v q4_0`
 - Flash attention: `--flash-attn on`
 - MTP + ngram speculative decoding: `--spec-type ngram-mod,draft-mtp --spec-draft-n-max 2`
+- Thinking mode: `--reasoning off` (no CoT) or `--reasoning on`
 
 The default context is the RTX 5090 benchmark profile. Edit `CTX_SIZE` only when
 recording a lower-context comparison or if startup fails.
+
+Thinking mode: the model card benchmarks Qwopus in no-thinking mode (SWE-bench
+Verified 67% at ~100 tok/s). The launcher defaults to `THINKING=0`
+(`--reasoning off`) so the model goes straight to answers with no CoT preamble,
+matching how the model card benchmarks Qwopus for fast local agentic coding.
+Toggle to `THINKING=1` at the top of the launcher to re-enable reasoning blocks.
