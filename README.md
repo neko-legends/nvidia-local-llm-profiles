@@ -161,19 +161,16 @@ Two-point smoke benchmarks only, one measured run per context.
 | --- | ---: | ---: | ---: | ---: | ---: |
 | nvidia/Qwen3.6-35B-A3B-NVFP4 | 10k target | 8,905 | 76.6 tok/s | 172W | 47C |
 | nvidia/Qwen3.6-35B-A3B-NVFP4 | 200k target | 174,588 | 33.7 tok/s | 228W | 55C |
-| unsloth/Qwen3.6-35B-A3B-MTP-GGUF UD-Q4_K_XL, 5090 display attached | 10k target | 8,907 | 96.3 tok/s | 174W | 46C |
-| unsloth/Qwen3.6-35B-A3B-MTP-GGUF UD-Q4_K_XL, 5090 display attached | 200k target | 174,590 | 14.2 tok/s | 222W | 57C |
-| unsloth/Qwen3.6-35B-A3B-MTP-GGUF UD-Q4_K_XL, 5090 headless / display on 3090 | 10k target | 8,907 | 95.8 tok/s | 170W | 46C |
-| unsloth/Qwen3.6-35B-A3B-MTP-GGUF UD-Q4_K_XL, 5090 headless / display on 3090 | 200k target | 174,590 | 14.7 tok/s | 213W | 55C |
+| unsloth/Qwen3.6-35B-A3B-MTP-GGUF UD-Q4_K_XL | 10k target | 8,907 | 96.3 tok/s | 174W | 46C |
+| unsloth/Qwen3.6-35B-A3B-MTP-GGUF UD-Q4_K_XL | 200k target | 174,590 | 14.2 tok/s | 222W | 57C |
 
 The GGUF profile was fast at short context, but this 200k-profile run was slow
 at long context. The NVIDIA NVFP4 vLLM profile loaded with a 200k max context and
 used roughly 30GB VRAM while idle.
 
-Moving display output from the RTX 5090 to the RTX 3090 did not materially
-change Unsloth GGUF throughput on this run: short context was effectively flat,
-and the 200k run moved from 14.2 tok/s to 14.7 tok/s. The headless 5090 run did
-draw less power and finished a little cooler.
+A follow-up run with display output moved from the RTX 5090 to the RTX 3090 did
+not materially change Unsloth GGUF throughput: 95.8 tok/s at 10k and 14.7 tok/s
+at 200k. The headless 5090 run is kept in the CSVs, but not charted.
 
 ---
 
