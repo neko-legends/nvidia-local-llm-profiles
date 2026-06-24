@@ -8,7 +8,7 @@
 
 ![RTX 5090 long-context throughput comparison](../../assets/images/rtx-5090-context-ladder-comparison.png)
 
-![RTX 5090 Qwen 35B local variants vs Qwopus Q5](../../assets/images/rtx-5090-qwen35-moe-vs-qwopus.png)
+![RTX 5090 local Qwen-family throughput with full model labels](../../assets/images/rtx-5090-qwen35-moe-vs-qwopus.png)
 
 ---
 

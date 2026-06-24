@@ -155,14 +155,14 @@ Full per-run CSVs: `results/rtx-5090/`
 
 Two-point smoke benchmarks only, one measured run per context.
 
-![RTX 5090 Qwen 35B local variants vs Qwopus Q5](assets/images/rtx-5090-qwen35-moe-vs-qwopus.png)
+![RTX 5090 local Qwen-family throughput with full model labels](assets/images/rtx-5090-qwen35-moe-vs-qwopus.png)
 
 | Model | Context | Actual prompt tokens | avg tok/s | Power | Temp |
 | --- | ---: | ---: | ---: | ---: | ---: |
-| NVIDIA Qwen3.6 35B A3B NVFP4 | 10k target | 8,905 | 76.6 tok/s | 172W | 47C |
-| NVIDIA Qwen3.6 35B A3B NVFP4 | 200k target | 174,588 | 33.7 tok/s | 228W | 55C |
-| Unsloth Qwen3.6 35B A3B GGUF Q4 | 10k target | 8,907 | 96.3 tok/s | 174W | 46C |
-| Unsloth Qwen3.6 35B A3B GGUF Q4 | 200k target | 174,590 | 14.2 tok/s | 222W | 57C |
+| nvidia/Qwen3.6-35B-A3B-NVFP4 | 10k target | 8,905 | 76.6 tok/s | 172W | 47C |
+| nvidia/Qwen3.6-35B-A3B-NVFP4 | 200k target | 174,588 | 33.7 tok/s | 228W | 55C |
+| unsloth/Qwen3.6-35B-A3B-MTP-GGUF UD-Q4_K_XL | 10k target | 8,907 | 96.3 tok/s | 174W | 46C |
+| unsloth/Qwen3.6-35B-A3B-MTP-GGUF UD-Q4_K_XL | 200k target | 174,590 | 14.2 tok/s | 222W | 57C |
 
 The GGUF profile was fast at short context, but this 200k-profile run was slow
 at long context. The NVIDIA NVFP4 vLLM profile loaded with a 200k max context and

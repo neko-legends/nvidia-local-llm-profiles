@@ -84,7 +84,7 @@ def load_rows() -> tuple[list[dict[str, object]], int]:
             rows.append(
                 {
                     "group": label,
-                    "model": "Qwopus Q5",
+                    "model": "Jackrong/Qwopus3.6-27B-Coder-MTP-GGUF Q5_K_M",
                     "target": q[0],
                     "tps": avg_tps(q[1]),
                     "path": q[1].name,
@@ -95,7 +95,7 @@ def load_rows() -> tuple[list[dict[str, object]], int]:
             rows.append(
                 {
                     "group": label,
-                    "model": "Qwen 35B GGUF Q4",
+                    "model": "unsloth/Qwen3.6-35B-A3B-MTP-GGUF UD-Q4_K_XL",
                     "target": g[0],
                     "tps": avg_tps(g[1]),
                     "path": g[1].name,
@@ -106,7 +106,7 @@ def load_rows() -> tuple[list[dict[str, object]], int]:
             rows.append(
                 {
                     "group": label,
-                    "model": "Qwen 35B A3B NVFP4",
+                    "model": "nvidia/Qwen3.6-35B-A3B-NVFP4",
                     "target": m[0],
                     "tps": avg_tps(m[1]),
                     "path": m[1].name,
@@ -123,10 +123,10 @@ def load_rows() -> tuple[list[dict[str, object]], int]:
 
 
 def render_svg(rows: list[dict[str, object]], scale_max: int) -> Path:
-    width = 1600
+    width = 1780
     height = 820
-    left = 430
-    right = 90
+    left = 620
+    right = 100
     top = 220
     row_gap = 68
     group_gap = 62
@@ -160,8 +160,8 @@ def render_svg(rows: list[dict[str, object]], scale_max: int) -> Path:
         f'<rect x="{left - 26}" y="{top - 52}" width="{plot_w + 56}" height="{height - top - 72}" rx="10" fill="#181e25"/>',
     ]
 
-    parts.append(svg_text(72, 82, "RTX 5090: Qwen 35B local variants vs Qwopus Q5", class_="title"))
-    parts.append(svg_text(72, 122, "Average completion tokens per second. Qwen 35B variants use one measured run per requested context.", class_="subtitle"))
+    parts.append(svg_text(72, 82, "RTX 5090: local Qwen-family throughput", class_="title"))
+    parts.append(svg_text(72, 122, "Average completion tokens per second. Labels use repo/model names plus tested quantization.", class_="subtitle"))
 
     for tick in range(0, scale_max + 1, 25):
         x = left + (tick / scale_max) * plot_w
@@ -201,10 +201,10 @@ def render_png(rows: list[dict[str, object]], scale_max: int) -> Path:
     except ImportError as exc:
         raise SystemExit("Pillow is required to render the PNG chart.") from exc
 
-    width = 1600
+    width = 1780
     height = 820
-    left = 430
-    right = 90
+    left = 620
+    right = 100
     top = 220
     row_gap = 68
     group_gap = 62
@@ -244,10 +244,10 @@ def render_png(rows: list[dict[str, object]], scale_max: int) -> Path:
         radius=10,
         fill="#181e25",
     )
-    draw.text((72, 48), "RTX 5090: Qwen 35B local variants vs Qwopus Q5", fill="#edf3f7", font=title_font)
+    draw.text((72, 48), "RTX 5090: local Qwen-family throughput", fill="#edf3f7", font=title_font)
     draw.text(
         (72, 104),
-        "Average completion tokens per second. Qwen 35B variants use one measured run per requested context.",
+        "Average completion tokens per second. Labels use repo/model names plus tested quantization.",
         fill="#b5bec8",
         font=subtitle_font,
     )
