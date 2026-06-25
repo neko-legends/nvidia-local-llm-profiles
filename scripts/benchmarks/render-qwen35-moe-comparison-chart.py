@@ -72,6 +72,19 @@ def nearest(paths: dict[int, Path], target: int) -> tuple[int, Path] | None:
     return actual, paths[actual]
 
 
+def manual_rows_for(rows: list[dict[str, str]], model_prefix: str, target: int) -> list[dict[str, str]]:
+    selected: list[dict[str, str]] = []
+    for row in rows:
+        if not row["model"].startswith(model_prefix):
+            continue
+        context_tokens = int(row["context_tokens"])
+        if target < 50000 and context_tokens < 50000:
+            selected.append(row)
+        elif target >= 50000 and context_tokens >= 50000:
+            selected.append(row)
+    return selected
+
+
 def context_label(tokens: int) -> str:
     if tokens >= 1000 and tokens % 1000:
         return f"{tokens / 1000:.1f}k"
@@ -112,8 +125,7 @@ def load_rows() -> tuple[list[dict[str, object]], int]:
                     "color": "#46d3c7",
                 }
             )
-        if label == "Short context":
-            for manual in (row for row in manual_ui if row["model"].startswith("Jackrong/")):
+        for manual in manual_rows_for(manual_ui, "Jackrong/", target):
                 context_tokens = int(manual["context_tokens"])
                 rows.append(
                     {
@@ -138,8 +150,7 @@ def load_rows() -> tuple[list[dict[str, object]], int]:
                     "color": "#9d82ff",
                 }
             )
-        if label == "Short context":
-            for manual in (row for row in manual_ui if row["model"].startswith("unsloth/")):
+        for manual in manual_rows_for(manual_ui, "unsloth/", target):
                 context_tokens = int(manual["context_tokens"])
                 rows.append(
                     {

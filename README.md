@@ -161,6 +161,7 @@ Two-point smoke benchmarks only, one measured run per context.
 | --- | ---: | ---: | ---: | ---: | ---: |
 | Jackrong/Qwopus3.6-27B-Coder-MTP-GGUF Q5_K_M, llama.cpp endpoint | 8k target | 7,303 | 109.2 tok/s | 355W | 54C |
 | Jackrong/Qwopus3.6-27B-Coder-MTP-GGUF Q5_K_M, Unsloth Studio UI file run | 11.2k reported | 11,200 | 67.2 tok/s | n/a | n/a |
+| Jackrong/Qwopus3.6-27B-Coder-MTP-GGUF Q5_K_M, Unsloth Studio UI file run | 176k reported | 176,000 | 21.4 tok/s | n/a | n/a |
 | nvidia/Qwen3.6-35B-A3B-NVFP4 | 10k target | 8,905 | 76.6 tok/s | 172W | 47C |
 | nvidia/Qwen3.6-35B-A3B-NVFP4 | 200k target | 174,588 | 33.7 tok/s | 228W | 55C |
 | unsloth/Qwen3.6-35B-A3B-MTP-GGUF UD-Q4_K_XL, llama.cpp endpoint | 10k target | 8,907 | 96.3 tok/s | 174W | 46C |
@@ -180,7 +181,9 @@ tok/s counters may report decode-only speed.
 
 The Unsloth Studio UI rows are manual observations from file-added runs on the
 same Windows RTX 5090 box. They are useful real-world UI data points, but not
-strict replacements for the endpoint benchmark rows.
+strict replacements for the endpoint benchmark rows. The 176k Qwopus Studio row
+is especially tentative because Studio appeared to keep using the RTX 3090 even
+after tensor parallelism was disabled.
 
 A follow-up run with display output moved from the RTX 5090 to the RTX 3090 did
 not materially change Unsloth GGUF throughput: 95.8 tok/s at 10k and 14.7 tok/s
