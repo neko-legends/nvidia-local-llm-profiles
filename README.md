@@ -166,7 +166,7 @@ Two-point smoke benchmarks only, one measured run per context.
 | nvidia/Qwen3.6-35B-A3B-NVFP4 | 200k target | 174,588 | 33.7 tok/s | 228W | 55C |
 | unsloth/Qwen3.6-35B-A3B-MTP-GGUF UD-Q4_K_XL, llama.cpp endpoint | 10k target | 8,907 | 96.3 tok/s | 174W | 46C |
 | unsloth/Qwen3.6-35B-A3B-MTP-GGUF UD-Q4_K_XL, Unsloth Studio UI file run | 13k reported | 13,000 | 121.1 tok/s | n/a | n/a |
-| unsloth/Qwen3.6-35B-A3B-MTP-GGUF UD-Q4_K_XL | 200k target | 174,590 | 14.2 tok/s | 222W | 57C |
+| unsloth/Qwen3.6-35B-A3B-MTP-GGUF UD-Q4_K_XL, llama.cpp endpoint | 200k target | 174,590 | 14.8 tok/s | 226W | 57C |
 
 The GGUF profile was fast at short context, but this 200k-profile run was slow
 at long context. The NVIDIA NVFP4 vLLM profile loaded with a 200k max context and

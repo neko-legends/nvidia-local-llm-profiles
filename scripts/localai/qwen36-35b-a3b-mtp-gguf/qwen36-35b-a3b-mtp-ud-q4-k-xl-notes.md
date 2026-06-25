@@ -29,7 +29,7 @@ RTX 5090 quick benchmark:
 | Context target | Prompt tokens | tok/s | Power | Temp |
 | ---: | ---: | ---: | ---: | ---: |
 | 10k | 8,907 | 96.3 | 174W | 46C |
-| 200k | 174,590 | 14.2 | 222W | 57C |
+| 200k | 174,590 | 14.8 | 226W | 57C |
 
 Token accounting: the benchmark sends the generated BookContext prompt inline as
 the user message. The reported tok/s is completion tokens divided by full

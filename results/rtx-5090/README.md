@@ -78,12 +78,14 @@ Two-point smoke benchmark only, one measured run per context.
 | Context target | Prompt tokens | tok/s | Power | Temp |
 | ---: | ---: | ---: | ---: | ---: |
 | 10k | 8,907 | 96.3 | 174W | 46C |
-| 200k | 174,590 | 14.2 | 222W | 57C |
+| 200k | 174,590 | 14.8 | 226W | 57C |
 
 - **Stack:** llama.cpp server -> OpenAI-compatible endpoint at 127.0.0.1:39185
 - **Model:** `unsloth/Qwen3.6-35B-A3B-MTP-GGUF`
 - **File:** `Qwen3.6-35B-A3B-UD-Q4_K_XL.gguf`
 - **Flags:** `--gpu-layers all --ctx-size 200000 --cache-type-k q4_0 --cache-type-v q4_0 --flash-attn on --reasoning off --spec-type draft-mtp --spec-draft-n-max 2`
+- **200k row:** fresh scripted endpoint run on 2026-06-24, separate from manual
+  Unsloth Studio UI observations.
 
 Display-output check: a follow-up run with desktop display duties moved from the
 RTX 5090 to the RTX 3090 landed at 95.8 tok/s for 10k and 14.7 tok/s for 200k,

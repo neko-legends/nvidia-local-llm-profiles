@@ -111,11 +111,13 @@ def svg_text(x: float, y: float, text: str, **attrs: str) -> str:
 def load_rows() -> tuple[list[dict[str, object]], int]:
     qwopus = latest_by_target(QWOPUS_GLOB)
     moe = latest_by_target(MOE_GLOB)
-    gguf = earliest_by_target(GGUF_GLOB)
+    gguf_first = earliest_by_target(GGUF_GLOB)
+    gguf_latest = latest_by_target(GGUF_GLOB)
     manual_ui = read_manual_ui_rows()
 
     rows: list[dict[str, object]] = []
     for label, target in (("Short context", 10000), ("Long context", 200000)):
+        gguf = gguf_latest if target >= 50000 else gguf_first
         q = nearest(qwopus, 8192 if target == 10000 else target)
         m = nearest(moe, target)
         g = nearest(gguf, target)
@@ -124,7 +126,7 @@ def load_rows() -> tuple[list[dict[str, object]], int]:
                 {
                     "group": label,
                     "model": "Jackrong/Qwopus3.6-27B-Coder-MTP-GGUF",
-                    "detail": f"Q5_K_M - {context_label(q[0])}",
+                    "detail": f"Q5_K_M - {context_label(q[0])} - endpoint bench",
                     "target": q[0],
                     "tps": avg_tps(q[1]),
                     "path": q[1].name,
@@ -149,7 +151,7 @@ def load_rows() -> tuple[list[dict[str, object]], int]:
                 {
                     "group": label,
                     "model": "unsloth/Qwen3.6-35B-A3B-MTP-GGUF",
-                    "detail": f"UD-Q4_K_XL - {context_label(g[0])} - llama.cpp",
+                    "detail": f"UD-Q4_K_XL - {context_label(g[0])} - endpoint bench",
                     "target": g[0],
                     "tps": avg_tps(g[1]),
                     "path": g[1].name,
@@ -174,7 +176,7 @@ def load_rows() -> tuple[list[dict[str, object]], int]:
                 {
                     "group": label,
                     "model": "nvidia/Qwen3.6-35B-A3B-NVFP4",
-                    "detail": f"modelopt NVFP4 - {context_label(m[0])} - vLLM nightly",
+                    "detail": f"modelopt NVFP4 - {context_label(m[0])} - vLLM endpoint",
                     "target": m[0],
                     "tps": avg_tps(m[1]),
                     "path": m[1].name,
