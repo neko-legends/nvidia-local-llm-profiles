@@ -38,6 +38,8 @@ Why this profile uses it:
   interactive throughput.
 - With the 256k llama.cpp profile here, it keeps full long-context operation on
   the 5090 without dropping to a smaller coding model.
+- A Q4_K_M launcher is included as a lower-VRAM fallback when Q5_K_M cannot fit
+  the desired context on a single 32GB card.
 
 > Note: A Hugging Face account may be required to download. Run
 > `huggingface-cli login` and set up a token at huggingface.co/settings/tokens
@@ -89,7 +91,9 @@ notes and serving assumptions.
 Minimal vLLM/Docker support for
 [nvidia/Qwen3.6-35B-A3B-NVFP4](https://huggingface.co/nvidia/Qwen3.6-35B-A3B-NVFP4).
 This profile only runs the quick two-point check requested here: about 10k and
-200k prompt tokens, one measured run each.
+200k prompt tokens, one measured run each. The benchmark helper uses the saved
+prompt fixtures in `benchmarks/prompts/` so the NVFP4 rows are tested against
+the same text as the GGUF endpoint rows.
 
 Launcher folder:
 
@@ -109,12 +113,28 @@ Launcher folder:
 scripts\localai\qwen36-35b-a3b-mtp-gguf\
 ```
 
+### DeepReinforce Ornith 1.0 35B GGUF
+
+Minimal llama.cpp support for
+[deepreinforce-ai/Ornith-1.0-35B-GGUF](https://huggingface.co/deepreinforce-ai/Ornith-1.0-35B-GGUF),
+using `ornith-1.0-35b-Q4_K_M.gguf`.
+
+Launcher folder:
+
+```text
+scripts\localai\ornith-1.0-35b-gguf\
+```
+
+Ornith is a reasoning model, so the foreground launcher leaves reasoning mode
+on by default. Use `-NoThinking` in the benchmark wrapper or set `THINKING=0`
+in the `.bat` file for no-think latency experiments.
+
 ---
 
 ## RTX 5090 Benchmark Results
 
 **GPU:** RTX 5090 32GB — **Driver:** 610.62 — **Dates:** 2026-06-22 to
-2026-06-24
+2026-06-25
 
 BookContext prompt ladder — gen=1024 tok — temperature=0 — 3 measured runs
 
@@ -153,39 +173,61 @@ Full per-run CSVs: `results/rtx-5090/`
 
 ### Qwen3.6 35B Local Variants
 
-Two-point smoke benchmarks only, one measured run per context.
+Two-point comparison rows. The chart bars and table use generation speed where
+that timing split was captured; prompt read / prefill time is listed separately.
 
-![RTX 5090 local Qwen-family throughput with automated and manual Studio rows](assets/images/rtx-5090-qwen35-moe-vs-qwopus.png)
+![RTX 5090 local coding-model throughput with automated and manual Studio rows](assets/images/rtx-5090-qwen35-moe-vs-qwopus.png)
 
-| Model / source | Context | Actual / reported context tokens | avg tok/s | Power | Temp |
-| --- | ---: | ---: | ---: | ---: | ---: |
-| Jackrong/Qwopus3.6-27B-Coder-MTP-GGUF Q5_K_M, llama.cpp endpoint | 8k target | 7,303 | 109.2 tok/s | 355W | 54C |
-| Jackrong/Qwopus3.6-27B-Coder-MTP-GGUF Q5_K_M, Unsloth Studio UI pasted text | 9.5k inferred | 9,496 | 65.7 tok/s | n/a | n/a |
-| Jackrong/Qwopus3.6-27B-Coder-MTP-GGUF Q5_K_M, Unsloth Studio UI file run | 176k reported | 176,000 | 21.4 tok/s | n/a | n/a |
-| nvidia/Qwen3.6-35B-A3B-NVFP4 | 10k target | 8,905 | 76.6 tok/s | 172W | 47C |
-| nvidia/Qwen3.6-35B-A3B-NVFP4 | 200k target | 174,588 | 33.7 tok/s | 228W | 55C |
-| unsloth/Qwen3.6-35B-A3B-MTP-GGUF UD-Q4_K_XL, llama.cpp endpoint | 10k target | 8,907 | 96.3 tok/s | 174W | 46C |
-| unsloth/Qwen3.6-35B-A3B-MTP-GGUF UD-Q4_K_XL, Unsloth Studio UI file run | 13k reported | 13,000 | 121.1 tok/s | n/a | n/a |
-| unsloth/Qwen3.6-35B-A3B-MTP-GGUF UD-Q4_K_XL, llama.cpp endpoint | 200k target | 174,590 | 14.8 tok/s | 226W | 57C |
+| Model / source | Context | Actual / reported context tokens | generation tok/s | Prompt read / prefill | Timing source |
+| --- | ---: | ---: | ---: | ---: | --- |
+| Jackrong/Qwopus3.6-27B-Coder-MTP-GGUF Q5_K_M, llama.cpp endpoint | 10k reference | 8,907 | 79.5 tok/s | 3.9s | llama.cpp log |
+| Jackrong/Qwopus3.6-27B-Coder-MTP-GGUF Q5_K_M, llama.cpp endpoint | 200k target | 174,588 | 70.2 tok/s | ~75.6s | repeat-run estimate |
+| Jackrong/Qwopus3.6-27B-Coder-MTP-GGUF Q5_K_M, pasted text (Unsloth Studio) | 9.5k inferred | 9,496 | 65.7 tok/s | 3.8s | UI screenshot |
+| Jackrong/Qwopus3.6-27B-Coder-MTP-GGUF Q5_K_M, file run (Unsloth Studio) | 176k reported | 176,000 | 21.4 tok/s | 210.9s | UI screenshot |
+| Jackrong/Qwopus3.6-27B-Coder-MTP-GGUF Q4_K_M, llama.cpp endpoint | 10k reference | 8,908 | 89.2 tok/s | 3.8s | llama.cpp log |
+| Jackrong/Qwopus3.6-27B-Coder-MTP-GGUF Q4_K_M, llama.cpp endpoint | 200k target | 174,591 | 46.4 tok/s | 141.1s | llama.cpp log |
+| unsloth/Qwen3.6-35B-A3B-MTP-GGUF UD-Q4_K_XL, llama.cpp endpoint | 10k target | 8,907 | 126.9 tok/s | 2.4s | llama.cpp log |
+| unsloth/Qwen3.6-35B-A3B-MTP-GGUF UD-Q4_K_XL, file run (Unsloth Studio) | 13k reported | 13,000 | 121.1 tok/s | n/a | UI screenshot |
+| unsloth/Qwen3.6-35B-A3B-MTP-GGUF UD-Q4_K_XL, llama.cpp endpoint | 200k target | 174,590 | 89.5 tok/s | 57.1s | llama.cpp log |
+| unsloth/Qwen3.6-35B-A3B-MTP-GGUF UD-Q4_K_XL, file run (Unsloth Studio, 5090 only) | 179.5k reported | 179,500 | 95.7 tok/s | 49.4s | UI screenshot |
+| nvidia/Qwen3.6-35B-A3B-NVFP4 | 10k reference | 8,905 | 92.0 tok/s | n/a | full-request timing, split unavailable |
+| nvidia/Qwen3.6-35B-A3B-NVFP4 | 200k reference | 174,588 | 30.5 tok/s | n/a | full-request timing, split unavailable |
+| deepreinforce-ai/Ornith-1.0-35B-GGUF Q4_K_M, llama.cpp endpoint | 10k reference | 8,905 | 201.5 tok/s | 1.7s | llama.cpp log |
+| deepreinforce-ai/Ornith-1.0-35B-GGUF Q4_K_M, file run (Unsloth Studio) | 9.5k inferred | 9,498 | 127.2 tok/s | 1.8s | UI screenshot |
+| deepreinforce-ai/Ornith-1.0-35B-GGUF Q4_K_M, llama.cpp endpoint | 200k target | 174,588 | 106.7 tok/s | 40.3s | llama.cpp log |
+| deepreinforce-ai/Ornith-1.0-35B-GGUF Q4_K_M, file run (Unsloth Studio) | 175.2k inferred | 175,188 | 89.9 tok/s | 39.7s | UI screenshot |
 
-The GGUF profile was fast at short context, but this 200k-profile run was slow
-at long context. The NVIDIA NVFP4 vLLM profile loaded with a 200k max context and
-used roughly 30GB VRAM while idle.
+Ornith Unsloth Studio long-context proof:
+
+![Ornith 1.0 35B GGUF in Unsloth Studio at 89.9 tok/s near 175k context](assets/images/ornith-unsloth-studio-175k-proof.png)
+
+The NVIDIA NVFP4 vLLM profile loaded with a 200k max context and used roughly
+30GB VRAM while idle, but the captured vLLM run did not include a prompt-vs-
+generation timing split.
 
 Token accounting note: these benchmark prompts are sent inline as the user
-message in an OpenAI-compatible chat completion request. The `tok/s` value is
-`completion_tokens / full request wall time`, so it includes prompt ingestion and
-prefill for the inline context. UI tests that drag in a file may use attachment
-or RAG behavior instead of putting the whole file into the model context, and UI
-tok/s counters may report decode-only speed.
+message in an OpenAI-compatible chat completion request. The chart separates
+generation speed from prompt read / prefill time when the runtime exposed that
+split. UI tests that drag in a file may use attachment or RAG behavior instead
+of putting the whole file into the model context, and UI tok/s counters may
+report decode-only speed.
 
-The Unsloth Studio UI rows are manual observations from pasted-text or file-added
-runs on the same Windows RTX 5090 box. They are useful real-world UI data points,
-but not strict replacements for the endpoint benchmark rows. The short Qwopus
+The 10k and 200k reference prompts are checked in at
+`benchmarks/prompts/book-context-10k.txt` and
+`benchmarks/prompts/book-context-200k.txt` so Q4/Q5, Unsloth 35B, NVIDIA NVFP4,
+and future runtimes can be compared against the same text. Their SHA256 values
+are `785c5b31d1ce77612431b1289c0a097ed51ab1a6d4a07bccfb7a70f59df55f94` and
+`a794ca243983eb3387bec6728db4b0c72a99ee2a98cfee7223269708e4ae228c`.
+
+Rows marked `(Unsloth Studio)` are manual observations from pasted-text or
+file-added runs on the same Windows RTX 5090 box. They are useful real-world UI data points,
+but not strict replacements for the endpoint benchmark rows. In the chart these
+manual Studio rows use the coral source color. The short Qwopus
 Studio row is a cleaner pasted-text run after restarting Studio/command prompt,
 with the RTX 3090 no longer used. The 176k Qwopus Studio row is especially
 tentative because Studio appeared to keep using the RTX 3090 even after tensor
-parallelism was disabled.
+parallelism was disabled. The 179.5k Unsloth Studio row was run after launching
+Studio with only the RTX 5090 visible via `CUDA_VISIBLE_DEVICES=0`.
 
 A follow-up run with display output moved from the RTX 5090 to the RTX 3090 did
 not materially change Unsloth GGUF throughput: 95.8 tok/s at 10k and 14.7 tok/s
@@ -288,11 +330,13 @@ Run a single endpoint bench:
 powershell -ExecutionPolicy Bypass -File scripts\benchmarks\bench-openai-chat-endpoint.ps1 `
   -BaseUrl http://127.0.0.1:39182/v1 `
   -Model qwopus3.6-27b-coder-mtp-q5-k-m `
-  -TargetPromptTokens 8192 `
+  -PromptFile benchmarks\prompts\book-context-10k.txt `
+  -PromptStyle BookContext `
+  -TargetPromptTokens 10000 `
   -MaxTokens 1024
 ```
 
-For manual UI comparisons, paste the generated benchmark prompt as plain text
+For manual UI comparisons, paste the saved benchmark prompt as plain text
 instead of dragging it in as a file. File attachment modes can route through RAG
 or document retrieval, which changes the actual prompt tokens seen by the model.
 
@@ -308,6 +352,7 @@ scripts/
   localai/
     qwopus3.6-27b-coder-mtp-gguf/   launchers, download, install
     qwen36-35b-a3b-mtp-gguf/        Unsloth Qwen 35B GGUF launcher
+    ornith-1.0-35b-gguf/            Ornith 35B GGUF launcher
   vllm/
     aeon-qwen36-27b-multimodal-nvfp4-mtp-xs/  Docker vLLM launcher
     qwen36-35b-a3b-nvfp4/            NVIDIA MoE NVFP4 two-point bench

@@ -4,6 +4,7 @@ import csv
 import html
 import math
 import re
+from decimal import Decimal, ROUND_HALF_UP
 from pathlib import Path
 
 
@@ -13,10 +14,10 @@ OUTPUT_DIR = ROOT / "assets" / "images"
 OUTPUT_SVG_PATH = OUTPUT_DIR / "rtx-5090-qwen35-moe-vs-qwopus.svg"
 OUTPUT_PNG_PATH = OUTPUT_DIR / "rtx-5090-qwen35-moe-vs-qwopus.png"
 
-QWOPUS_GLOB = "qwopus-coder-mtp-q5-ctx256k-mtp-prompt*-gen1024-*.csv"
 MOE_GLOB = "qwen36-35b-a3b-nvfp4-vllm-fp8kv-ctx200k-prompt*-gen1024-*.csv"
-GGUF_GLOB = "qwen36-35b-a3b-mtp-ud-q4-k-xl-llamacpp-ctx200k-prompt*-gen1024-*.csv"
 MANUAL_UI_CSV = RESULTS_DIR / "manual-unsloth-studio-ui-runs-20260624.csv"
+TIMING_CSV = RESULTS_DIR / "generation-timing-breakdowns-20260624.csv"
+MANUAL_UI_COLOR = "#ff7a90"
 
 
 def fnum(value: str | None) -> float:
@@ -40,6 +41,14 @@ def read_manual_ui_rows() -> list[dict[str, str]]:
         return list(csv.DictReader(handle))
 
 
+def read_timing_rows() -> list[dict[str, str]]:
+    if not TIMING_CSV.exists():
+        return []
+
+    with TIMING_CSV.open(newline="", encoding="utf-8-sig") as handle:
+        return list(csv.DictReader(handle))
+
+
 def paths_by_target(pattern: str) -> dict[int, list[Path]]:
     matches: dict[int, list[Path]] = {}
     for path in sorted(RESULTS_DIR.glob(pattern)):
@@ -51,10 +60,6 @@ def paths_by_target(pattern: str) -> dict[int, list[Path]]:
     return matches
 
 
-def earliest_by_target(pattern: str) -> dict[int, Path]:
-    return {target: paths[0] for target, paths in paths_by_target(pattern).items()}
-
-
 def latest_by_target(pattern: str) -> dict[int, Path]:
     return {target: paths[-1] for target, paths in paths_by_target(pattern).items()}
 
@@ -63,6 +68,10 @@ def avg_tps(path: Path) -> float:
     rows = read_measured(path)
     values = [fnum(row["wall_completion_tps"]) for row in rows]
     return sum(values) / len(values)
+
+
+def fmt_one_decimal(value: float) -> str:
+    return str(Decimal(str(value)).quantize(Decimal("0.1"), rounding=ROUND_HALF_UP))
 
 
 def nearest(paths: dict[int, Path], target: int) -> tuple[int, Path] | None:
@@ -85,10 +94,44 @@ def manual_rows_for(rows: list[dict[str, str]], model_prefix: str, target: int) 
     return selected
 
 
+def timing_rows_for(rows: list[dict[str, str]], model_prefix: str, target: int) -> list[dict[str, str]]:
+    selected: list[dict[str, str]] = []
+    for row in rows:
+        if not row["model"].startswith(model_prefix):
+            continue
+        context_tokens = int(row["context_tokens"])
+        if target < 50000 and context_tokens < 50000:
+            selected.append(row)
+        elif target >= 50000 and context_tokens >= 50000:
+            selected.append(row)
+    return selected
+
+
+def variant_label(filename: str) -> str:
+    if "Q5_K_M" in filename:
+        return "Q5_K_M"
+    if "Q4_K_M" in filename:
+        return "Q4_K_M"
+    if "UD-Q4_K_XL" in filename:
+        return "UD-Q4_K_XL"
+    return filename.removesuffix(".gguf")
+
+
+def prompt_read_label(row: dict[str, str]) -> str:
+    seconds = row.get("prompt_eval_seconds", "")
+    if not seconds:
+        return "prompt read n/a"
+    prefix = "~" if "estimate" in row.get("timing_source", "").lower() else ""
+    return f"prompt read {prefix}{fmt_one_decimal(fnum(seconds))}s"
+
+
 def manual_detail(row: dict[str, str]) -> str:
     context_tokens = int(row["context_tokens"])
     prompt_mode = row["prompt_mode"].replace(" in UI", "")
-    return f'{row["file"].removesuffix(".gguf")} - {context_label(context_tokens)} - {prompt_mode} UI'
+    prompt_read = ""
+    if row.get("prompt_eval_seconds"):
+        prompt_read = f"; prompt read {fmt_one_decimal(fnum(row['prompt_eval_seconds']))}s"
+    return f'{variant_label(row["file"])} - {context_label(context_tokens)} - {prompt_mode} (Unsloth Studio){prompt_read}'
 
 
 def context_label(tokens: int) -> str:
@@ -108,31 +151,65 @@ def svg_text(x: float, y: float, text: str, **attrs: str) -> str:
     return f'<text x="{x:.1f}" y="{y:.1f}" {attr}>{html.escape(text)}</text>'
 
 
+def add_timing_row(
+    rows: list[dict[str, object]],
+    *,
+    group: str,
+    row: dict[str, str],
+    color: str,
+) -> None:
+    tps = fnum(row["generation_tps"])
+    if math.isnan(tps):
+        return
+
+    rows.append(
+        {
+            "group": group,
+            "model": row["model"],
+            "detail": f'{variant_label(row["file"])} - {context_label(int(row["context_tokens"]))} - generation only; {prompt_read_label(row)}',
+            "target": int(row["context_tokens"]),
+            "tps": tps,
+            "path": TIMING_CSV.name,
+            "color": color,
+        }
+    )
+
+
+def add_full_request_row(
+    rows: list[dict[str, object]],
+    *,
+    group: str,
+    model: str,
+    variant: str,
+    target: int,
+    path: Path,
+    color: str,
+) -> None:
+    rows.append(
+        {
+            "group": group,
+            "model": model,
+            "detail": f"{variant} - {context_label(target)} reference - full request; timing split unavailable",
+            "target": target,
+            "tps": avg_tps(path),
+            "path": path.name,
+            "color": color,
+        }
+    )
+
+
 def load_rows() -> tuple[list[dict[str, object]], int]:
-    qwopus = latest_by_target(QWOPUS_GLOB)
     moe = latest_by_target(MOE_GLOB)
-    gguf_first = earliest_by_target(GGUF_GLOB)
-    gguf_latest = latest_by_target(GGUF_GLOB)
     manual_ui = read_manual_ui_rows()
+    timing = read_timing_rows()
 
     rows: list[dict[str, object]] = []
     for label, target in (("Short context", 10000), ("Long context", 200000)):
-        gguf = gguf_latest if target >= 50000 else gguf_first
-        q = nearest(qwopus, 8192 if target == 10000 else target)
         m = nearest(moe, target)
-        g = nearest(gguf, target)
-        if q:
-            rows.append(
-                {
-                    "group": label,
-                    "model": "Jackrong/Qwopus3.6-27B-Coder-MTP-GGUF",
-                    "detail": f"Q5_K_M - {context_label(q[0])} - endpoint bench",
-                    "target": q[0],
-                    "tps": avg_tps(q[1]),
-                    "path": q[1].name,
-                    "color": "#46d3c7",
-                }
-            )
+        for timing_row in timing_rows_for(timing, "Jackrong/", target):
+            file = timing_row["file"]
+            color = "#46d3c7" if "Q5_K_M" in file else "#69a8ff"
+            add_timing_row(rows, group=label, row=timing_row, color=color)
         for manual in manual_rows_for(manual_ui, "Jackrong/", target):
                 context_tokens = int(manual["context_tokens"])
                 rows.append(
@@ -143,21 +220,11 @@ def load_rows() -> tuple[list[dict[str, object]], int]:
                         "target": context_tokens,
                         "tps": fnum(manual["completion_tps"]),
                         "path": MANUAL_UI_CSV.name,
-                        "color": "#2da8a2",
+                        "color": MANUAL_UI_COLOR,
                     }
                 )
-        if g:
-            rows.append(
-                {
-                    "group": label,
-                    "model": "unsloth/Qwen3.6-35B-A3B-MTP-GGUF",
-                    "detail": f"UD-Q4_K_XL - {context_label(g[0])} - endpoint bench",
-                    "target": g[0],
-                    "tps": avg_tps(g[1]),
-                    "path": g[1].name,
-                    "color": "#9d82ff",
-                }
-            )
+        for timing_row in timing_rows_for(timing, "unsloth/", target):
+            add_timing_row(rows, group=label, row=timing_row, color="#9d82ff")
         for manual in manual_rows_for(manual_ui, "unsloth/", target):
                 context_tokens = int(manual["context_tokens"])
                 rows.append(
@@ -168,20 +235,33 @@ def load_rows() -> tuple[list[dict[str, object]], int]:
                         "target": context_tokens,
                         "tps": fnum(manual["completion_tps"]),
                         "path": MANUAL_UI_CSV.name,
-                        "color": "#c7a8ff",
+                        "color": MANUAL_UI_COLOR,
+                    }
+                )
+        for timing_row in timing_rows_for(timing, "deepreinforce-ai/", target):
+            add_timing_row(rows, group=label, row=timing_row, color="#7edc72")
+        for manual in manual_rows_for(manual_ui, "deepreinforce-ai/", target):
+                context_tokens = int(manual["context_tokens"])
+                rows.append(
+                    {
+                        "group": label,
+                        "model": manual["model"],
+                        "detail": manual_detail(manual),
+                        "target": context_tokens,
+                        "tps": fnum(manual["completion_tps"]),
+                        "path": MANUAL_UI_CSV.name,
+                        "color": MANUAL_UI_COLOR,
                     }
                 )
         if m:
-            rows.append(
-                {
-                    "group": label,
-                    "model": "nvidia/Qwen3.6-35B-A3B-NVFP4",
-                    "detail": f"modelopt NVFP4 - {context_label(m[0])} - vLLM endpoint",
-                    "target": m[0],
-                    "tps": avg_tps(m[1]),
-                    "path": m[1].name,
-                    "color": "#f2b846",
-                }
+            add_full_request_row(
+                rows,
+                group=label,
+                model="nvidia/Qwen3.6-35B-A3B-NVFP4",
+                variant="modelopt NVFP4",
+                target=m[0],
+                path=m[1],
+                color="#f2b846",
             )
 
     if not rows:
@@ -225,14 +305,15 @@ def render_svg(rows: list[dict[str, object]], scale_max: int) -> Path:
         ".small{fill:#9aa5b1;font-size:16px}",
         ".detail{fill:#7f8b98;font-size:14px}",
         ".value{fill:#edf3f7;font-size:21px;font-weight:750}",
+        ".sourceTag{fill:#261218;font-size:15px;font-weight:750}",
         ".axis{fill:#9aa5b1;font-size:15px}",
         "</style>",
         f'<rect width="{width}" height="{height}" fill="#111418"/>',
         f'<rect x="{left - 26}" y="{top - 52}" width="{plot_w + 56}" height="{height - top - 72}" rx="10" fill="#181e25"/>',
     ]
 
-    parts.append(svg_text(72, 82, "RTX 5090: local Qwen-family throughput", class_="title"))
-    parts.append(svg_text(72, 122, "Average completion tokens per second. Studio UI rows are manual observations from pasted-text or file-added runs.", class_="subtitle"))
+    parts.append(svg_text(72, 82, "RTX 5090: local coding-model throughput", class_="title"))
+    parts.append(svg_text(72, 122, "Bars show generation speed where captured. Prompt read / prefill seconds are labeled separately and are not in those bars.", class_="subtitle"))
 
     for tick in range(0, scale_max + 1, 25):
         x = left + (tick / scale_max) * plot_w
@@ -252,10 +333,13 @@ def render_svg(rows: list[dict[str, object]], scale_max: int) -> Path:
         parts.append(svg_text(left - 28, ypos + 17, str(row["detail"]), class_="detail", text_anchor="end"))
         parts.append(f'<rect x="{left}" y="{ypos - 24}" width="{bar_w:.1f}" height="{bar_h}" rx="5" fill="{row["color"]}" opacity="0.95"/>')
         parts.append(f'<rect x="{left}" y="{ypos - 24}" width="{bar_w:.1f}" height="{bar_h}" rx="5" fill="none" stroke="#d9fff8" stroke-opacity="0.55"/>')
-        parts.append(svg_text(left + bar_w + 12, ypos + 2, f"{value:.1f}", class_="value"))
+        if row["path"] == MANUAL_UI_CSV.name:
+            tag = "Studio" if bar_w < 150 else "Unsloth Studio"
+            parts.append(svg_text(left + 14, ypos - 2, tag, class_="sourceTag"))
+        parts.append(svg_text(left + bar_w + 12, ypos + 2, fmt_one_decimal(value), class_="value"))
         parts.append(svg_text(left + bar_w + 70, ypos + 2, "tok/s", class_="small"))
 
-    footnote = "Source: results/rtx-5090 CSVs plus manual Unsloth Studio UI observations. UI accounting may differ from endpoint benches."
+    footnote = "vLLM rows are full-request timing because the prompt/generation split was not captured. UI accounting may differ from endpoint benches."
     parts.append(svg_text(72, height - 34, footnote, class_="small"))
     parts.append(svg_text(width - 72, height - 34, "neko-legends/nvidia-local-llm-profiles", class_="small", text_anchor="end"))
     parts.append("</svg>")
@@ -310,16 +394,17 @@ def render_png(rows: list[dict[str, object]], scale_max: int) -> Path:
     small_font = font("segoeui.ttf", 16)
     detail_font = font("segoeui.ttf", 14)
     value_font = font("segoeuib.ttf", 21)
+    source_font = font("segoeuib.ttf", 15)
 
     draw.rounded_rectangle(
         [left - 26, top - 52, left - 26 + plot_w + 56, height - 72],
         radius=10,
         fill="#181e25",
     )
-    draw.text((72, 48), "RTX 5090: local Qwen-family throughput", fill="#edf3f7", font=title_font)
+    draw.text((72, 48), "RTX 5090: local coding-model throughput", fill="#edf3f7", font=title_font)
     draw.text(
         (72, 104),
-        "Average completion tokens per second. Studio UI rows are manual observations from pasted-text or file-added runs.",
+        "Bars show generation speed where captured. Prompt read / prefill seconds are labeled separately and are not in those bars.",
         fill="#b5bec8",
         font=subtitle_font,
     )
@@ -353,10 +438,13 @@ def render_png(rows: list[dict[str, object]], scale_max: int) -> Path:
             outline="#d9fff8",
             width=1,
         )
-        draw.text((left + bar_w + 12, ypos - 23), f"{value:.1f}", fill="#edf3f7", font=value_font)
+        if row["path"] == MANUAL_UI_CSV.name:
+            tag = "Studio" if bar_w < 150 else "Unsloth Studio"
+            draw.text((left + 14, ypos - 18), tag, fill="#261218", font=source_font)
+        draw.text((left + bar_w + 12, ypos - 23), fmt_one_decimal(value), fill="#edf3f7", font=value_font)
         draw.text((left + bar_w + 70, ypos - 18), "tok/s", fill="#9aa5b1", font=small_font)
 
-    footnote = "Source: results/rtx-5090 CSVs plus manual Unsloth Studio UI observations. UI accounting may differ from endpoint benches."
+    footnote = "vLLM rows are full-request timing because the prompt/generation split was not captured. UI accounting may differ from endpoint benches."
     draw.text((72, height - 54), footnote, fill="#9aa5b1", font=small_font)
     repo = "neko-legends/nvidia-local-llm-profiles"
     bbox = draw.textbbox((0, 0), repo, font=small_font)

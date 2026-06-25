@@ -25,5 +25,5 @@ RTX 5090 quick benchmark:
 
 | Context target | Prompt tokens | tok/s | Power | Temp |
 | ---: | ---: | ---: | ---: | ---: |
-| 10k | 8,905 | 76.6 | 172W | 47C |
-| 200k | 174,588 | 33.7 | 228W | 55C |
+| 10k reference | 8,905 | 92.0 | 172W | 48C |
+| 200k reference | 174,588 | 30.5 | 231W | 56C |

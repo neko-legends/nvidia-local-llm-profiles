@@ -10,6 +10,9 @@ param(
     [int]$Seed = 1234,
     [string]$OutCsv = "",
     [string]$Prompt = "",
+    [string]$PromptFile = "",
+    [string]$PromptOutFile = "",
+    [switch]$PromptOnly,
     [int]$TargetPromptTokens = 0,
     [ValidateSet("Default", "BookContext")]
     [string]$PromptStyle = "Default"
@@ -72,6 +75,24 @@ function Get-Sha256 {
     }
 }
 
+if ($Prompt -and $PromptFile) {
+    throw "Use either -Prompt or -PromptFile, not both."
+}
+
+if ($PromptFile) {
+    $promptFileFull = if ([System.IO.Path]::IsPathRooted($PromptFile)) {
+        [System.IO.Path]::GetFullPath($PromptFile)
+    } else {
+        [System.IO.Path]::GetFullPath((Join-Path (Get-RepoRoot) $PromptFile))
+    }
+
+    if (-not (Test-Path -LiteralPath $promptFileFull)) {
+        throw "Prompt file not found at $promptFileFull"
+    }
+
+    $Prompt = [System.IO.File]::ReadAllText($promptFileFull, [System.Text.Encoding]::UTF8)
+}
+
 if (-not $Prompt) {
     if ($PromptStyle -eq "BookContext" -or $TargetPromptTokens -gt 0) {
         $Prompt = New-BookBenchmarkPrompt -TargetTokens $TargetPromptTokens
@@ -84,6 +105,32 @@ Write a compact but realistic PowerShell module that watches a project folder fo
 }
 
 $promptHash = Get-Sha256 -Text $Prompt
+
+if ($PromptOutFile) {
+    $promptOutFull = if ([System.IO.Path]::IsPathRooted($PromptOutFile)) {
+        [System.IO.Path]::GetFullPath($PromptOutFile)
+    } else {
+        [System.IO.Path]::GetFullPath((Join-Path (Get-RepoRoot) $PromptOutFile))
+    }
+
+    $promptOutDir = Split-Path -Parent $promptOutFull
+    if (-not (Test-Path -LiteralPath $promptOutDir)) {
+        New-Item -ItemType Directory -Force -Path $promptOutDir | Out-Null
+    }
+
+    $utf8NoBom = [System.Text.UTF8Encoding]::new($false)
+    [System.IO.File]::WriteAllText($promptOutFull, $Prompt, $utf8NoBom)
+    Write-Host "Wrote prompt file: $promptOutFull" -ForegroundColor Green
+    Write-Host "Prompt SHA256: $promptHash"
+}
+
+if ($PromptOnly) {
+    Write-Host "Prompt style: $PromptStyle"
+    Write-Host "Prompt target tokens: $TargetPromptTokens"
+    Write-Host "Prompt chars: $($Prompt.Length)"
+    Write-Host "Prompt SHA256: $promptHash"
+    return
+}
 
 function Get-GpuSnapshot {
     param([int]$Index)

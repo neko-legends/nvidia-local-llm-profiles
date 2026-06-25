@@ -2,17 +2,18 @@
 
 - **GPU:** NVIDIA GeForce RTX 5090 32GB
 - **Driver:** 610.62
-- **Dates:** 2026-06-22 to 2026-06-24
+- **Dates:** 2026-06-22 to 2026-06-25
 - **Prompt style:** BookContext (synthetic long-document with continuity sections)
-- **Generation:** 1024 tokens, temperature=0, seed=1234, 3 measured runs per context
-- **Token accounting:** prompts are inline chat messages; tok/s is completion
-  tokens divided by full request wall time, including prompt ingestion and
-  prefill. UI file attachments may use RAG/retrieval and are not equivalent to
-  pasting the whole prompt into context.
+- **Generation:** 1024 tokens, temperature=0, seed=1234. Full ladders use 3
+  measured runs per context; two-point smoke tests may use 1 measured run.
+- **Token accounting:** raw ladder CSV `tok/s` is completion tokens divided by
+  full request wall time. The local Qwen-family comparison chart uses
+  generation-only timing where llama.cpp or the UI exposed that split, and lists
+  prompt read / prefill seconds separately.
 
 ![RTX 5090 long-context throughput comparison](../../assets/images/rtx-5090-context-ladder-comparison.png)
 
-![RTX 5090 local Qwen-family throughput with automated and manual Studio rows](../../assets/images/rtx-5090-qwen35-moe-vs-qwopus.png)
+![RTX 5090 local coding-model throughput with automated and manual Studio rows](../../assets/images/rtx-5090-qwen35-moe-vs-qwopus.png)
 
 ---
 
@@ -34,9 +35,45 @@
 **Flags:** `-ngl 999 -fa on -c 262144 -np 1 --spec-type draft-mtp --spec-draft-n-max 2 --spec-draft-ngl 999`
 
 Notes on variance: the wide min/max at 33k–131k is MTP draft hit/miss variance
-on cold KV cache. Run 1 includes prefill overhead; runs 2–3 are decode-only and
-are tighter. The 256k run was benched separately with a warmup run which explains
-the tighter spread.
+on a fresh KV cache. The original Q5 ladder's llama.cpp timing log was not
+captured, so the comparison chart estimates 200k generation speed from repeat
+requests and estimates prompt read time as first-request wall time minus
+repeat-request wall time: **70.2 tok/s generation** with **~75.6s prompt read**
+at 200k. The table above remains the raw full-request ladder summary. The 256k
+run was benched separately with a warmup run which explains the tighter spread.
+
+### Qwopus3.6-27B-Coder-MTP-Q5_K_M — 10k reference prompt rerun — llama.cpp b9267
+
+This one-pass rerun uses the checked-in prompt file
+`benchmarks/prompts/book-context-10k.txt`, the same prompt text used by the Q4
+10k check.
+
+| Context target | Prompt tokens | Full-request tok/s | Generation tok/s | Prompt read | Power | Temp |
+| ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+| 10k | 8,907 | 60.5 | 79.5 | 3.9s | 349W | 55C |
+
+- **Prompt SHA256:** `785c5b31d1ce77612431b1289c0a097ed51ab1a6d4a07bccfb7a70f59df55f94`
+- **CSV:** `qwopus-coder-mtp-q5-ctx256k-mtp-ref10k-gen1024-20260624-194440.csv`
+- **Timing log:** `logs/qwopus-q5-ref10k-server-20260624-194440.err.log`
+- **Timing note:** exact llama.cpp `print_timing` values: prompt eval
+  3932.42 ms, generation eval 1024 tokens at 79.52 tok/s.
+
+### Qwopus3.6-27B-Coder-MTP-Q4_K_M — llama.cpp b9267 — ctx=256k — MTP + ngram
+
+Two-point fallback check only, one measured run per context. llama.cpp
+`print_timing` gives the generation and prompt-eval split.
+
+| Context target | Prompt tokens | Full-request tok/s | Generation tok/s | Prompt read | Power | Temp |
+| ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+| 10k | 8,908 | 66.4 | 89.2 | 3.8s | 345W | 54C |
+| 200k | 174,591 | 6.3 | 46.4 | 141.1s | 351W | 68C |
+
+- **Stack:** llama.cpp server -> OpenAI-compatible endpoint at 127.0.0.1:39186
+- **Model:** `Jackrong/Qwopus3.6-27B-Coder-MTP-GGUF`
+- **File:** `Qwopus3.6-27B-Coder-MTP-Q4_K_M.gguf`
+- **Flags:** `--gpu-layers all --ctx-size 262144 --cache-type-k q4_0 --cache-type-v q4_0 --flash-attn on --reasoning off --spec-type ngram-mod,draft-mtp --spec-draft-n-max 2`
+- **Timing note:** the 200k prompt read value is exact llama.cpp prompt-eval
+  time for 166,199 newly processed prompt tokens after prompt-cache reuse.
 
 ### AEON Qwen3.6 27B Multimodal NVFP4 MTP-XS — vLLM — ctx=200k — fp8 KV — qwen3_5_mtp
 
@@ -60,16 +97,22 @@ compatibility baseline rather than the model's likely ceiling.
 
 ### NVIDIA Qwen3.6 35B A3B NVFP4 MoE — vLLM nightly — ctx=200k — fp8 KV
 
-Two-point smoke benchmark only, one measured run per context.
+Two-point smoke benchmark only, one measured run per context. The current CSV
+rows match the saved prompt fixtures:
+`benchmarks/prompts/book-context-10k.txt` and
+`benchmarks/prompts/book-context-200k.txt`.
 
 | Context target | Prompt tokens | tok/s | Power | Temp |
 | ---: | ---: | ---: | ---: | ---: |
-| 10k | 8,905 | 76.6 | 172W | 47C |
-| 200k | 174,588 | 33.7 | 228W | 55C |
+| 10k reference | 8,905 | 92.0 | 172W | 48C |
+| 200k reference | 174,588 | 30.5 | 231W | 56C |
 
 - **Stack:** Docker `vllm/vllm-openai:nightly` -> OpenAI-compatible endpoint at 127.0.0.1:39184
 - **Model:** `nvidia/Qwen3.6-35B-A3B-NVFP4`
 - **Flags:** `--quantization modelopt --kv-cache-dtype fp8 --max-model-len 200000 --max-num-seqs 1 --max-num-batched-tokens 8192 --gpu-memory-utilization 0.93 --attention-backend flashinfer --moe-backend marlin`
+- **Prompt SHA256:** 10k `785c5b31d1ce77612431b1289c0a097ed51ab1a6d4a07bccfb7a70f59df55f94`; 200k `a794ca243983eb3387bec6728db4b0c72a99ee2a98cfee7223269708e4ae228c`
+- **CSV:** `qwen36-35b-a3b-nvfp4-vllm-fp8kv-ctx200k-prompt10k-gen1024-20260624-201006.csv`
+  and `qwen36-35b-a3b-nvfp4-vllm-fp8kv-ctx200k-prompt200k-gen1024-20260624-201026.csv`
 
 ### Unsloth Qwen3.6 35B A3B MTP GGUF Q4 — llama.cpp b9267 — ctx=200k — MTP n=2
 
@@ -85,25 +128,53 @@ Two-point smoke benchmark only, one measured run per context.
 - **File:** `Qwen3.6-35B-A3B-UD-Q4_K_XL.gguf`
 - **Flags:** `--gpu-layers all --ctx-size 200000 --cache-type-k q4_0 --cache-type-v q4_0 --flash-attn on --reasoning off --spec-type draft-mtp --spec-draft-n-max 2`
 - **200k row:** fresh scripted endpoint run on 2026-06-24, separate from manual
-  Unsloth Studio UI observations.
+  `(Unsloth Studio)` observations.
 
 Display-output check: a follow-up run with desktop display duties moved from the
 RTX 5090 to the RTX 3090 landed at 95.8 tok/s for 10k and 14.7 tok/s for 200k,
 so the chart leaves the headless condition out and keeps focus on model/runtime
 differences.
 
-### Manual Unsloth Studio UI observations
+### DeepReinforce Ornith 1.0 35B GGUF Q4_K_M — llama.cpp b9267 — ctx=256k
 
-These rows come from manual UI runs where the benchmark text file was added in
-Unsloth Studio. They are charted separately from the endpoint benchmarks because
-the UI may report decode-only speed and may handle added files differently than
-an inline chat prompt.
+Two-point smoke benchmark only, one measured run per context. The server ran
+with reasoning mode enabled because Ornith is a reasoning model.
+
+| Context target | Prompt tokens | Full-request tok/s | Generation tok/s | Prompt read | Power | Temp |
+| ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+| 10k reference | 8,905 | 149.7 | 201.5 | 1.7s | 327W | 53C |
+| 200k reference | 174,588 | 20.3 | 106.7 | 40.3s | 478W | 66C |
+
+- **Stack:** llama.cpp server -> OpenAI-compatible endpoint at 127.0.0.1:39188
+- **Model:** `deepreinforce-ai/Ornith-1.0-35B-GGUF`
+- **File:** `ornith-1.0-35b-Q4_K_M.gguf`
+- **Flags:** `--gpu-layers all --ctx-size 262144 --cache-type-k q4_0 --cache-type-v q4_0 --flash-attn on --reasoning on`
+- **Prompt SHA256:** 10k `785c5b31d1ce77612431b1289c0a097ed51ab1a6d4a07bccfb7a70f59df55f94`; 200k `a794ca243983eb3387bec6728db4b0c72a99ee2a98cfee7223269708e4ae228c`
+- **CSV:** `ornith-1.0-35b-q4-k-m-llamacpp-ctx256k-prompt10k-gen1024-20260625-114352.csv`
+  and `ornith-1.0-35b-q4-k-m-llamacpp-ctx256k-prompt200k-gen1024-20260625-114359.csv`
+- **Timing note:** the 200k prompt read value is exact llama.cpp prompt-eval
+  time for 166,199 newly processed prompt tokens after prompt-cache reuse from
+  the preceding 10k run.
+
+### Manual (Unsloth Studio) Observations
+
+These rows come from manual runs in Unsloth Studio where the benchmark text was
+pasted or added as a file. They are charted separately from the endpoint
+benchmarks because the UI may report decode-only speed and may handle added
+files differently than an inline chat prompt.
 
 | Model | Reported context | UI speed | Extra UI details |
 | --- | ---: | ---: | --- |
 | Jackrong/Qwopus3.6-27B-Coder-MTP-GGUF Q5_K_M | 9.5k inferred | 65.7 tok/s | pasted inline text, 1,800 generated tokens, 31.76s total, 3.76s prompt eval, 2,525.5 prompt tok/s; RTX 3090 not used after restarting Studio/command prompt |
 | Jackrong/Qwopus3.6-27B-Coder-MTP-GGUF Q5_K_M | 176k | 21.4 tok/s | 1,358 generated tokens, 275.57s total, 210.87s prompt eval, 831.1 prompt tok/s; Studio appeared to keep using the RTX 3090 |
 | unsloth/Qwen3.6-35B-A3B-MTP-GGUF UD-Q4_K_XL | 13k | 121.1 tok/s | manual UI screenshot observation |
+| unsloth/Qwen3.6-35B-A3B-MTP-GGUF UD-Q4_K_XL | 179.5k | 95.7 tok/s | 4,325 generated tokens, 96.20s total, 49.42s prompt eval, 3,544.2 prompt tok/s; Studio launched with only RTX 5090 visible |
+| deepreinforce-ai/Ornith-1.0-35B-GGUF Q4_K_M | 9.5k inferred | 127.2 tok/s | 2,523 generated tokens, 22.65s total, 1.75s prompt eval, 5,427.6 prompt tok/s; context inferred from prompt eval × prompt speed |
+| deepreinforce-ai/Ornith-1.0-35B-GGUF Q4_K_M | 175.2k inferred | 89.9 tok/s | 3,281 generated tokens, 77.29s total, 39.69s prompt eval, 4,413.9 prompt tok/s; context inferred from prompt eval × prompt speed |
+
+Ornith Unsloth Studio long-context proof:
+
+![Ornith 1.0 35B GGUF in Unsloth Studio at 89.9 tok/s near 175k context](../../assets/images/ornith-unsloth-studio-175k-proof.png)
 
 ---
 
@@ -111,8 +182,15 @@ an inline chat prompt.
 
 **Qwopus Q5 GGUF via llama.cpp stays interactive across the full 8k-256k ladder.**
 
-- Short context peaks at **109.2 tok/s** @ 8k.
-- Long context remains usable at **50.6 tok/s** @ 200k and **65.0 tok/s** @ 256k.
+- Raw full-request ladder average remains **50.6 tok/s** @ 200k and
+  **65.0 tok/s** @ 256k.
+- On the checked-in 10k reference prompt, Q5 measured **79.5 tok/s generation**
+  after **3.9s prompt read**.
+- For the comparison chart, Q5 generation is estimated from repeat runs:
+  **70.2 tok/s generation** @ 200k with **~75.6s prompt read**.
+- Q4's exact llama.cpp split at 200k was **46.4 tok/s generation** after
+  **141.1s prompt read**, so Q4 is slower than Q5 but not as absurd as the old
+  full-request bar implied.
 - The 256k run was benched separately with one warmup run, which explains the
   tighter spread there.
 

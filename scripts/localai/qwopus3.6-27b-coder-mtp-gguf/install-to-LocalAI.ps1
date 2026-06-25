@@ -23,9 +23,14 @@ if (-not (Test-Path -LiteralPath $modelsDir)) {
 
 $files = @(
     "start-qwopus3.6-27b-coder-mtp-q5-server.bat",
+    "start-qwopus3.6-27b-coder-mtp-q4-server.bat",
     "download-qwopus3.6-27B-Coder-MTP-Q5.bat",
+    "download-qwopus3.6-27B-Coder-MTP-Q4.bat",
+    "bench-qwopus3.6-27b-coder-mtp-q4-two-point.bat",
+    "bench-with-server-qwopus3.6-27b-coder-mtp-q4.ps1",
     "allow-qwopus3.6-coder-mtp-server-firewall-admin.bat",
-    "qwopus3.6-27b-coder-mtp-q5-server-notes.md"
+    "qwopus3.6-27b-coder-mtp-q5-server-notes.md",
+    "qwopus3.6-27b-coder-mtp-q4-server-notes.md"
 )
 
 foreach ($file in $files) {
@@ -39,9 +44,10 @@ Write-Host "Installed Qwopus3.6 Coder MTP launcher files to:" -ForegroundColor C
 Write-Host $targetDirFull
 Write-Host ""
 Write-Host "Next steps:"
-Write-Host "1. Edit LLAMA_DIR in start-qwopus3.6-27b-coder-mtp-q5-server.bat to point at your llama.cpp CUDA build."
+Write-Host "1. Edit LLAMA_DIR in the Q4/Q5 start script to point at your llama.cpp CUDA build."
 Write-Host "   Download llama.cpp CUDA releases from: https://github.com/ggml-org/llama.cpp/releases"
-Write-Host "2. Run download-qwopus3.6-27B-Coder-MTP-Q5.bat to download the model (free HF account may be required)."
-Write-Host "3. Run start-qwopus3.6-27b-coder-mtp-q5-server.bat to start the server."
-Write-Host "4. If Hermes Client cannot connect remotely, run allow-qwopus3.6-coder-mtp-server-firewall-admin.bat as admin."
+Write-Host "2. Run download-qwopus3.6-27B-Coder-MTP-Q5.bat for Q5_K_M, or download-qwopus3.6-27B-Coder-MTP-Q4.bat for Q4_K_M."
+Write-Host "3. Run start-qwopus3.6-27b-coder-mtp-q5-server.bat or start-qwopus3.6-27b-coder-mtp-q4-server.bat."
+Write-Host "4. Optional: run bench-qwopus3.6-27b-coder-mtp-q4-two-point.bat for the 10k/200k smoke benchmark."
+Write-Host "5. If Hermes Client cannot connect remotely, run allow-qwopus3.6-coder-mtp-server-firewall-admin.bat as admin."
 Write-Host ""
