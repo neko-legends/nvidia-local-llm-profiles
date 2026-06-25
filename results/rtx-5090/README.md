@@ -12,7 +12,7 @@
 
 ![RTX 5090 long-context throughput comparison](../../assets/images/rtx-5090-context-ladder-comparison.png)
 
-![RTX 5090 local Qwen-family throughput with full model labels](../../assets/images/rtx-5090-qwen35-moe-vs-qwopus.png)
+![RTX 5090 local Qwen-family throughput with automated and manual Studio rows](../../assets/images/rtx-5090-qwen35-moe-vs-qwopus.png)
 
 ---
 
@@ -89,6 +89,18 @@ Display-output check: a follow-up run with desktop display duties moved from the
 RTX 5090 to the RTX 3090 landed at 95.8 tok/s for 10k and 14.7 tok/s for 200k,
 so the chart leaves the headless condition out and keeps focus on model/runtime
 differences.
+
+### Manual Unsloth Studio UI observations
+
+These rows come from manual UI runs where the benchmark text file was added in
+Unsloth Studio. They are charted separately from the endpoint benchmarks because
+the UI may report decode-only speed and may handle added files differently than
+an inline chat prompt.
+
+| Model | Reported context | UI speed | Extra UI details |
+| --- | ---: | ---: | --- |
+| Jackrong/Qwopus3.6-27B-Coder-MTP-GGUF Q5_K_M | 11.2k | 67.2 tok/s | 1,696 generated tokens, 29.49s total, 3.67s prompt eval, 2,597.1 prompt tok/s |
+| unsloth/Qwen3.6-35B-A3B-MTP-GGUF UD-Q4_K_XL | 13k | 121.1 tok/s | manual UI screenshot observation |
 
 ---
 

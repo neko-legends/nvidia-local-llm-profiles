@@ -16,6 +16,7 @@ OUTPUT_PNG_PATH = OUTPUT_DIR / "rtx-5090-qwen35-moe-vs-qwopus.png"
 QWOPUS_GLOB = "qwopus-coder-mtp-q5-ctx256k-mtp-prompt*-gen1024-*.csv"
 MOE_GLOB = "qwen36-35b-a3b-nvfp4-vllm-fp8kv-ctx200k-prompt*-gen1024-*.csv"
 GGUF_GLOB = "qwen36-35b-a3b-mtp-ud-q4-k-xl-llamacpp-ctx200k-prompt*-gen1024-*.csv"
+MANUAL_UI_CSV = RESULTS_DIR / "manual-unsloth-studio-ui-runs-20260624.csv"
 
 
 def fnum(value: str | None) -> float:
@@ -29,6 +30,14 @@ def read_measured(path: Path) -> list[dict[str, str]]:
             for row in csv.DictReader(handle)
             if row.get("warmup", "").lower() not in ("true", "1", "yes")
         ]
+
+
+def read_manual_ui_rows() -> list[dict[str, str]]:
+    if not MANUAL_UI_CSV.exists():
+        return []
+
+    with MANUAL_UI_CSV.open(newline="", encoding="utf-8-sig") as handle:
+        return list(csv.DictReader(handle))
 
 
 def paths_by_target(pattern: str) -> dict[int, list[Path]]:
@@ -64,6 +73,8 @@ def nearest(paths: dict[int, Path], target: int) -> tuple[int, Path] | None:
 
 
 def context_label(tokens: int) -> str:
+    if tokens >= 1000 and tokens % 1000:
+        return f"{tokens / 1000:.1f}k"
     if tokens >= 1000:
         return f"{round(tokens / 1000):.0f}k"
     return str(tokens)
@@ -82,6 +93,7 @@ def load_rows() -> tuple[list[dict[str, object]], int]:
     qwopus = latest_by_target(QWOPUS_GLOB)
     moe = latest_by_target(MOE_GLOB)
     gguf = earliest_by_target(GGUF_GLOB)
+    manual_ui = read_manual_ui_rows()
 
     rows: list[dict[str, object]] = []
     for label, target in (("Short context", 10000), ("Long context", 200000)):
@@ -100,6 +112,20 @@ def load_rows() -> tuple[list[dict[str, object]], int]:
                     "color": "#46d3c7",
                 }
             )
+        if label == "Short context":
+            for manual in (row for row in manual_ui if row["model"].startswith("Jackrong/")):
+                context_tokens = int(manual["context_tokens"])
+                rows.append(
+                    {
+                        "group": label,
+                        "model": manual["model"],
+                        "detail": f'{manual["file"].removesuffix(".gguf")} - {context_label(context_tokens)} - Unsloth Studio UI',
+                        "target": context_tokens,
+                        "tps": fnum(manual["completion_tps"]),
+                        "path": MANUAL_UI_CSV.name,
+                        "color": "#2da8a2",
+                    }
+                )
         if g:
             rows.append(
                 {
@@ -112,6 +138,20 @@ def load_rows() -> tuple[list[dict[str, object]], int]:
                     "color": "#9d82ff",
                 }
             )
+        if label == "Short context":
+            for manual in (row for row in manual_ui if row["model"].startswith("unsloth/")):
+                context_tokens = int(manual["context_tokens"])
+                rows.append(
+                    {
+                        "group": label,
+                        "model": manual["model"],
+                        "detail": f'{manual["file"].removesuffix(".gguf")} - {context_label(context_tokens)} - Unsloth Studio UI',
+                        "target": context_tokens,
+                        "tps": fnum(manual["completion_tps"]),
+                        "path": MANUAL_UI_CSV.name,
+                        "color": "#c7a8ff",
+                    }
+                )
         if m:
             rows.append(
                 {
@@ -173,7 +213,7 @@ def render_svg(rows: list[dict[str, object]], scale_max: int) -> Path:
     ]
 
     parts.append(svg_text(72, 82, "RTX 5090: local Qwen-family throughput", class_="title"))
-    parts.append(svg_text(72, 122, "Average completion tokens per second. Labels use repo/model names plus tested quantization and runtime.", class_="subtitle"))
+    parts.append(svg_text(72, 122, "Average completion tokens per second. Studio UI rows are manual observations from file-added runs.", class_="subtitle"))
 
     for tick in range(0, scale_max + 1, 25):
         x = left + (tick / scale_max) * plot_w
@@ -196,7 +236,7 @@ def render_svg(rows: list[dict[str, object]], scale_max: int) -> Path:
         parts.append(svg_text(left + bar_w + 12, ypos + 2, f"{value:.1f}", class_="value"))
         parts.append(svg_text(left + bar_w + 70, ypos + 2, "tok/s", class_="small"))
 
-    footnote = "Source: results/rtx-5090 CSVs. Short context compares 10k Qwen runs against nearest Qwopus result."
+    footnote = "Source: results/rtx-5090 CSVs plus manual Unsloth Studio UI observations. UI file-added runs may differ from inline prompt benches."
     parts.append(svg_text(72, height - 34, footnote, class_="small"))
     parts.append(svg_text(width - 72, height - 34, "neko-legends/nvidia-local-llm-profiles", class_="small", text_anchor="end"))
     parts.append("</svg>")
@@ -260,7 +300,7 @@ def render_png(rows: list[dict[str, object]], scale_max: int) -> Path:
     draw.text((72, 48), "RTX 5090: local Qwen-family throughput", fill="#edf3f7", font=title_font)
     draw.text(
         (72, 104),
-        "Average completion tokens per second. Labels use repo/model names plus tested quantization and runtime.",
+        "Average completion tokens per second. Studio UI rows are manual observations from file-added runs.",
         fill="#b5bec8",
         font=subtitle_font,
     )
@@ -297,7 +337,7 @@ def render_png(rows: list[dict[str, object]], scale_max: int) -> Path:
         draw.text((left + bar_w + 12, ypos - 23), f"{value:.1f}", fill="#edf3f7", font=value_font)
         draw.text((left + bar_w + 70, ypos - 18), "tok/s", fill="#9aa5b1", font=small_font)
 
-    footnote = "Source: results/rtx-5090 CSVs. Short context compares 10k Qwen runs against nearest Qwopus result."
+    footnote = "Source: results/rtx-5090 CSVs plus manual Unsloth Studio UI observations. UI file-added runs may differ from inline prompt benches."
     draw.text((72, height - 54), footnote, fill="#9aa5b1", font=small_font)
     repo = "neko-legends/nvidia-local-llm-profiles"
     bbox = draw.textbbox((0, 0), repo, font=small_font)
