@@ -160,7 +160,7 @@ Two-point smoke benchmarks only, one measured run per context.
 | Model / source | Context | Actual / reported context tokens | avg tok/s | Power | Temp |
 | --- | ---: | ---: | ---: | ---: | ---: |
 | Jackrong/Qwopus3.6-27B-Coder-MTP-GGUF Q5_K_M, llama.cpp endpoint | 8k target | 7,303 | 109.2 tok/s | 355W | 54C |
-| Jackrong/Qwopus3.6-27B-Coder-MTP-GGUF Q5_K_M, Unsloth Studio UI file run | 11.2k reported | 11,200 | 67.2 tok/s | n/a | n/a |
+| Jackrong/Qwopus3.6-27B-Coder-MTP-GGUF Q5_K_M, Unsloth Studio UI pasted text | 9.5k inferred | 9,496 | 65.7 tok/s | n/a | n/a |
 | Jackrong/Qwopus3.6-27B-Coder-MTP-GGUF Q5_K_M, Unsloth Studio UI file run | 176k reported | 176,000 | 21.4 tok/s | n/a | n/a |
 | nvidia/Qwen3.6-35B-A3B-NVFP4 | 10k target | 8,905 | 76.6 tok/s | 172W | 47C |
 | nvidia/Qwen3.6-35B-A3B-NVFP4 | 200k target | 174,588 | 33.7 tok/s | 228W | 55C |
@@ -179,11 +179,13 @@ prefill for the inline context. UI tests that drag in a file may use attachment
 or RAG behavior instead of putting the whole file into the model context, and UI
 tok/s counters may report decode-only speed.
 
-The Unsloth Studio UI rows are manual observations from file-added runs on the
-same Windows RTX 5090 box. They are useful real-world UI data points, but not
-strict replacements for the endpoint benchmark rows. The 176k Qwopus Studio row
-is especially tentative because Studio appeared to keep using the RTX 3090 even
-after tensor parallelism was disabled.
+The Unsloth Studio UI rows are manual observations from pasted-text or file-added
+runs on the same Windows RTX 5090 box. They are useful real-world UI data points,
+but not strict replacements for the endpoint benchmark rows. The short Qwopus
+Studio row is a cleaner pasted-text run after restarting Studio/command prompt,
+with the RTX 3090 no longer used. The 176k Qwopus Studio row is especially
+tentative because Studio appeared to keep using the RTX 3090 even after tensor
+parallelism was disabled.
 
 A follow-up run with display output moved from the RTX 5090 to the RTX 3090 did
 not materially change Unsloth GGUF throughput: 95.8 tok/s at 10k and 14.7 tok/s

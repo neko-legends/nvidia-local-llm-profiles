@@ -85,6 +85,12 @@ def manual_rows_for(rows: list[dict[str, str]], model_prefix: str, target: int) 
     return selected
 
 
+def manual_detail(row: dict[str, str]) -> str:
+    context_tokens = int(row["context_tokens"])
+    prompt_mode = row["prompt_mode"].replace(" in UI", "")
+    return f'{row["file"].removesuffix(".gguf")} - {context_label(context_tokens)} - {prompt_mode} UI'
+
+
 def context_label(tokens: int) -> str:
     if tokens >= 1000 and tokens % 1000:
         return f"{tokens / 1000:.1f}k"
@@ -131,7 +137,7 @@ def load_rows() -> tuple[list[dict[str, object]], int]:
                     {
                         "group": label,
                         "model": manual["model"],
-                        "detail": f'{manual["file"].removesuffix(".gguf")} - {context_label(context_tokens)} - Unsloth Studio UI',
+                        "detail": manual_detail(manual),
                         "target": context_tokens,
                         "tps": fnum(manual["completion_tps"]),
                         "path": MANUAL_UI_CSV.name,
@@ -156,7 +162,7 @@ def load_rows() -> tuple[list[dict[str, object]], int]:
                     {
                         "group": label,
                         "model": manual["model"],
-                        "detail": f'{manual["file"].removesuffix(".gguf")} - {context_label(context_tokens)} - Unsloth Studio UI',
+                        "detail": manual_detail(manual),
                         "target": context_tokens,
                         "tps": fnum(manual["completion_tps"]),
                         "path": MANUAL_UI_CSV.name,
@@ -224,7 +230,7 @@ def render_svg(rows: list[dict[str, object]], scale_max: int) -> Path:
     ]
 
     parts.append(svg_text(72, 82, "RTX 5090: local Qwen-family throughput", class_="title"))
-    parts.append(svg_text(72, 122, "Average completion tokens per second. Studio UI rows are manual observations from file-added runs.", class_="subtitle"))
+    parts.append(svg_text(72, 122, "Average completion tokens per second. Studio UI rows are manual observations from pasted-text or file-added runs.", class_="subtitle"))
 
     for tick in range(0, scale_max + 1, 25):
         x = left + (tick / scale_max) * plot_w
@@ -247,7 +253,7 @@ def render_svg(rows: list[dict[str, object]], scale_max: int) -> Path:
         parts.append(svg_text(left + bar_w + 12, ypos + 2, f"{value:.1f}", class_="value"))
         parts.append(svg_text(left + bar_w + 70, ypos + 2, "tok/s", class_="small"))
 
-    footnote = "Source: results/rtx-5090 CSVs plus manual Unsloth Studio UI observations. UI file-added runs may differ from inline prompt benches."
+    footnote = "Source: results/rtx-5090 CSVs plus manual Unsloth Studio UI observations. UI accounting may differ from endpoint benches."
     parts.append(svg_text(72, height - 34, footnote, class_="small"))
     parts.append(svg_text(width - 72, height - 34, "neko-legends/nvidia-local-llm-profiles", class_="small", text_anchor="end"))
     parts.append("</svg>")
@@ -311,7 +317,7 @@ def render_png(rows: list[dict[str, object]], scale_max: int) -> Path:
     draw.text((72, 48), "RTX 5090: local Qwen-family throughput", fill="#edf3f7", font=title_font)
     draw.text(
         (72, 104),
-        "Average completion tokens per second. Studio UI rows are manual observations from file-added runs.",
+        "Average completion tokens per second. Studio UI rows are manual observations from pasted-text or file-added runs.",
         fill="#b5bec8",
         font=subtitle_font,
     )
@@ -348,7 +354,7 @@ def render_png(rows: list[dict[str, object]], scale_max: int) -> Path:
         draw.text((left + bar_w + 12, ypos - 23), f"{value:.1f}", fill="#edf3f7", font=value_font)
         draw.text((left + bar_w + 70, ypos - 18), "tok/s", fill="#9aa5b1", font=small_font)
 
-    footnote = "Source: results/rtx-5090 CSVs plus manual Unsloth Studio UI observations. UI file-added runs may differ from inline prompt benches."
+    footnote = "Source: results/rtx-5090 CSVs plus manual Unsloth Studio UI observations. UI accounting may differ from endpoint benches."
     draw.text((72, height - 54), footnote, fill="#9aa5b1", font=small_font)
     repo = "neko-legends/nvidia-local-llm-profiles"
     bbox = draw.textbbox((0, 0), repo, font=small_font)

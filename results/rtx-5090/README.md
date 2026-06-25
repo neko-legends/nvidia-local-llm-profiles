@@ -99,7 +99,7 @@ an inline chat prompt.
 
 | Model | Reported context | UI speed | Extra UI details |
 | --- | ---: | ---: | --- |
-| Jackrong/Qwopus3.6-27B-Coder-MTP-GGUF Q5_K_M | 11.2k | 67.2 tok/s | 1,696 generated tokens, 29.49s total, 3.67s prompt eval, 2,597.1 prompt tok/s |
+| Jackrong/Qwopus3.6-27B-Coder-MTP-GGUF Q5_K_M | 9.5k inferred | 65.7 tok/s | pasted inline text, 1,800 generated tokens, 31.76s total, 3.76s prompt eval, 2,525.5 prompt tok/s; RTX 3090 not used after restarting Studio/command prompt |
 | Jackrong/Qwopus3.6-27B-Coder-MTP-GGUF Q5_K_M | 176k | 21.4 tok/s | 1,358 generated tokens, 275.57s total, 210.87s prompt eval, 831.1 prompt tok/s; Studio appeared to keep using the RTX 3090 |
 | unsloth/Qwen3.6-35B-A3B-MTP-GGUF UD-Q4_K_XL | 13k | 121.1 tok/s | manual UI screenshot observation |
 

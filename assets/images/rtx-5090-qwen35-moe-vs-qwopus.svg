@@ -12,7 +12,7 @@ text{font-family:Segoe UI,Arial,sans-serif;letter-spacing:0}
 <rect width="1780" height="1147" fill="#111418"/>
 <rect x="594" y="168" width="1116" height="855" rx="10" fill="#181e25"/>
 <text x="72.0" y="82.0" class="title">RTX 5090: local Qwen-family throughput</text>
-<text x="72.0" y="122.0" class="subtitle">Average completion tokens per second. Studio UI rows are manual observations from file-added runs.</text>
+<text x="72.0" y="122.0" class="subtitle">Average completion tokens per second. Studio UI rows are manual observations from pasted-text or file-added runs.</text>
 <line x1="620.0" y1="182" x2="620.0" y2="1049" stroke="#2f3742" stroke-width="1"/>
 <text x="620.0" y="1077.0" class="axis" text-anchor="middle">0</text>
 <line x1="832.0" y1="182" x2="832.0" y2="1049" stroke="#2f3742" stroke-width="1"/>
@@ -33,11 +33,11 @@ text{font-family:Segoe UI,Arial,sans-serif;letter-spacing:0}
 <text x="1557.6" y="222.0" class="value">109.2</text>
 <text x="1615.6" y="222.0" class="small">tok/s</text>
 <text x="592.0" y="296.0" class="small" text-anchor="end">Jackrong/Qwopus3.6-27B-Coder-MTP-GGUF</text>
-<text x="592.0" y="317.0" class="detail" text-anchor="end">Qwopus3.6-27B-Coder-MTP-Q5_K_M - 11.2k - Unsloth Studio UI</text>
-<rect x="620" y="276" width="569.9" height="34" rx="5" fill="#2da8a2" opacity="0.95"/>
-<rect x="620" y="276" width="569.9" height="34" rx="5" fill="none" stroke="#d9fff8" stroke-opacity="0.55"/>
-<text x="1201.9" y="302.0" class="value">67.2</text>
-<text x="1259.9" y="302.0" class="small">tok/s</text>
+<text x="592.0" y="317.0" class="detail" text-anchor="end">Qwopus3.6-27B-Coder-MTP-Q5_K_M - 9.5k - pasted inline text UI</text>
+<rect x="620" y="276" width="557.1" height="34" rx="5" fill="#2da8a2" opacity="0.95"/>
+<rect x="620" y="276" width="557.1" height="34" rx="5" fill="none" stroke="#d9fff8" stroke-opacity="0.55"/>
+<text x="1189.1" y="302.0" class="value">65.7</text>
+<text x="1247.1" y="302.0" class="small">tok/s</text>
 <text x="592.0" y="376.0" class="small" text-anchor="end">unsloth/Qwen3.6-35B-A3B-MTP-GGUF</text>
 <text x="592.0" y="397.0" class="detail" text-anchor="end">UD-Q4_K_XL - 10k - llama.cpp</text>
 <rect x="620" y="356" width="817.0" height="34" rx="5" fill="#9d82ff" opacity="0.95"/>
@@ -45,7 +45,7 @@ text{font-family:Segoe UI,Arial,sans-serif;letter-spacing:0}
 <text x="1449.0" y="382.0" class="value">96.3</text>
 <text x="1507.0" y="382.0" class="small">tok/s</text>
 <text x="592.0" y="456.0" class="small" text-anchor="end">unsloth/Qwen3.6-35B-A3B-MTP-GGUF</text>
-<text x="592.0" y="477.0" class="detail" text-anchor="end">Qwen3.6-35B-A3B-UD-Q4_K_XL - 13k - Unsloth Studio UI</text>
+<text x="592.0" y="477.0" class="detail" text-anchor="end">Qwen3.6-35B-A3B-UD-Q4_K_XL - 13k - file added UI</text>
 <rect x="620" y="436" width="1026.9" height="34" rx="5" fill="#c7a8ff" opacity="0.95"/>
 <rect x="620" y="436" width="1026.9" height="34" rx="5" fill="none" stroke="#d9fff8" stroke-opacity="0.55"/>
 <text x="1658.9" y="462.0" class="value">121.1</text>
@@ -64,7 +64,7 @@ text{font-family:Segoe UI,Arial,sans-serif;letter-spacing:0}
 <text x="1061.0" y="694.0" class="value">50.6</text>
 <text x="1119.0" y="694.0" class="small">tok/s</text>
 <text x="592.0" y="768.0" class="small" text-anchor="end">Jackrong/Qwopus3.6-27B-Coder-MTP-GGUF</text>
-<text x="592.0" y="789.0" class="detail" text-anchor="end">Qwopus3.6-27B-Coder-MTP-Q5_K_M - 176k - Unsloth Studio UI</text>
+<text x="592.0" y="789.0" class="detail" text-anchor="end">Qwopus3.6-27B-Coder-MTP-Q5_K_M - 176k - file added UI</text>
 <rect x="620" y="748" width="181.5" height="34" rx="5" fill="#2da8a2" opacity="0.95"/>
 <rect x="620" y="748" width="181.5" height="34" rx="5" fill="none" stroke="#d9fff8" stroke-opacity="0.55"/>
 <text x="813.5" y="774.0" class="value">21.4</text>
@@ -81,6 +81,6 @@ text{font-family:Segoe UI,Arial,sans-serif;letter-spacing:0}
 <rect x="620" y="908" width="286.1" height="34" rx="5" fill="none" stroke="#d9fff8" stroke-opacity="0.55"/>
 <text x="918.1" y="934.0" class="value">33.7</text>
 <text x="976.1" y="934.0" class="small">tok/s</text>
-<text x="72.0" y="1113.0" class="small">Source: results/rtx-5090 CSVs plus manual Unsloth Studio UI observations. UI file-added runs may differ from inline prompt benches.</text>
+<text x="72.0" y="1113.0" class="small">Source: results/rtx-5090 CSVs plus manual Unsloth Studio UI observations. UI accounting may differ from endpoint benches.</text>
 <text x="1708.0" y="1113.0" class="small" text-anchor="end">neko-legends/nvidia-local-llm-profiles</text>
 </svg>
