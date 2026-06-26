@@ -8,6 +8,7 @@ from pathlib import Path
 
 QWOPUS_MODEL = "qwopus3.6-27b-coder-mtp-q5-k-m"
 DIFFUSION_MODEL = "diffusiongemma"
+ORNITH_MODEL = "ornith-1.0-35b-q4-k-m"
 
 
 def parse_args() -> argparse.Namespace:
@@ -17,6 +18,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--router-port", default="39190")
     parser.add_argument("--qwopus-base-url", default="http://127.0.0.1:39182/v1")
     parser.add_argument("--diffusiongemma-base-url", default="http://127.0.0.1:8890/v1")
+    parser.add_argument("--ornith-base-url", default="http://127.0.0.1:39188/v1")
     return parser.parse_args()
 
 
@@ -46,6 +48,10 @@ def provider_config(name: str, router_port: str) -> dict:
                 "context_length": 262144,
                 "supports_vision": False,
             },
+            ORNITH_MODEL: {
+                "context_length": 262144,
+                "supports_vision": False,
+            },
         },
         "name": name,
     }
@@ -64,17 +70,24 @@ def should_remove_provider(provider: object, name: str) -> bool:
         "local 5090",
         "diffusiongemma-local",
         "qwopus-local",
+        "ornith-local",
     }
     base_urls = {
         "http://127.0.0.1:39190/v1",
         "http://127.0.0.1:39182/v1",
         "http://127.0.0.1:8890/v1",
+        "http://127.0.0.1:39188/v1",
     }
     models = {
         QWOPUS_MODEL,
         "qwopus",
         "qwopus-coder",
         "diffusiongemma",
+        ORNITH_MODEL,
+        "ornith",
+        "ornith-35b",
+        "ornith-1.0-35b",
+        "ornith-1.0-35b-gguf",
     }
 
     return provider_name in names or base_url in base_urls or model in models

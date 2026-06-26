@@ -6,17 +6,18 @@ endpoints.
 ## Local 5090 Provider
 
 The recommended desktop setup is one Hermes provider named `Local 5090` that
-lists both local models:
+lists the local model servers:
 
 - `qwopus3.6-27b-coder-mtp-q5-k-m`
 - `diffusiongemma`
+- `ornith-1.0-35b-q4-k-m`
 
 ![Hermes Desktop Local 5090 provider](../../assets/images/hermes-local-5090-provider.png)
 
-Hermes custom providers are anchored to one base URL. Since Qwopus and
-DiffusionGemma are served by different local endpoints, this repo includes a
-small local router that exposes one `/v1` endpoint for Hermes and routes each
-request by the `model` field.
+Hermes custom providers are anchored to one base URL. Since Qwopus,
+DiffusionGemma, and Ornith are served by different local endpoints, this repo
+includes a small local router that exposes one `/v1` endpoint for Hermes and
+routes each request by the `model` field.
 
 Run:
 
@@ -30,8 +31,8 @@ What it does:
 - Copies `scripts\hermes\local-5090-router.py` into
   `%LOCALAPPDATA%\hermes\local-5090-router\`.
 - Starts the router at `http://127.0.0.1:39190/v1`.
-- Replaces old `diffusiongemma-local` or `qwopus-local` custom providers with
-  one `Local 5090` provider.
+- Replaces old `diffusiongemma-local`, `qwopus-local`, or `ornith-local`
+  custom providers with one `Local 5090` provider.
 
 Installed Hermes config shape:
 
@@ -48,6 +49,9 @@ custom_providers:
     qwopus3.6-27b-coder-mtp-q5-k-m:
       context_length: 262144
       supports_vision: false
+    ornith-1.0-35b-q4-k-m:
+      context_length: 262144
+      supports_vision: false
   name: Local 5090
 ```
 
@@ -57,6 +61,7 @@ Default local routes:
 Hermes -> http://127.0.0.1:39190/v1
   diffusiongemma                     -> http://127.0.0.1:8890/v1
   qwopus3.6-27b-coder-mtp-q5-k-m     -> http://127.0.0.1:39182/v1
+  ornith-1.0-35b-q4-k-m              -> http://127.0.0.1:39188/v1
 ```
 
 Restart Hermes Desktop after running the installer so the model menu refreshes.

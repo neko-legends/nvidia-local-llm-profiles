@@ -291,10 +291,11 @@ This updates Hermes Desktop with a single `Local 5090` provider:
 
 - `qwopus3.6-27b-coder-mtp-q5-k-m` routes to `http://127.0.0.1:39182/v1`
 - `diffusiongemma` routes to `http://127.0.0.1:8890/v1`
+- `ornith-1.0-35b-q4-k-m` routes to `http://127.0.0.1:39188/v1`
 - Hermes talks to the local router at `http://127.0.0.1:39190/v1`
 - The script backs up `%LOCALAPPDATA%\hermes\config.yaml` before editing it.
 
-Hermes uses one base URL per provider, so the tiny router lets both local model
+Hermes uses one base URL per provider, so the tiny router lets these local model
 servers appear together under `Local 5090`.
 
 Restart Hermes Desktop after running the script, then pick the model from the

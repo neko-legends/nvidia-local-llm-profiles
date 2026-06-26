@@ -11,6 +11,7 @@ from typing import Any
 
 QWOPUS_MODEL = "qwopus3.6-27b-coder-mtp-q5-k-m"
 DIFFUSION_MODEL = "diffusiongemma"
+ORNITH_MODEL = "ornith-1.0-35b-q4-k-m"
 
 
 def parse_args() -> argparse.Namespace:
@@ -19,6 +20,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--port", type=int, default=39190)
     parser.add_argument("--qwopus-base-url", default="http://127.0.0.1:39182/v1")
     parser.add_argument("--diffusiongemma-base-url", default="http://127.0.0.1:8890/v1")
+    parser.add_argument("--ornith-base-url", default="http://127.0.0.1:39188/v1")
     return parser.parse_args()
 
 
@@ -31,6 +33,7 @@ class Local5090Router(BaseHTTPRequestHandler):
 
     qwopus_base_url: str
     diffusiongemma_base_url: str
+    ornith_base_url: str
 
     def _models_response(self) -> bytes:
         return json.dumps(
@@ -46,6 +49,13 @@ class Local5090Router(BaseHTTPRequestHandler):
                     },
                     {
                         "id": QWOPUS_MODEL,
+                        "object": "model",
+                        "created": 0,
+                        "owned_by": "Local 5090",
+                        "context_length": 262144,
+                    },
+                    {
+                        "id": ORNITH_MODEL,
                         "object": "model",
                         "created": 0,
                         "owned_by": "Local 5090",
@@ -73,6 +83,11 @@ class Local5090Router(BaseHTTPRequestHandler):
             DIFFUSION_MODEL: self.diffusiongemma_base_url,
             "diffusiongemma-med": self.diffusiongemma_base_url,
             "diffusiongemma med": self.diffusiongemma_base_url,
+            ORNITH_MODEL: self.ornith_base_url,
+            "ornith": self.ornith_base_url,
+            "ornith-35b": self.ornith_base_url,
+            "ornith-1.0-35b": self.ornith_base_url,
+            "ornith-1.0-35b-gguf": self.ornith_base_url,
         }
         return aliases.get(normalize_model(model))
 
@@ -130,7 +145,7 @@ class Local5090Router(BaseHTTPRequestHandler):
                 {
                     "error": {
                         "message": "Unknown local model. Use diffusiongemma or "
-                        f"{QWOPUS_MODEL}."
+                        f"{QWOPUS_MODEL} or {ORNITH_MODEL}."
                     }
                 },
             )
@@ -176,6 +191,7 @@ def main() -> int:
     args = parse_args()
     Local5090Router.qwopus_base_url = args.qwopus_base_url
     Local5090Router.diffusiongemma_base_url = args.diffusiongemma_base_url
+    Local5090Router.ornith_base_url = args.ornith_base_url
 
     server = ThreadingHTTPServer((args.host, args.port), Local5090Router)
     print(f"Local 5090 router listening at http://{args.host}:{args.port}/v1", flush=True)
