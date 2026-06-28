@@ -14,6 +14,7 @@ OUTPUT_DIR = ROOT / "assets" / "images"
 OUTPUT_SVG_PATH = OUTPUT_DIR / "aeon-ornith-windows-docker-vs-gguf.svg"
 OUTPUT_PNG_PATH = OUTPUT_DIR / "aeon-ornith-windows-docker-vs-gguf.png"
 TIMING_CSV = RESULTS_DIR / "generation-timing-breakdowns-20260624.csv"
+PUBLISHED_MTP_FILE = "ornith-1.0-35b-aeon-ultimate-uncensored-nvfp4-gguf-mtp.gguf"
 
 DOCKER_COLOR = "#f2a23a"
 DOCKER_EDGE = "#ffd99c"
@@ -121,12 +122,12 @@ def load_chart_rows() -> tuple[list[dict[str, object]], dict[str, str]]:
     )
     mtp_10k_timing = read_native_timing(
         "AEON-7/Ornith-1.0-35B-AEON-Ultimate-Uncensored-NVFP4",
-        "aeon-ornith-1.0-35b-nvfp4-aeon-mtp.gguf",
+        PUBLISHED_MTP_FILE,
         8905,
     )
     mtp_200k_timing = read_native_timing(
         "AEON-7/Ornith-1.0-35B-AEON-Ultimate-Uncensored-NVFP4",
-        "aeon-ornith-1.0-35b-nvfp4-aeon-mtp.gguf",
+        PUBLISHED_MTP_FILE,
         174588,
     )
 
@@ -156,7 +157,7 @@ def load_chart_rows() -> tuple[list[dict[str, object]], dict[str, str]]:
         {
             "group": "10K prompt",
             "detail": f'{int(fnum(mtp_10k["prompt_tokens"])):,} prompt tokens',
-            "runtime": "Native AEON+MTP",
+            "runtime": "Native Ultimate Uncensored MTP",
             "value": fnum(mtp_10k_timing["generation_tps"]),
             "metric": "decode",
             "wall_tps": fnum(mtp_10k["wall_completion_tps"]),
@@ -190,7 +191,7 @@ def load_chart_rows() -> tuple[list[dict[str, object]], dict[str, str]]:
         {
             "group": "200K prompt",
             "detail": f'{int(fnum(mtp_200k["prompt_tokens"])):,} prompt tokens',
-            "runtime": "Native AEON+MTP",
+            "runtime": "Native Ultimate Uncensored MTP",
             "value": fnum(mtp_200k_timing["generation_tps"]),
             "metric": "decode",
             "wall_tps": fnum(mtp_200k["wall_completion_tps"]),
@@ -220,10 +221,10 @@ def load_chart_rows() -> tuple[list[dict[str, object]], dict[str, str]]:
 
 def render_svg(rows: list[dict[str, object]], notes: dict[str, str]) -> Path:
     width = 1680
-    height = 1040
+    height = 1120
     left = 520
     right = 130
-    top = 248
+    top = 278
     plot_w = width - left - right
     row_gap = 74
     group_gap = 70
@@ -258,9 +259,10 @@ def render_svg(rows: list[dict[str, object]], notes: dict[str, str]) -> Path:
         f'<rect x="{left - 28}" y="{top - 70}" width="{plot_w + 60}" height="560" rx="10" fill="{PANEL}"/>',
     ]
 
-    parts.append(svg_text(72, 78, "AEON Ornith NVFP4 on Windows", class_="title"))
+    parts.append(svg_text(72, 78, "AEON Ornith Ultimate Uncensored NVFP4 on Windows", class_="title"))
     parts.append(svg_text(72, 118, "Docker vLLM compressed-tensors vs native GGUF llama.cpp on RTX 5090", class_="subtitle"))
-    parts.append(svg_text(72, 154, "Native bars show llama.cpp decode speed at temperature 0.6. Docker/vLLM bars are full-wall proxy because the decode split was not captured.", class_="small"))
+    parts.append(svg_text(72, 154, "All rows use the AEON Ultimate Uncensored NVFP4 source; MTP bars are the published neko-legends GGUF-MTP artifact.", class_="small"))
+    parts.append(svg_text(72, 182, "Native bars show llama.cpp decode speed at temperature 0.6. Docker/vLLM bars are full-wall proxy because the decode split was not captured.", class_="small"))
 
     for tick in range(0, scale_max + 1, 20):
         x = left + (tick / scale_max) * plot_w
@@ -289,7 +291,7 @@ def render_svg(rows: list[dict[str, object]], notes: dict[str, str]) -> Path:
             detail = f"{detail}; decode split n/a"
         parts.append(svg_text(left + bar_w + 14, ypos + 24, detail, class_="small"))
 
-    note_y = 828
+    note_y = 862
     parts.append(svg_text(72, note_y, "Do not compare Docker bars as decode speed: vLLM only gave us full request wall timing for this run.", class_="note"))
     parts.append(svg_text(72, note_y + 34, f'AEON-trunk MTP changed native decode by {notes["mtp_10k_lift"]}% at 10K and {notes["mtp_200k_lift"]}% at 200K; 200K wall was {notes["mtp_200k_wall"]} tok/s after long prefill.', class_="note"))
     parts.append(svg_text(72, note_y + 68, f'10K tuning with draft-mtp n_max=2 reached 133.7 decode tok/s; chart bars use one temp=0.6 n_max=3+ngram profile.', class_="note"))
@@ -311,9 +313,9 @@ def render_png(rows: list[dict[str, object]], notes: dict[str, str]) -> Path:
         raise SystemExit("Pillow is required to render the PNG chart.") from exc
 
     width = 1680
-    height = 1040
+    height = 1120
     left = 520
-    top = 248
+    top = 278
     plot_w = width - left - 130
     row_gap = 74
     group_gap = 70
@@ -340,9 +342,10 @@ def render_png(rows: list[dict[str, object]], notes: dict[str, str]) -> Path:
     note_font = font("segoeui.ttf", 18)
 
     draw.rounded_rectangle([left - 28, top - 70, left - 28 + plot_w + 60, top - 70 + 560], radius=10, fill=PANEL)
-    draw.text((72, 46), "AEON Ornith NVFP4 on Windows", fill=TEXT, font=title_font)
+    draw.text((72, 46), "AEON Ornith Ultimate Uncensored NVFP4 on Windows", fill=TEXT, font=title_font)
     draw.text((72, 101), "Docker vLLM compressed-tensors vs native GGUF llama.cpp on RTX 5090", fill="#bcc6cf", font=subtitle_font)
-    draw.text((72, 141), "Native bars show llama.cpp decode speed at temperature 0.6. Docker/vLLM bars are full-wall proxy because the decode split was not captured.", fill=MUTED, font=small_font)
+    draw.text((72, 141), "All rows use the AEON Ultimate Uncensored NVFP4 source; MTP bars are the published neko-legends GGUF-MTP artifact.", fill=MUTED, font=small_font)
+    draw.text((72, 169), "Native bars show llama.cpp decode speed at temperature 0.6. Docker/vLLM bars are full-wall proxy because the decode split was not captured.", fill=MUTED, font=small_font)
 
     for tick in range(0, scale_max + 1, 20):
         x = left + (tick / scale_max) * plot_w
@@ -384,7 +387,7 @@ def render_png(rows: list[dict[str, object]], notes: dict[str, str]) -> Path:
             detail = f"{detail}; decode split n/a"
         draw.text((left + bar_w + 14, ypos - 1), detail, fill=MUTED, font=small_font)
 
-    note_y = 814
+    note_y = 862
     draw.text((72, note_y), "Do not compare Docker bars as decode speed: vLLM only gave us full request wall timing for this run.", fill="#cdd5dd", font=note_font)
     draw.text((72, note_y + 38), f'AEON-trunk MTP changed native decode by {notes["mtp_10k_lift"]}% at 10K and {notes["mtp_200k_lift"]}% at 200K; 200K wall was {notes["mtp_200k_wall"]} tok/s after long prefill.', fill="#cdd5dd", font=note_font)
     draw.text((72, note_y + 76), "10K tuning with draft-mtp n_max=2 reached 133.7 decode tok/s; chart bars use one temp=0.6 n_max=3+ngram profile.", fill="#cdd5dd", font=note_font)

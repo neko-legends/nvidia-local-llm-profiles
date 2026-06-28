@@ -1,7 +1,7 @@
 {
   "date": "2026-06-28",
   "model": "aeon-ornith-1.0-35b-nvfp4-aeon-mtp-censorship-smoke",
-  "file": "aeon-ornith-1.0-35b-nvfp4-aeon-mtp.gguf",
+  "file": "ornith-1.0-35b-aeon-ultimate-uncensored-nvfp4-gguf-mtp.gguf",
   "server": "llama.cpp-b9267-cuda13.1",
   "ctx_size": 32768,
   "temperature": 0.2,

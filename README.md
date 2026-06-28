@@ -204,9 +204,9 @@ Windows/container/driver stack rather than a simple VRAM limit.
 
 Full per-run CSVs: `results/rtx-5090/`
 
-### AEON Ornith 1.0 35B NVFP4 — Docker vLLM vs native GGUF
+### AEON Ornith 1.0 35B Ultimate Uncensored NVFP4 — Docker vLLM vs native GGUF
 
-![AEON Ornith NVFP4 on Windows, Docker vLLM vs native GGUF llama.cpp](assets/images/aeon-ornith-windows-docker-vs-gguf.png)
+![AEON Ornith Ultimate Uncensored NVFP4 on Windows, Docker vLLM vs native GGUF llama.cpp](assets/images/aeon-ornith-windows-docker-vs-gguf.png)
 
 Native Windows GGUF loaded successfully through llama.cpp with
 `BLACKWELL_NATIVE_FP4 = 1`. The chart uses native GGUF decode speed where
@@ -216,18 +216,18 @@ Official GGUF mirror and model card:
 [neko-legends/Ornith-1.0-35B-AEON-Ultimate-Uncensored-NVFP4-GGUF-MTP](https://huggingface.co/neko-legends/Ornith-1.0-35B-AEON-Ultimate-Uncensored-NVFP4-GGUF-MTP).
 
 - Native GGUF 10k: **133.0 decode tok/s**, 106.0 full-wall tok/s after 1.9s prefill.
-- Native AEON+MTP 10k: **131.5 decode tok/s** at temp=0.6, 101.5 full-wall tok/s after 2.2s prefill.
+- Native Ultimate Uncensored MTP 10k: **131.5 decode tok/s** at temp=0.6, 101.5 full-wall tok/s after 2.2s prefill.
 - Native GGUF 200k: **82.1 decode tok/s**, 18.9 full-wall tok/s after 41.0s prefill.
-- Native AEON+MTP 200k: **86.0 decode tok/s** at temp=0.6, 15.9 full-wall tok/s after 52.1s prefill.
+- Native Ultimate Uncensored MTP 200k: **86.0 decode tok/s** at temp=0.6, 15.9 full-wall tok/s after 52.1s prefill.
 - Docker/vLLM finished the 200k full request faster in this run, but only
   full-wall timing was captured for Docker.
-- MTP note: `aeon-ornith-1.0-35b-nvfp4-aeon-mtp.gguf` uses the AEON Ultimate
+- MTP note: `ornith-1.0-35b-aeon-ultimate-uncensored-nvfp4-gguf-mtp.gguf` uses the AEON Ultimate
   Uncensored NVFP4 trunk/body and a compatible grafted MTP block. AEON's
   compressed-tensors safetensors release advertises MTP in config metadata, but
   the downloaded tensors did not contain the `blk.40.*` MTP weights.
 - Tuning note: with `draft-mtp`, `n_max=2`, q4 target/draft KV, and temp=0.6,
   the 10k pass reached **133.7 decode tok/s** and **104.0 full-wall tok/s**.
-- Censorship smoke: the AEON+MTP GGUF answered Tiananmen, Xinjiang/Uyghur
+- Censorship smoke: the Ultimate Uncensored MTP GGUF answered Tiananmen, Xinjiang/Uyghur
   detention reporting, and Falun Gong prompts without refusal/evasion markers.
   Raw output:
   `results/rtx-5090/aeon-ornith-1.0-35b-nvfp4-aeon-mtp-censorship-smoke-20260628.json`.
