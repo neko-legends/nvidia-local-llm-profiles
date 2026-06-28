@@ -213,7 +213,7 @@ Native Windows GGUF loaded successfully through llama.cpp with
 llama.cpp exposed the split. Docker/vLLM bars are labeled as full-request wall
 proxies because that run did not capture a separate decode-only number.
 Official GGUF mirror and model card:
-[neko-legends/Ornith-1.0-35B-AEON-Ultimate-Uncensored-NVFP4-GGUF](https://huggingface.co/neko-legends/Ornith-1.0-35B-AEON-Ultimate-Uncensored-NVFP4-GGUF).
+[neko-legends/Ornith-1.0-35B-AEON-Ultimate-Uncensored-NVFP4-GGUF-MTP](https://huggingface.co/neko-legends/Ornith-1.0-35B-AEON-Ultimate-Uncensored-NVFP4-GGUF-MTP).
 
 - Native GGUF 10k: **133.0 decode tok/s**, 106.0 full-wall tok/s after 1.9s prefill.
 - Native NVFP4+MTP 10k: **137.9 decode tok/s** at temp=0.6, 106.8 full-wall tok/s after 2.0s prefill.

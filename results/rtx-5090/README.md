@@ -102,12 +102,12 @@ compatibility baseline rather than the model's likely ceiling.
 Two-point comparison only, one measured run per context. The Docker rows use
 vLLM with the original compressed-tensors NVFP4 model. The base native rows use
 the converted GGUF file:
-`AEON-7/Ornith-1.0-35B-AEON-Ultimate-Uncensored-NVFP4-GGUF/aeon-ornith-1.0-35b-nvfp4.gguf`.
+`neko-legends/Ornith-1.0-35B-AEON-Ultimate-Uncensored-NVFP4-GGUF-MTP/aeon-ornith-1.0-35b-nvfp4.gguf`.
 The MTP rows use
 `s-batman/Ornith-1.0-35B-NVFP4-MTP-GGUF/ornith-1.0-35b-NVFP4_MOE-MTP.gguf`,
 which grafts a Qwen3.6 MTP block into an Ornith NVFP4 GGUF.
 Official GGUF mirror and model card:
-[neko-legends/Ornith-1.0-35B-AEON-Ultimate-Uncensored-NVFP4-GGUF](https://huggingface.co/neko-legends/Ornith-1.0-35B-AEON-Ultimate-Uncensored-NVFP4-GGUF).
+[neko-legends/Ornith-1.0-35B-AEON-Ultimate-Uncensored-NVFP4-GGUF-MTP](https://huggingface.co/neko-legends/Ornith-1.0-35B-AEON-Ultimate-Uncensored-NVFP4-GGUF-MTP).
 
 | Runtime | Context target | Prompt tokens | Full-request tok/s | Generation tok/s | Prompt prefill | Wall time | Power | Temp |
 | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
