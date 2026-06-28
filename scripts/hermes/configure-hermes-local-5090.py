@@ -9,6 +9,8 @@ from pathlib import Path
 QWOPUS_MODEL = "qwopus3.6-27b-coder-mtp-q5-k-m"
 DIFFUSION_MODEL = "diffusiongemma"
 ORNITH_MODEL = "ornith-1.0-35b-q4-k-m"
+ORNITH_Q5_MODEL = "ornith-1.0-35b-q5-k-m"
+AEON_ORNITH_NVFP4_MODEL = "aeon-ornith-1.0-35b-nvfp4"
 
 
 def parse_args() -> argparse.Namespace:
@@ -19,6 +21,8 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--qwopus-base-url", default="http://127.0.0.1:39182/v1")
     parser.add_argument("--diffusiongemma-base-url", default="http://127.0.0.1:8890/v1")
     parser.add_argument("--ornith-base-url", default="http://127.0.0.1:39188/v1")
+    parser.add_argument("--ornith-q5-base-url", default="http://127.0.0.1:39189/v1")
+    parser.add_argument("--aeon-ornith-nvfp4-base-url", default="http://127.0.0.1:39187/v1")
     return parser.parse_args()
 
 
@@ -52,6 +56,14 @@ def provider_config(name: str, router_port: str) -> dict:
                 "context_length": 262144,
                 "supports_vision": False,
             },
+            ORNITH_Q5_MODEL: {
+                "context_length": 262144,
+                "supports_vision": False,
+            },
+            AEON_ORNITH_NVFP4_MODEL: {
+                "context_length": 262144,
+                "supports_vision": True,
+            },
         },
         "name": name,
     }
@@ -71,12 +83,17 @@ def should_remove_provider(provider: object, name: str) -> bool:
         "diffusiongemma-local",
         "qwopus-local",
         "ornith-local",
+        "ornith-q5-local",
+        "aeon-ornith-local",
+        "aeon-ornith-nvfp4-local",
     }
     base_urls = {
         "http://127.0.0.1:39190/v1",
         "http://127.0.0.1:39182/v1",
         "http://127.0.0.1:8890/v1",
         "http://127.0.0.1:39188/v1",
+        "http://127.0.0.1:39189/v1",
+        "http://127.0.0.1:39187/v1",
     }
     models = {
         QWOPUS_MODEL,
@@ -88,6 +105,17 @@ def should_remove_provider(provider: object, name: str) -> bool:
         "ornith-35b",
         "ornith-1.0-35b",
         "ornith-1.0-35b-gguf",
+        ORNITH_Q5_MODEL,
+        "ornith-q5",
+        "ornith-35b-q5",
+        "ornith-1.0-35b-q5",
+        "ornith-1.0-35b-q5-k-m",
+        AEON_ORNITH_NVFP4_MODEL,
+        "aeon-ornith",
+        "aeon-ornith-35b",
+        "aeon-ornith-nvfp4",
+        "ornith-aeon-nvfp4",
+        "ornith-1.0-35b-aeon-nvfp4",
     }
 
     return provider_name in names or base_url in base_urls or model in models

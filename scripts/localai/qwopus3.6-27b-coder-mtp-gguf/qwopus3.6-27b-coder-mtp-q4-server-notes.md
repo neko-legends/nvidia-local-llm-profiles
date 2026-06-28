@@ -15,7 +15,7 @@ download-qwopus3.6-27B-Coder-MTP-Q4.bat
 Default download location:
 
 ```text
-D:\forPublic\.local-model-cache\Jackrong\Qwopus3.6-27B-Coder-MTP-GGUF\
+<checkout-parent>\.local-model-cache\Jackrong\Qwopus3.6-27B-Coder-MTP-GGUF\
 ```
 
 Start:

@@ -1,7 +1,7 @@
 param(
     [string]$LlamaDir = "D:\Tools\llama.cpp-b9267-cuda13.1",
     [string]$ModelPath = "",
-    [int]$Port = 39188,
+    [int]$Port = 39189,
     [int]$ContextSize = 262144,
     [int]$MaxTokens = 1024,
     [int]$Runs = 1,
@@ -15,7 +15,7 @@ $ErrorActionPreference = "Stop"
 $repoRoot = (Resolve-Path -LiteralPath (Join-Path $PSScriptRoot "..\..\..")).Path
 $checkoutParent = (Resolve-Path -LiteralPath (Join-Path $repoRoot "..")).Path
 if (-not $ModelPath) {
-    $ModelPath = Join-Path $checkoutParent ".local-model-cache\deepreinforce-ai\Ornith-1.0-35B-GGUF\ornith-1.0-35b-Q4_K_M.gguf"
+    $ModelPath = Join-Path $checkoutParent ".local-model-cache\deepreinforce-ai\Ornith-1.0-35B-GGUF\ornith-1.0-35b-Q5_K_M.gguf"
 }
 
 $bench = Join-Path $repoRoot "scripts\benchmarks\bench-openai-chat-endpoint.ps1"
@@ -23,8 +23,8 @@ $llamaServer = Join-Path $LlamaDir "llama-server.exe"
 $prompt10k = "benchmarks\prompts\book-context-10k.txt"
 $prompt200k = "benchmarks\prompts\book-context-200k.txt"
 $stamp = Get-Date -Format "yyyyMMdd-HHmmss"
-$outLog = Join-Path $repoRoot "logs\ornith-q4km-bench-server-$stamp.out.log"
-$errLog = Join-Path $repoRoot "logs\ornith-q4km-bench-server-$stamp.err.log"
+$outLog = Join-Path $repoRoot "logs\ornith-q5km-bench-server-$stamp.out.log"
+$errLog = Join-Path $repoRoot "logs\ornith-q5km-bench-server-$stamp.err.log"
 
 if (-not (Test-Path -LiteralPath $llamaServer)) {
     throw "llama-server.exe not found at $llamaServer"
@@ -43,10 +43,11 @@ foreach ($prompt in @($prompt10k, $prompt200k)) {
 
 $modelFullPath = (Resolve-Path -LiteralPath $ModelPath).Path
 $reasoning = if ($NoThinking) { "off" } else { "on" }
+$modelId = "ornith-1.0-35b-q5-k-m"
 
 $args = @(
     "--model", $modelFullPath,
-    "--alias", "ornith-1.0-35b-q4-k-m",
+    "--alias", $modelId,
     "--host", "0.0.0.0",
     "--port", "$Port",
     "--device", "CUDA0",
@@ -105,8 +106,8 @@ try {
 
     & $bench `
         -BaseUrl "http://127.0.0.1:$Port/v1" `
-        -Model "ornith-1.0-35b-q4-k-m" `
-        -CaseName "ornith-1.0-35b-q4-k-m-llamacpp-ctx256k-prompt10k-gen$MaxTokens" `
+        -Model $modelId `
+        -CaseName "ornith-1.0-35b-q5-k-m-llamacpp-ctx256k-prompt10k-gen$MaxTokens" `
         -GpuIndex 0 `
         -MaxTokens $MaxTokens `
         -Runs $Runs `
@@ -123,8 +124,8 @@ try {
 
     & $bench `
         -BaseUrl "http://127.0.0.1:$Port/v1" `
-        -Model "ornith-1.0-35b-q4-k-m" `
-        -CaseName "ornith-1.0-35b-q4-k-m-llamacpp-ctx256k-prompt200k-gen$MaxTokens" `
+        -Model $modelId `
+        -CaseName "ornith-1.0-35b-q5-k-m-llamacpp-ctx256k-prompt200k-gen$MaxTokens" `
         -GpuIndex 0 `
         -MaxTokens $MaxTokens `
         -Runs $Runs `

@@ -10,14 +10,16 @@ lists the local model servers:
 
 - `qwopus3.6-27b-coder-mtp-q5-k-m`
 - `diffusiongemma`
+- `aeon-ornith-1.0-35b-nvfp4`
 - `ornith-1.0-35b-q4-k-m`
+- `ornith-1.0-35b-q5-k-m`
 
 ![Hermes Desktop Local 5090 provider](../../assets/images/hermes-local-5090-provider.png)
 
 Hermes custom providers are anchored to one base URL. Since Qwopus,
-DiffusionGemma, and Ornith are served by different local endpoints, this repo
-includes a small local router that exposes one `/v1` endpoint for Hermes and
-routes each request by the `model` field.
+DiffusionGemma, AEON Ornith, and GGUF Ornith are served by different local
+endpoints, this repo includes a small local router that exposes one `/v1`
+endpoint for Hermes and routes each request by the `model` field.
 
 Run:
 
@@ -31,7 +33,8 @@ What it does:
 - Copies `scripts\hermes\local-5090-router.py` into
   `%LOCALAPPDATA%\hermes\local-5090-router\`.
 - Starts the router at `http://127.0.0.1:39190/v1`.
-- Replaces old `diffusiongemma-local`, `qwopus-local`, or `ornith-local`
+- Replaces old `diffusiongemma-local`, `qwopus-local`, `ornith-local`,
+  `ornith-q5-local`, `aeon-ornith-local`, or `aeon-ornith-nvfp4-local`
   custom providers with one `Local 5090` provider.
 
 Installed Hermes config shape:
@@ -49,7 +52,13 @@ custom_providers:
     qwopus3.6-27b-coder-mtp-q5-k-m:
       context_length: 262144
       supports_vision: false
+    aeon-ornith-1.0-35b-nvfp4:
+      context_length: 262144
+      supports_vision: true
     ornith-1.0-35b-q4-k-m:
+      context_length: 262144
+      supports_vision: false
+    ornith-1.0-35b-q5-k-m:
       context_length: 262144
       supports_vision: false
   name: Local 5090
@@ -61,7 +70,9 @@ Default local routes:
 Hermes -> http://127.0.0.1:39190/v1
   diffusiongemma                     -> http://127.0.0.1:8890/v1
   qwopus3.6-27b-coder-mtp-q5-k-m     -> http://127.0.0.1:39182/v1
+  aeon-ornith-1.0-35b-nvfp4          -> http://127.0.0.1:39187/v1
   ornith-1.0-35b-q4-k-m              -> http://127.0.0.1:39188/v1
+  ornith-1.0-35b-q5-k-m              -> http://127.0.0.1:39189/v1
 ```
 
 Restart Hermes Desktop after running the installer so the model menu refreshes.
@@ -166,6 +177,11 @@ Invoke-RestMethod -Uri http://127.0.0.1:39182/v1/chat/completions `
 
 For AEON, use port `39183` and model
 `aeon-qwen36-27b-multimodal-nvfp4-mtp-xs` in the same request shape.
+
+For AEON Ornith NVFP4, use port `39187` and model
+`aeon-ornith-1.0-35b-nvfp4`.
+
+For Ornith Q5_K_M, use port `39189` and model `ornith-1.0-35b-q5-k-m`.
 
 ## Notes
 

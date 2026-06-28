@@ -4,6 +4,8 @@ param(
   [string]$QwopusBaseUrl = "http://127.0.0.1:39182/v1",
   [string]$DiffusionGemmaBaseUrl = "http://127.0.0.1:8890/v1",
   [string]$OrnithBaseUrl = "http://127.0.0.1:39188/v1",
+  [string]$OrnithQ5BaseUrl = "http://127.0.0.1:39189/v1",
+  [string]$AeonOrnithNvfp4BaseUrl = "http://127.0.0.1:39187/v1",
   [switch]$NoStartRouter
 )
 
@@ -68,7 +70,9 @@ if (-not $Python) {
   --router-port $RouterPort `
   --qwopus-base-url $QwopusBaseUrl `
   --diffusiongemma-base-url $DiffusionGemmaBaseUrl `
-  --ornith-base-url $OrnithBaseUrl
+  --ornith-base-url $OrnithBaseUrl `
+  --ornith-q5-base-url $OrnithQ5BaseUrl `
+  --aeon-ornith-nvfp4-base-url $AeonOrnithNvfp4BaseUrl
 
 if (-not $NoStartRouter) {
   $OutLog = Join-Path $RouterDir "local-5090-router.out.log"
@@ -82,7 +86,9 @@ if (-not $NoStartRouter) {
         "--port", "$RouterPort",
         "--qwopus-base-url", $QwopusBaseUrl,
         "--diffusiongemma-base-url", $DiffusionGemmaBaseUrl,
-        "--ornith-base-url", $OrnithBaseUrl
+        "--ornith-base-url", $OrnithBaseUrl,
+        "--ornith-q5-base-url", $OrnithQ5BaseUrl,
+        "--aeon-ornith-nvfp4-base-url", $AeonOrnithNvfp4BaseUrl
       ) `
       -WorkingDirectory $RouterDir `
       -RedirectStandardOutput $OutLog `
@@ -100,6 +106,8 @@ Write-Host "Models:"
 Write-Host "  - qwopus3.6-27b-coder-mtp-q5-k-m -> $QwopusBaseUrl"
 Write-Host "  - diffusiongemma -> $DiffusionGemmaBaseUrl"
 Write-Host "  - ornith-1.0-35b-q4-k-m -> $OrnithBaseUrl"
+Write-Host "  - ornith-1.0-35b-q5-k-m -> $OrnithQ5BaseUrl"
+Write-Host "  - aeon-ornith-1.0-35b-nvfp4 -> $AeonOrnithNvfp4BaseUrl"
 Write-Host ""
 Write-Host "Restart Hermes Desktop, then open the model menu and choose '$ProviderName'."
 Write-Host "Start the model servers separately before using them."

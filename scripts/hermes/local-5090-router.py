@@ -12,6 +12,8 @@ from typing import Any
 QWOPUS_MODEL = "qwopus3.6-27b-coder-mtp-q5-k-m"
 DIFFUSION_MODEL = "diffusiongemma"
 ORNITH_MODEL = "ornith-1.0-35b-q4-k-m"
+ORNITH_Q5_MODEL = "ornith-1.0-35b-q5-k-m"
+AEON_ORNITH_NVFP4_MODEL = "aeon-ornith-1.0-35b-nvfp4"
 
 
 def parse_args() -> argparse.Namespace:
@@ -21,6 +23,8 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--qwopus-base-url", default="http://127.0.0.1:39182/v1")
     parser.add_argument("--diffusiongemma-base-url", default="http://127.0.0.1:8890/v1")
     parser.add_argument("--ornith-base-url", default="http://127.0.0.1:39188/v1")
+    parser.add_argument("--ornith-q5-base-url", default="http://127.0.0.1:39189/v1")
+    parser.add_argument("--aeon-ornith-nvfp4-base-url", default="http://127.0.0.1:39187/v1")
     return parser.parse_args()
 
 
@@ -34,6 +38,8 @@ class Local5090Router(BaseHTTPRequestHandler):
     qwopus_base_url: str
     diffusiongemma_base_url: str
     ornith_base_url: str
+    ornith_q5_base_url: str
+    aeon_ornith_nvfp4_base_url: str
 
     def _models_response(self) -> bytes:
         return json.dumps(
@@ -56,6 +62,20 @@ class Local5090Router(BaseHTTPRequestHandler):
                     },
                     {
                         "id": ORNITH_MODEL,
+                        "object": "model",
+                        "created": 0,
+                        "owned_by": "Local 5090",
+                        "context_length": 262144,
+                    },
+                    {
+                        "id": ORNITH_Q5_MODEL,
+                        "object": "model",
+                        "created": 0,
+                        "owned_by": "Local 5090",
+                        "context_length": 262144,
+                    },
+                    {
+                        "id": AEON_ORNITH_NVFP4_MODEL,
                         "object": "model",
                         "created": 0,
                         "owned_by": "Local 5090",
@@ -88,6 +108,17 @@ class Local5090Router(BaseHTTPRequestHandler):
             "ornith-35b": self.ornith_base_url,
             "ornith-1.0-35b": self.ornith_base_url,
             "ornith-1.0-35b-gguf": self.ornith_base_url,
+            ORNITH_Q5_MODEL: self.ornith_q5_base_url,
+            "ornith-q5": self.ornith_q5_base_url,
+            "ornith-35b-q5": self.ornith_q5_base_url,
+            "ornith-1.0-35b-q5": self.ornith_q5_base_url,
+            "ornith-1.0-35b-q5-k-m": self.ornith_q5_base_url,
+            AEON_ORNITH_NVFP4_MODEL: self.aeon_ornith_nvfp4_base_url,
+            "aeon-ornith": self.aeon_ornith_nvfp4_base_url,
+            "aeon-ornith-35b": self.aeon_ornith_nvfp4_base_url,
+            "aeon-ornith-nvfp4": self.aeon_ornith_nvfp4_base_url,
+            "ornith-aeon-nvfp4": self.aeon_ornith_nvfp4_base_url,
+            "ornith-1.0-35b-aeon-nvfp4": self.aeon_ornith_nvfp4_base_url,
         }
         return aliases.get(normalize_model(model))
 
@@ -145,7 +176,8 @@ class Local5090Router(BaseHTTPRequestHandler):
                 {
                     "error": {
                         "message": "Unknown local model. Use diffusiongemma or "
-                        f"{QWOPUS_MODEL} or {ORNITH_MODEL}."
+                        f"{QWOPUS_MODEL}, {ORNITH_MODEL}, {ORNITH_Q5_MODEL}, "
+                        f"or {AEON_ORNITH_NVFP4_MODEL}."
                     }
                 },
             )
@@ -192,6 +224,8 @@ def main() -> int:
     Local5090Router.qwopus_base_url = args.qwopus_base_url
     Local5090Router.diffusiongemma_base_url = args.diffusiongemma_base_url
     Local5090Router.ornith_base_url = args.ornith_base_url
+    Local5090Router.ornith_q5_base_url = args.ornith_q5_base_url
+    Local5090Router.aeon_ornith_nvfp4_base_url = args.aeon_ornith_nvfp4_base_url
 
     server = ThreadingHTTPServer((args.host, args.port), Local5090Router)
     print(f"Local 5090 router listening at http://{args.host}:{args.port}/v1", flush=True)

@@ -3,17 +3,17 @@ setlocal EnableDelayedExpansion
 
 rem ============================================================
 rem  DeepReinforce Ornith 1.0 35B GGUF llama.cpp launcher.
-rem  Model: ornith-1.0-35b-Q4_K_M.gguf
-rem  Endpoint: http://127.0.0.1:39188/v1
+rem  Model: ornith-1.0-35b-Q5_K_M.gguf
+rem  Endpoint: http://127.0.0.1:39189/v1
 rem ============================================================
 set "SCRIPT_DIR=%~dp0"
 for %%I in ("%SCRIPT_DIR%..\..\..\..") do set "CHECKOUT_PARENT=%%~fI"
 set "LLAMA_DIR=D:\Tools\llama.cpp-b9267-cuda13.1"
-set "MODEL_PATH=%CHECKOUT_PARENT%\.local-model-cache\deepreinforce-ai\Ornith-1.0-35B-GGUF\ornith-1.0-35b-Q4_K_M.gguf"
-set "MODEL_ALIAS=ornith-1.0-35b-q4-k-m"
+set "MODEL_PATH=%CHECKOUT_PARENT%\.local-model-cache\deepreinforce-ai\Ornith-1.0-35B-GGUF\ornith-1.0-35b-Q5_K_M.gguf"
+set "MODEL_ALIAS=ornith-1.0-35b-q5-k-m"
 set "HOST=0.0.0.0"
-set "PORT=39188"
-rem RTX 5090 benchmark profile: enough room for the 200k prompt fixture plus generation.
+set "PORT=39189"
+rem RTX 5090 profile: 256k context for the Q5_K_M quant.
 set "CTX_SIZE=262144"
 
 rem Ornith is a reasoning model. Keep reasoning on by default so the model follows
@@ -37,7 +37,7 @@ if not exist "%MODEL_PATH%" (
   echo   %MODEL_PATH%
   echo.
   echo Download it with:
-  echo   download-ornith-1.0-35b-q4-k-m.bat
+  echo   download-ornith-1.0-35b-q5-k-m.bat
   echo.
   pause
   exit /b 1

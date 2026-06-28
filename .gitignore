@@ -4,5 +4,6 @@
 __pycache__/
 scripts/**/models/
 scripts/localai/installed/
+scripts/vllm/installed-*/
 *.gguf
 *.safetensors

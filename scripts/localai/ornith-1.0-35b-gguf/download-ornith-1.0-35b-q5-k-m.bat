@@ -2,14 +2,14 @@
 setlocal
 
 rem ============================================================
-rem  Download DeepReinforce Ornith 1.0 35B GGUF Q4_K_M.
+rem  Download DeepReinforce Ornith 1.0 35B GGUF Q5_K_M.
 rem  Default target:
-rem    <checkout-parent>\.local-model-cache\deepreinforce-ai\Ornith-1.0-35B-GGUF\ornith-1.0-35b-Q4_K_M.gguf
+rem    <checkout-parent>\.local-model-cache\deepreinforce-ai\Ornith-1.0-35B-GGUF\ornith-1.0-35b-Q5_K_M.gguf
 rem ============================================================
 set "SCRIPT_DIR=%~dp0"
 for %%I in ("%SCRIPT_DIR%..\..\..\..") do set "CHECKOUT_PARENT=%%~fI"
 set "MODEL_DIR=%CHECKOUT_PARENT%\.local-model-cache\deepreinforce-ai\Ornith-1.0-35B-GGUF"
-set "FILENAME=ornith-1.0-35b-Q4_K_M.gguf"
+set "FILENAME=ornith-1.0-35b-Q5_K_M.gguf"
 set "REPO_ID=deepreinforce-ai/Ornith-1.0-35B-GGUF"
 
 echo ============================================================
@@ -58,6 +58,6 @@ echo Model saved to:
 echo   %MODEL_DIR%\%FILENAME%
 echo.
 echo Start the server with:
-echo   start-ornith-1.0-35b-q4-k-m-server.bat
+echo   start-ornith-1.0-35b-q5-k-m-server.bat
 echo.
 pause

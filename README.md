@@ -117,7 +117,7 @@ scripts\localai\qwen36-35b-a3b-mtp-gguf\
 
 Minimal llama.cpp support for
 [deepreinforce-ai/Ornith-1.0-35B-GGUF](https://huggingface.co/deepreinforce-ai/Ornith-1.0-35B-GGUF),
-using `ornith-1.0-35b-Q4_K_M.gguf`.
+using `ornith-1.0-35b-Q4_K_M.gguf` and `ornith-1.0-35b-Q5_K_M.gguf`.
 
 Launcher folder:
 
@@ -125,9 +125,42 @@ Launcher folder:
 scripts\localai\ornith-1.0-35b-gguf\
 ```
 
+Q5_K_M quick path:
+
+```bat
+download-ornith-1.0-35b-q5-k-m.bat
+start-ornith-1.0-35b-q5-k-m-server.bat
+bench-ornith-1.0-35b-q5-k-m-two-point.bat
+```
+
 Ornith is a reasoning model, so the foreground launcher leaves reasoning mode
 on by default. Use `-NoThinking` in the benchmark wrapper or set `THINKING=0`
 in the `.bat` file for no-think latency experiments.
+
+### AEON Ornith 1.0 35B Ultimate Uncensored NVFP4
+
+Docker/vLLM support for
+[AEON-7/Ornith-1.0-35B-AEON-Ultimate-Uncensored-NVFP4](https://huggingface.co/AEON-7/Ornith-1.0-35B-AEON-Ultimate-Uncensored-NVFP4),
+a compressed-tensors NVFP4 safetensors profile for Blackwell GPUs.
+
+Launcher folder:
+
+```text
+scripts\vllm\aeon-ornith-1.0-35b-nvfp4\
+```
+
+Quick path:
+
+```bat
+download-aeon-ornith-1.0-35b-nvfp4.bat
+start-aeon-ornith-1.0-35b-nvfp4-vllm-docker.bat
+bench-aeon-ornith-1.0-35b-nvfp4-two-point.bat
+```
+
+Endpoint defaults:
+
+- Base URL: `http://127.0.0.1:39187/v1`
+- Model: `aeon-ornith-1.0-35b-nvfp4`
 
 ---
 
@@ -279,27 +312,47 @@ start-qwopus3.6-27b-coder-mtp-q5-server.bat
 
 Serves OpenAI-compatible endpoint at `http://127.0.0.1:39182/v1`
 
-**4. Add to Hermes Desktop**
+**4. Use Hermes Desktop**
 
-Run the Local 5090 installer:
+Install the Hermes `Local 5090` provider and local router:
 
 ```bat
 scripts\hermes\install-local-5090-provider.bat
 ```
 
-This updates Hermes Desktop with a single `Local 5090` provider:
+Start the model server you want from `scripts\localai\`. For example, Ornith Q5:
+
+```bat
+scripts\localai\ornith-1.0-35b-gguf\start-ornith-1.0-35b-q5-k-m-server.bat
+```
+
+Or Qwopus:
+
+```bat
+scripts\localai\qwopus3.6-27b-coder-mtp-gguf\start-qwopus3.6-27b-coder-mtp-q5-server.bat
+```
+
+Then restart or open Hermes Desktop, choose the `Local 5090` provider, and pick
+the model you started. You can also point any OpenAI-compatible client at the
+router:
+
+```text
+Base URL: http://127.0.0.1:39190/v1
+Model:    ornith-1.0-35b-q5-k-m
+```
+
+The installer updates Hermes Desktop with a single `Local 5090` provider:
 
 - `qwopus3.6-27b-coder-mtp-q5-k-m` routes to `http://127.0.0.1:39182/v1`
 - `diffusiongemma` routes to `http://127.0.0.1:8890/v1`
+- `aeon-ornith-1.0-35b-nvfp4` routes to `http://127.0.0.1:39187/v1`
 - `ornith-1.0-35b-q4-k-m` routes to `http://127.0.0.1:39188/v1`
+- `ornith-1.0-35b-q5-k-m` routes to `http://127.0.0.1:39189/v1`
 - Hermes talks to the local router at `http://127.0.0.1:39190/v1`
 - The script backs up `%LOCALAPPDATA%\hermes\config.yaml` before editing it.
 
 Hermes uses one base URL per provider, so the tiny router lets these local model
 servers appear together under `Local 5090`.
-
-Restart Hermes Desktop after running the script, then pick the model from the
-menu:
 
 ![Hermes Desktop Local 5090 provider](assets/images/hermes-local-5090-provider.png)
 
@@ -355,6 +408,7 @@ scripts/
     qwen36-35b-a3b-mtp-gguf/        Unsloth Qwen 35B GGUF launcher
     ornith-1.0-35b-gguf/            Ornith 35B GGUF launcher
   vllm/
+    aeon-ornith-1.0-35b-nvfp4/       AEON Ornith NVFP4 Docker vLLM launcher
     aeon-qwen36-27b-multimodal-nvfp4-mtp-xs/  Docker vLLM launcher
     qwen36-35b-a3b-nvfp4/            NVIDIA MoE NVFP4 two-point bench
   benchmarks/

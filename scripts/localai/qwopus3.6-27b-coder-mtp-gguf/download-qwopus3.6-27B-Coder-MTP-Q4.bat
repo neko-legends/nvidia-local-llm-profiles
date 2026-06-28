@@ -6,7 +6,7 @@ rem  Download Qwopus3.6 27B Coder MTP Q4_K_M GGUF.
 rem
 rem  Default destination matches the shared local model cache used
 rem  by this repo, next to the Q5_K_M variant:
-rem    D:\forPublic\.local-model-cache\Jackrong\Qwopus3.6-27B-Coder-MTP-GGUF
+rem    <checkout-parent>\.local-model-cache\Jackrong\Qwopus3.6-27B-Coder-MTP-GGUF
 rem
 rem  Edit MODEL_DIR below if you want a different location.
 rem ============================================================
