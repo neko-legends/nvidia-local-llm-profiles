@@ -19,6 +19,8 @@ DOCKER_COLOR = "#f2a23a"
 DOCKER_EDGE = "#ffd99c"
 GGUF_COLOR = "#42d0c4"
 GGUF_EDGE = "#bdf9f4"
+MTP_COLOR = "#7bd66f"
+MTP_EDGE = "#d4ffcb"
 BACKGROUND = "#101317"
 PANEL = "#181e25"
 TEXT = "#edf3f7"
@@ -31,6 +33,8 @@ SOURCE_FILES = {
     "docker_200k": "aeon-ornith-1.0-35b-nvfp4-vllm-ct-nvfp4-ctx256k-prompt200k-gen1024-20260627-175219.csv",
     "gguf_10k": "aeon-ornith-1.0-35b-nvfp4-gguf-llamacpp-native-nvfp4-ctx256k-prompt10k-gen1024-20260627-190202.csv",
     "gguf_200k": "aeon-ornith-1.0-35b-nvfp4-gguf-llamacpp-native-nvfp4-ctx256k-prompt200k-gen1024-20260627-190223.csv",
+    "mtp_10k": "ornith-1.0-35b-nvfp4-moe-mtp-ngram-temp06-llamacpp-ctx262k-prompt10k-gen1024-20260627-220534.csv",
+    "mtp_200k": "ornith-1.0-35b-nvfp4-moe-mtp-ngram-temp06-llamacpp-ctx262k-prompt200k-gen1024-20260627-220534.csv",
 }
 
 
@@ -56,7 +60,7 @@ def read_row(name: str) -> dict[str, str]:
     return measured[-1]
 
 
-def read_native_timing(context_tokens: int) -> dict[str, str]:
+def read_native_timing(model: str, filename: str, context_tokens: int) -> dict[str, str]:
     if not TIMING_CSV.exists():
         raise FileNotFoundError(f"Missing timing CSV: {TIMING_CSV}")
 
@@ -64,13 +68,13 @@ def read_native_timing(context_tokens: int) -> dict[str, str]:
         matches = [
             row
             for row in csv.DictReader(handle)
-            if row["model"] == "AEON-7/Ornith-1.0-35B-AEON-Ultimate-Uncensored-NVFP4"
-            and row["file"] == "aeon-ornith-1.0-35b-nvfp4.gguf"
+            if row["model"] == model
+            and row["file"] == filename
             and int(row["context_tokens"]) == context_tokens
         ]
 
     if not matches:
-        raise ValueError(f"No native GGUF timing row found for {context_tokens} tokens")
+        raise ValueError(f"No native GGUF timing row found for {model} / {filename} / {context_tokens} tokens")
 
     return matches[-1]
 
@@ -98,8 +102,28 @@ def load_chart_rows() -> tuple[list[dict[str, object]], dict[str, str]]:
     docker_200k = read_row("docker_200k")
     gguf_10k = read_row("gguf_10k")
     gguf_200k = read_row("gguf_200k")
-    gguf_10k_timing = read_native_timing(8905)
-    gguf_200k_timing = read_native_timing(174588)
+    mtp_10k = read_row("mtp_10k")
+    mtp_200k = read_row("mtp_200k")
+    gguf_10k_timing = read_native_timing(
+        "AEON-7/Ornith-1.0-35B-AEON-Ultimate-Uncensored-NVFP4",
+        "aeon-ornith-1.0-35b-nvfp4.gguf",
+        8905,
+    )
+    gguf_200k_timing = read_native_timing(
+        "AEON-7/Ornith-1.0-35B-AEON-Ultimate-Uncensored-NVFP4",
+        "aeon-ornith-1.0-35b-nvfp4.gguf",
+        174588,
+    )
+    mtp_10k_timing = read_native_timing(
+        "s-batman/Ornith-1.0-35B-NVFP4-MTP-GGUF",
+        "ornith-1.0-35b-NVFP4_MOE-MTP.gguf",
+        8905,
+    )
+    mtp_200k_timing = read_native_timing(
+        "s-batman/Ornith-1.0-35B-NVFP4-MTP-GGUF",
+        "ornith-1.0-35b-NVFP4_MOE-MTP.gguf",
+        174588,
+    )
 
     rows = [
         {
@@ -125,6 +149,18 @@ def load_chart_rows() -> tuple[list[dict[str, object]], dict[str, str]]:
             "edge": GGUF_EDGE,
         },
         {
+            "group": "10K prompt",
+            "detail": f'{int(fnum(mtp_10k["prompt_tokens"])):,} prompt tokens',
+            "runtime": "Native NVFP4+MTP",
+            "value": fnum(mtp_10k_timing["generation_tps"]),
+            "metric": "decode",
+            "wall_tps": fnum(mtp_10k["wall_completion_tps"]),
+            "wall": fnum(mtp_10k["wall_seconds"]),
+            "prefill": fnum(mtp_10k_timing["prompt_eval_seconds"]),
+            "color": MTP_COLOR,
+            "edge": MTP_EDGE,
+        },
+        {
             "group": "200K prompt",
             "detail": f'{int(fnum(docker_200k["prompt_tokens"])):,} prompt tokens',
             "runtime": "Docker / vLLM",
@@ -146,13 +182,29 @@ def load_chart_rows() -> tuple[list[dict[str, object]], dict[str, str]]:
             "color": GGUF_COLOR,
             "edge": GGUF_EDGE,
         },
+        {
+            "group": "200K prompt",
+            "detail": f'{int(fnum(mtp_200k["prompt_tokens"])):,} prompt tokens',
+            "runtime": "Native NVFP4+MTP",
+            "value": fnum(mtp_200k_timing["generation_tps"]),
+            "metric": "decode",
+            "wall_tps": fnum(mtp_200k["wall_completion_tps"]),
+            "wall": fnum(mtp_200k["wall_seconds"]),
+            "prefill": fnum(mtp_200k_timing["prompt_eval_seconds"]),
+            "color": MTP_COLOR,
+            "edge": MTP_EDGE,
+        },
     ]
 
     notes = {
         "cold_10k": fmt_one(fnum(docker_10k_cold["wall_completion_tps"])),
-        "native_10k_lift": fmt_one((fnum(gguf_10k_timing["generation_tps"]) / fnum(docker_10k["wall_completion_tps"]) - 1) * 100),
+        "mtp_10k_lift": fmt_one((fnum(mtp_10k_timing["generation_tps"]) / fnum(gguf_10k_timing["generation_tps"]) - 1) * 100),
+        "mtp_200k_lift": fmt_one((fnum(mtp_200k_timing["generation_tps"]) / fnum(gguf_200k_timing["generation_tps"]) - 1) * 100),
         "docker_200k_lift": fmt_one((fnum(docker_200k["wall_completion_tps"]) / fnum(gguf_200k["wall_completion_tps"]) - 1) * 100),
         "native_200k_decode": fmt_one(fnum(gguf_200k_timing["generation_tps"])),
+        "mtp_10k_decode": fmt_one(fnum(mtp_10k_timing["generation_tps"])),
+        "mtp_200k_decode": fmt_one(fnum(mtp_200k_timing["generation_tps"])),
+        "mtp_200k_wall": fmt_one(fnum(mtp_200k["wall_completion_tps"])),
         "native_200k_prefill": fmt_one(fnum(gguf_200k_timing["prompt_eval_seconds"])),
         "native_200k_wall": fmt_one(fnum(gguf_200k["wall_completion_tps"])),
         "prompt_hash_10k": docker_10k["prompt_sha256"],
@@ -163,13 +215,13 @@ def load_chart_rows() -> tuple[list[dict[str, object]], dict[str, str]]:
 
 def render_svg(rows: list[dict[str, object]], notes: dict[str, str]) -> Path:
     width = 1680
-    height = 900
+    height = 1040
     left = 520
     right = 130
-    top = 260
+    top = 248
     plot_w = width - left - right
-    row_gap = 86
-    group_gap = 78
+    row_gap = 74
+    group_gap = 70
     bar_h = 38
     scale_max = 160
 
@@ -198,17 +250,17 @@ def render_svg(rows: list[dict[str, object]], notes: dict[str, str]) -> Path:
         ".axis{fill:#9ca7b2;font-size:15px}",
         "</style>",
         f'<rect width="{width}" height="{height}" fill="{BACKGROUND}"/>',
-        f'<rect x="{left - 28}" y="{top - 70}" width="{plot_w + 60}" height="438" rx="10" fill="{PANEL}"/>',
+        f'<rect x="{left - 28}" y="{top - 70}" width="{plot_w + 60}" height="560" rx="10" fill="{PANEL}"/>',
     ]
 
     parts.append(svg_text(72, 78, "AEON Ornith NVFP4 on Windows", class_="title"))
     parts.append(svg_text(72, 118, "Docker vLLM compressed-tensors vs native GGUF llama.cpp on RTX 5090", class_="subtitle"))
-    parts.append(svg_text(72, 154, "Native GGUF bars show llama.cpp decode speed. Docker/vLLM bars are full-wall proxy because the decode split was not captured.", class_="small"))
+    parts.append(svg_text(72, 154, "Native bars show llama.cpp decode speed at temperature 0.6. Docker/vLLM bars are full-wall proxy because the decode split was not captured.", class_="small"))
 
     for tick in range(0, scale_max + 1, 20):
         x = left + (tick / scale_max) * plot_w
-        parts.append(f'<line x1="{x:.1f}" y1="{top - 46}" x2="{x:.1f}" y2="{top + 392}" stroke="{GRID}" stroke-width="1"/>')
-        parts.append(svg_text(x, top + 424, str(tick), class_="axis", text_anchor="middle"))
+        parts.append(f'<line x1="{x:.1f}" y1="{top - 46}" x2="{x:.1f}" y2="{top + 512}" stroke="{GRID}" stroke-width="1"/>')
+        parts.append(svg_text(x, top + 544, str(tick), class_="axis", text_anchor="middle"))
 
     group_seen: set[str] = set()
     for row, ypos in zip(rows, y_positions):
@@ -232,10 +284,10 @@ def render_svg(rows: list[dict[str, object]], notes: dict[str, str]) -> Path:
             detail = f"{detail}; decode split n/a"
         parts.append(svg_text(left + bar_w + 14, ypos + 24, detail, class_="small"))
 
-    note_y = 720
+    note_y = 828
     parts.append(svg_text(72, note_y, "Do not compare Docker bars as decode speed: vLLM only gave us full request wall timing for this run.", class_="note"))
-    parts.append(svg_text(72, note_y + 34, f'200K native GGUF decode was {notes["native_200k_decode"]} tok/s; full-wall was {notes["native_200k_wall"]} tok/s after {notes["native_200k_prefill"]}s prompt prefill.', class_="note"))
-    parts.append(svg_text(72, note_y + 68, f'Docker/vLLM still finished the 200K request faster wall-time here: +{notes["docker_200k_lift"]}% wall throughput.', class_="note"))
+    parts.append(svg_text(72, note_y + 34, f'MTP lifted native decode by +{notes["mtp_10k_lift"]}% at 10K and +{notes["mtp_200k_lift"]}% at 200K; 200K MTP wall was {notes["mtp_200k_wall"]} tok/s after long prefill.', class_="note"))
+    parts.append(svg_text(72, note_y + 68, f'Greedy warm 10K MTP tuning separately reached 152.7 decode tok/s / 150.2 full-wall tok/s; chart uses temp=0.6 for fairness.', class_="note"))
     parts.append(svg_text(72, note_y + 102, f'Docker first 10K request was {notes["cold_10k"]} tok/s because Triton JIT compilation landed in the timed request.', class_="note"))
     parts.append(svg_text(72, height - 42, "Source CSVs: results/rtx-5090, prompt hashes match for the 10K and 200K fixtures.", class_="small"))
     parts.append(svg_text(width - 72, height - 42, "neko-legends/nvidia-local-llm-profiles", class_="small", text_anchor="end"))
@@ -254,12 +306,12 @@ def render_png(rows: list[dict[str, object]], notes: dict[str, str]) -> Path:
         raise SystemExit("Pillow is required to render the PNG chart.") from exc
 
     width = 1680
-    height = 900
+    height = 1040
     left = 520
-    top = 260
+    top = 248
     plot_w = width - left - 130
-    row_gap = 86
-    group_gap = 78
+    row_gap = 74
+    group_gap = 70
     bar_h = 38
     scale_max = 160
 
@@ -282,17 +334,17 @@ def render_png(rows: list[dict[str, object]], notes: dict[str, str]) -> Path:
     small_font = font("segoeui.ttf", 16)
     note_font = font("segoeui.ttf", 18)
 
-    draw.rounded_rectangle([left - 28, top - 70, left - 28 + plot_w + 60, top - 70 + 438], radius=10, fill=PANEL)
+    draw.rounded_rectangle([left - 28, top - 70, left - 28 + plot_w + 60, top - 70 + 560], radius=10, fill=PANEL)
     draw.text((72, 46), "AEON Ornith NVFP4 on Windows", fill=TEXT, font=title_font)
     draw.text((72, 101), "Docker vLLM compressed-tensors vs native GGUF llama.cpp on RTX 5090", fill="#bcc6cf", font=subtitle_font)
-    draw.text((72, 141), "Native GGUF bars show llama.cpp decode speed. Docker/vLLM bars are full-wall proxy because the decode split was not captured.", fill=MUTED, font=small_font)
+    draw.text((72, 141), "Native bars show llama.cpp decode speed at temperature 0.6. Docker/vLLM bars are full-wall proxy because the decode split was not captured.", fill=MUTED, font=small_font)
 
     for tick in range(0, scale_max + 1, 20):
         x = left + (tick / scale_max) * plot_w
-        draw.line([(x, top - 46), (x, top + 392)], fill=GRID, width=1)
+        draw.line([(x, top - 46), (x, top + 512)], fill=GRID, width=1)
         text = str(tick)
         bbox = draw.textbbox((0, 0), text, font=small_font)
-        draw.text((x - (bbox[2] - bbox[0]) / 2, top + 405), text, fill="#9ca7b2", font=small_font)
+        draw.text((x - (bbox[2] - bbox[0]) / 2, top + 525), text, fill="#9ca7b2", font=small_font)
 
     y_positions: list[int] = []
     y = top
@@ -327,10 +379,10 @@ def render_png(rows: list[dict[str, object]], notes: dict[str, str]) -> Path:
             detail = f"{detail}; decode split n/a"
         draw.text((left + bar_w + 14, ypos - 1), detail, fill=MUTED, font=small_font)
 
-    note_y = 700
+    note_y = 814
     draw.text((72, note_y), "Do not compare Docker bars as decode speed: vLLM only gave us full request wall timing for this run.", fill="#cdd5dd", font=note_font)
-    draw.text((72, note_y + 38), f'200K native GGUF decode was {notes["native_200k_decode"]} tok/s; full-wall was {notes["native_200k_wall"]} tok/s after {notes["native_200k_prefill"]}s prompt prefill.', fill="#cdd5dd", font=note_font)
-    draw.text((72, note_y + 76), f'Docker/vLLM still finished the 200K request faster wall-time here: +{notes["docker_200k_lift"]}% wall throughput.', fill="#cdd5dd", font=note_font)
+    draw.text((72, note_y + 38), f'MTP lifted native decode by +{notes["mtp_10k_lift"]}% at 10K and +{notes["mtp_200k_lift"]}% at 200K; 200K MTP wall was {notes["mtp_200k_wall"]} tok/s after long prefill.', fill="#cdd5dd", font=note_font)
+    draw.text((72, note_y + 76), "Greedy warm 10K MTP tuning separately reached 152.7 decode tok/s / 150.2 full-wall tok/s; chart uses temp=0.6 for fairness.", fill="#cdd5dd", font=note_font)
     draw.text((72, note_y + 114), f'Docker first 10K request was {notes["cold_10k"]} tok/s because Triton JIT compilation landed in the timed request.', fill="#cdd5dd", font=note_font)
     draw.text((72, height - 56), "Source CSVs: results/rtx-5090, prompt hashes match for the 10K and 200K fixtures.", fill=MUTED, font=small_font)
     repo = "neko-legends/nvidia-local-llm-profiles"
