@@ -33,8 +33,8 @@ SOURCE_FILES = {
     "docker_200k": "aeon-ornith-1.0-35b-nvfp4-vllm-ct-nvfp4-ctx256k-prompt200k-gen1024-20260627-175219.csv",
     "gguf_10k": "aeon-ornith-1.0-35b-nvfp4-gguf-llamacpp-native-nvfp4-ctx256k-prompt10k-gen1024-20260627-190202.csv",
     "gguf_200k": "aeon-ornith-1.0-35b-nvfp4-gguf-llamacpp-native-nvfp4-ctx256k-prompt200k-gen1024-20260627-190223.csv",
-    "mtp_10k": "ornith-1.0-35b-nvfp4-moe-mtp-ngram-temp06-llamacpp-ctx262k-prompt10k-gen1024-20260627-220534.csv",
-    "mtp_200k": "ornith-1.0-35b-nvfp4-moe-mtp-ngram-temp06-llamacpp-ctx262k-prompt200k-gen1024-20260627-220534.csv",
+    "mtp_10k": "aeon-ornith-1.0-35b-nvfp4-aeon-mtp-temp06-llamacpp-ctx262k-prompt10k-gen1024-20260628-101704.csv",
+    "mtp_200k": "aeon-ornith-1.0-35b-nvfp4-aeon-mtp-temp06-llamacpp-ctx262k-prompt200k-gen1024-20260628-101715.csv",
 }
 
 
@@ -83,6 +83,11 @@ def fmt_one(value: float) -> str:
     return str(Decimal(str(value)).quantize(Decimal("0.1"), rounding=ROUND_HALF_UP))
 
 
+def fmt_signed_one(value: float) -> str:
+    sign = "+" if value >= 0 else ""
+    return f"{sign}{fmt_one(value)}"
+
+
 def fmt_seconds(value: float) -> str:
     return f"{fmt_one(value)}s"
 
@@ -115,13 +120,13 @@ def load_chart_rows() -> tuple[list[dict[str, object]], dict[str, str]]:
         174588,
     )
     mtp_10k_timing = read_native_timing(
-        "s-batman/Ornith-1.0-35B-NVFP4-MTP-GGUF",
-        "ornith-1.0-35b-NVFP4_MOE-MTP.gguf",
+        "AEON-7/Ornith-1.0-35B-AEON-Ultimate-Uncensored-NVFP4",
+        "aeon-ornith-1.0-35b-nvfp4-aeon-mtp.gguf",
         8905,
     )
     mtp_200k_timing = read_native_timing(
-        "s-batman/Ornith-1.0-35B-NVFP4-MTP-GGUF",
-        "ornith-1.0-35b-NVFP4_MOE-MTP.gguf",
+        "AEON-7/Ornith-1.0-35B-AEON-Ultimate-Uncensored-NVFP4",
+        "aeon-ornith-1.0-35b-nvfp4-aeon-mtp.gguf",
         174588,
     )
 
@@ -151,7 +156,7 @@ def load_chart_rows() -> tuple[list[dict[str, object]], dict[str, str]]:
         {
             "group": "10K prompt",
             "detail": f'{int(fnum(mtp_10k["prompt_tokens"])):,} prompt tokens',
-            "runtime": "Native NVFP4+MTP",
+            "runtime": "Native AEON+MTP",
             "value": fnum(mtp_10k_timing["generation_tps"]),
             "metric": "decode",
             "wall_tps": fnum(mtp_10k["wall_completion_tps"]),
@@ -185,7 +190,7 @@ def load_chart_rows() -> tuple[list[dict[str, object]], dict[str, str]]:
         {
             "group": "200K prompt",
             "detail": f'{int(fnum(mtp_200k["prompt_tokens"])):,} prompt tokens',
-            "runtime": "Native NVFP4+MTP",
+            "runtime": "Native AEON+MTP",
             "value": fnum(mtp_200k_timing["generation_tps"]),
             "metric": "decode",
             "wall_tps": fnum(mtp_200k["wall_completion_tps"]),
@@ -198,8 +203,8 @@ def load_chart_rows() -> tuple[list[dict[str, object]], dict[str, str]]:
 
     notes = {
         "cold_10k": fmt_one(fnum(docker_10k_cold["wall_completion_tps"])),
-        "mtp_10k_lift": fmt_one((fnum(mtp_10k_timing["generation_tps"]) / fnum(gguf_10k_timing["generation_tps"]) - 1) * 100),
-        "mtp_200k_lift": fmt_one((fnum(mtp_200k_timing["generation_tps"]) / fnum(gguf_200k_timing["generation_tps"]) - 1) * 100),
+        "mtp_10k_lift": fmt_signed_one((fnum(mtp_10k_timing["generation_tps"]) / fnum(gguf_10k_timing["generation_tps"]) - 1) * 100),
+        "mtp_200k_lift": fmt_signed_one((fnum(mtp_200k_timing["generation_tps"]) / fnum(gguf_200k_timing["generation_tps"]) - 1) * 100),
         "docker_200k_lift": fmt_one((fnum(docker_200k["wall_completion_tps"]) / fnum(gguf_200k["wall_completion_tps"]) - 1) * 100),
         "native_200k_decode": fmt_one(fnum(gguf_200k_timing["generation_tps"])),
         "mtp_10k_decode": fmt_one(fnum(mtp_10k_timing["generation_tps"])),
@@ -286,8 +291,8 @@ def render_svg(rows: list[dict[str, object]], notes: dict[str, str]) -> Path:
 
     note_y = 828
     parts.append(svg_text(72, note_y, "Do not compare Docker bars as decode speed: vLLM only gave us full request wall timing for this run.", class_="note"))
-    parts.append(svg_text(72, note_y + 34, f'MTP lifted native decode by +{notes["mtp_10k_lift"]}% at 10K and +{notes["mtp_200k_lift"]}% at 200K; 200K MTP wall was {notes["mtp_200k_wall"]} tok/s after long prefill.', class_="note"))
-    parts.append(svg_text(72, note_y + 68, f'Greedy warm 10K MTP tuning separately reached 152.7 decode tok/s / 150.2 full-wall tok/s; chart uses temp=0.6 for fairness.', class_="note"))
+    parts.append(svg_text(72, note_y + 34, f'AEON-trunk MTP changed native decode by {notes["mtp_10k_lift"]}% at 10K and {notes["mtp_200k_lift"]}% at 200K; 200K wall was {notes["mtp_200k_wall"]} tok/s after long prefill.', class_="note"))
+    parts.append(svg_text(72, note_y + 68, f'10K tuning with draft-mtp n_max=2 reached 133.7 decode tok/s; chart bars use one temp=0.6 n_max=3+ngram profile.', class_="note"))
     parts.append(svg_text(72, note_y + 102, f'Docker first 10K request was {notes["cold_10k"]} tok/s because Triton JIT compilation landed in the timed request.', class_="note"))
     parts.append(svg_text(72, height - 42, "Source CSVs: results/rtx-5090, prompt hashes match for the 10K and 200K fixtures.", class_="small"))
     parts.append(svg_text(width - 72, height - 42, "neko-legends/nvidia-local-llm-profiles", class_="small", text_anchor="end"))
@@ -381,8 +386,8 @@ def render_png(rows: list[dict[str, object]], notes: dict[str, str]) -> Path:
 
     note_y = 814
     draw.text((72, note_y), "Do not compare Docker bars as decode speed: vLLM only gave us full request wall timing for this run.", fill="#cdd5dd", font=note_font)
-    draw.text((72, note_y + 38), f'MTP lifted native decode by +{notes["mtp_10k_lift"]}% at 10K and +{notes["mtp_200k_lift"]}% at 200K; 200K MTP wall was {notes["mtp_200k_wall"]} tok/s after long prefill.', fill="#cdd5dd", font=note_font)
-    draw.text((72, note_y + 76), "Greedy warm 10K MTP tuning separately reached 152.7 decode tok/s / 150.2 full-wall tok/s; chart uses temp=0.6 for fairness.", fill="#cdd5dd", font=note_font)
+    draw.text((72, note_y + 38), f'AEON-trunk MTP changed native decode by {notes["mtp_10k_lift"]}% at 10K and {notes["mtp_200k_lift"]}% at 200K; 200K wall was {notes["mtp_200k_wall"]} tok/s after long prefill.', fill="#cdd5dd", font=note_font)
+    draw.text((72, note_y + 76), "10K tuning with draft-mtp n_max=2 reached 133.7 decode tok/s; chart bars use one temp=0.6 n_max=3+ngram profile.", fill="#cdd5dd", font=note_font)
     draw.text((72, note_y + 114), f'Docker first 10K request was {notes["cold_10k"]} tok/s because Triton JIT compilation landed in the timed request.', fill="#cdd5dd", font=note_font)
     draw.text((72, height - 56), "Source CSVs: results/rtx-5090, prompt hashes match for the 10K and 200K fixtures.", fill=MUTED, font=small_font)
     repo = "neko-legends/nvidia-local-llm-profiles"

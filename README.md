@@ -216,19 +216,21 @@ Official GGUF mirror and model card:
 [neko-legends/Ornith-1.0-35B-AEON-Ultimate-Uncensored-NVFP4-GGUF-MTP](https://huggingface.co/neko-legends/Ornith-1.0-35B-AEON-Ultimate-Uncensored-NVFP4-GGUF-MTP).
 
 - Native GGUF 10k: **133.0 decode tok/s**, 106.0 full-wall tok/s after 1.9s prefill.
-- Native NVFP4+MTP 10k: **137.9 decode tok/s** at temp=0.6, 106.8 full-wall tok/s after 2.0s prefill.
+- Native AEON+MTP 10k: **131.5 decode tok/s** at temp=0.6, 101.5 full-wall tok/s after 2.2s prefill.
 - Native GGUF 200k: **82.1 decode tok/s**, 18.9 full-wall tok/s after 41.0s prefill.
-- Native NVFP4+MTP 200k: **90.4 decode tok/s** at temp=0.6, 16.4 full-wall tok/s after 50.3s prefill.
+- Native AEON+MTP 200k: **86.0 decode tok/s** at temp=0.6, 15.9 full-wall tok/s after 52.1s prefill.
 - Docker/vLLM finished the 200k full request faster in this run, but only
   full-wall timing was captured for Docker.
-- MTP note: the working MTP artifact is
-  [s-batman/Ornith-1.0-35B-NVFP4-MTP-GGUF](https://huggingface.co/s-batman/Ornith-1.0-35B-NVFP4-MTP-GGUF),
-  which grafts a Qwen3.6 MTP block into an Ornith NVFP4 GGUF. AEON's
+- MTP note: `aeon-ornith-1.0-35b-nvfp4-aeon-mtp.gguf` uses the AEON Ultimate
+  Uncensored NVFP4 trunk/body and a compatible grafted MTP block. AEON's
   compressed-tensors safetensors release advertises MTP in config metadata, but
   the downloaded tensors did not contain the `blk.40.*` MTP weights.
-- Greedy tuning note: with `draft-mtp,ngram-mod`, `n_max=3`, q4 target/draft
-  KV, and temp=0, the warm 10k pass reached **152.7 decode tok/s** and
-  **150.2 full-wall tok/s**.
+- Tuning note: with `draft-mtp`, `n_max=2`, q4 target/draft KV, and temp=0.6,
+  the 10k pass reached **133.7 decode tok/s** and **104.0 full-wall tok/s**.
+- Censorship smoke: the AEON+MTP GGUF answered Tiananmen, Xinjiang/Uyghur
+  detention reporting, and Falun Gong prompts without refusal/evasion markers.
+  Raw output:
+  `results/rtx-5090/aeon-ornith-1.0-35b-nvfp4-aeon-mtp-censorship-smoke-20260628.json`.
 
 ### Qwen3.6 35B Local Variants
 

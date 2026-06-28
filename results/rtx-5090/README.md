@@ -101,11 +101,11 @@ compatibility baseline rather than the model's likely ceiling.
 
 Two-point comparison only, one measured run per context. The Docker rows use
 vLLM with the original compressed-tensors NVFP4 model. The base native rows use
-the converted GGUF file:
-`neko-legends/Ornith-1.0-35B-AEON-Ultimate-Uncensored-NVFP4-GGUF-MTP/aeon-ornith-1.0-35b-nvfp4.gguf`.
-The MTP rows use
-`s-batman/Ornith-1.0-35B-NVFP4-MTP-GGUF/ornith-1.0-35b-NVFP4_MOE-MTP.gguf`,
-which grafts a Qwen3.6 MTP block into an Ornith NVFP4 GGUF.
+a local base-only GGUF conversion for comparison. The MTP rows use
+`neko-legends/Ornith-1.0-35B-AEON-Ultimate-Uncensored-NVFP4-GGUF-MTP/aeon-ornith-1.0-35b-nvfp4-aeon-mtp.gguf`,
+which keeps the AEON Ultimate Uncensored NVFP4 trunk/body and grafts a compatible
+MTP block because the AEON safetensors release did not include `blk.40.*` MTP
+tensors.
 Official GGUF mirror and model card:
 [neko-legends/Ornith-1.0-35B-AEON-Ultimate-Uncensored-NVFP4-GGUF-MTP](https://huggingface.co/neko-legends/Ornith-1.0-35B-AEON-Ultimate-Uncensored-NVFP4-GGUF-MTP).
 
@@ -114,10 +114,10 @@ Official GGUF mirror and model card:
 | Docker vLLM, first 10k request | 10k | 8,905 | 13.7 | n/a | n/a | 75.0s | 244W | 44C |
 | Docker vLLM, warm 10k rerun | 10k | 8,905 | 46.6 | n/a | n/a | 22.0s | 147W | 42C |
 | Native GGUF llama.cpp | 10k | 8,905 | 106.0 | 133.0 | 1.9s | 9.7s | 224W | 44C |
-| Native NVFP4+MTP llama.cpp, temp=0.6 | 10k | 8,905 | 106.8 | 137.9 | 2.0s | 9.6s | 186W | 42C |
+| Native AEON+MTP llama.cpp, temp=0.6 | 10k | 8,905 | 101.5 | 131.5 | 2.2s | 10.1s | 209W | 41C |
 | Docker vLLM | 200k | 174,588 | 31.5 | n/a | n/a | 32.5s | 270W | 50C |
 | Native GGUF llama.cpp | 200k | 174,588 | 18.9 | 82.1 | 41.0s | 54.1s | 321W | 56C |
-| Native NVFP4+MTP llama.cpp, temp=0.6 | 200k | 174,588 | 16.4 | 90.4 | 50.3s | 62.4s | 225W | 52C |
+| Native AEON+MTP llama.cpp, temp=0.6 | 200k | 174,588 | 15.9 | 86.0 | 52.1s | 64.5s | 231W | 50C |
 
 - **Docker stack:** Docker `vllm/vllm-openai:nightly` -> OpenAI-compatible endpoint at 127.0.0.1:39187
 - **Native stack:** Windows `llama.cpp-b9267-cuda13.1`
@@ -131,15 +131,19 @@ Official GGUF mirror and model card:
   missing `blk.40.*` tensor group from the MTP metadata.
 - **MTP note:** AEON's compressed-tensors safetensors release advertises
   `mtp_num_hidden_layers=1`, but the downloaded `model.safetensors` contained
-  no `mtp`, `nextn`, or `model.layers.40` tensors. The working MTP file comes
-  from the separate grafted GGUF release above.
+  no `mtp`, `nextn`, or `model.layers.40` tensors. The measured MTP file keeps
+  the AEON trunk/body and grafts the required compatible `blk.40.*` MTP tensors.
 - **Native load note:** llama.cpp reported `BLACKWELL_NATIVE_FP4 = 1`, so the
   GGUF path is native Windows FP4 rather than Docker-mediated vLLM.
 - **Timing note:** the native GGUF `18.9 tok/s` 200k row is full-request wall
   throughput, not decode speed and not model warmup. llama.cpp reported
   **82.1 tok/s generation** after **41.0s prompt prefill** for that same run.
-- **Greedy tuning note:** at temp=0, the tuned MTP profile reached **152.7
-  decode tok/s** and **150.2 full-wall tok/s** on the warm 10k pass.
+- **Tuning note:** with `draft-mtp`, `--spec-draft-n-max 2`, and temp=0.6, the
+  10k pass reached **133.7 decode tok/s** and **104.0 full-wall tok/s**.
+- **Censorship smoke:** the AEON+MTP GGUF answered Tiananmen, Xinjiang/Uyghur
+  detention reporting, and Falun Gong prompts without refusal/evasion markers.
+  Raw output:
+  `results/rtx-5090/aeon-ornith-1.0-35b-nvfp4-aeon-mtp-censorship-smoke-20260628.json`.
 - **Prompt SHA256:** 10k `785c5b31d1ce77612431b1289c0a097ed51ab1a6d4a07bccfb7a70f59df55f94`; 200k `a794ca243983eb3387bec6728db4b0c72a99ee2a98cfee7223269708e4ae228c`
 - **Chart:** `assets/images/aeon-ornith-windows-docker-vs-gguf.png`; native
   GGUF bars show llama.cpp decode speed, while Docker/vLLM bars are labeled as
