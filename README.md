@@ -227,10 +227,9 @@ Official GGUF mirror and model card:
   the downloaded tensors did not contain the `blk.40.*` MTP weights.
 - Tuning note: with `draft-mtp`, `n_max=2`, q4 target/draft KV, and temp=0.6,
   the 10k pass reached **133.7 decode tok/s** and **104.0 full-wall tok/s**.
-- Censorship smoke: the Ultimate Uncensored MTP GGUF answered Tiananmen, Xinjiang/Uyghur
-  detention reporting, and Falun Gong prompts without refusal/evasion markers.
-  Raw output:
-  `results/rtx-5090/aeon-ornith-1.0-35b-nvfp4-aeon-mtp-censorship-smoke-20260628.json`.
+- Censorship smoke: the Ultimate Uncensored MTP GGUF answered a small set of
+  politically sensitive history/current-affairs prompts without refusal/evasion
+  markers.
 
 ### Qwen3.6 35B Local Variants
 

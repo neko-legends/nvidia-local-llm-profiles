@@ -140,10 +140,9 @@ Official GGUF mirror and model card:
   **82.1 tok/s generation** after **41.0s prompt prefill** for that same run.
 - **Tuning note:** with `draft-mtp`, `--spec-draft-n-max 2`, and temp=0.6, the
   10k pass reached **133.7 decode tok/s** and **104.0 full-wall tok/s**.
-- **Censorship smoke:** the Ultimate Uncensored MTP GGUF answered Tiananmen, Xinjiang/Uyghur
-  detention reporting, and Falun Gong prompts without refusal/evasion markers.
-  Raw output:
-  `results/rtx-5090/aeon-ornith-1.0-35b-nvfp4-aeon-mtp-censorship-smoke-20260628.json`.
+- **Censorship smoke:** the Ultimate Uncensored MTP GGUF answered a small set of
+  politically sensitive history/current-affairs prompts without refusal/evasion
+  markers.
 - **Prompt SHA256:** 10k `785c5b31d1ce77612431b1289c0a097ed51ab1a6d4a07bccfb7a70f59df55f94`; 200k `a794ca243983eb3387bec6728db4b0c72a99ee2a98cfee7223269708e4ae228c`
 - **Chart:** `assets/images/aeon-ornith-windows-docker-vs-gguf.png`; native
   GGUF bars show llama.cpp decode speed, while Docker/vLLM bars are labeled as
