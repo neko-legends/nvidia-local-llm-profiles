@@ -1,0 +1,67 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1680" height="900" viewBox="0 0 1680 900">
+<style>
+text{font-family:Segoe UI,Arial,sans-serif;letter-spacing:0}
+.title{fill:#edf3f7;font-size:40px;font-weight:750}
+.subtitle{fill:#bcc6cf;font-size:20px}
+.group{fill:#edf3f7;font-size:24px;font-weight:750}
+.runtime{fill:#edf3f7;font-size:20px;font-weight:700}
+.detail{fill:#8f9aa6;font-size:15px}
+.value{fill:#edf3f7;font-size:22px;font-weight:750}
+.small{fill:#a8b2bd;font-size:16px}
+.note{fill:#cdd5dd;font-size:18px}
+.axis{fill:#9ca7b2;font-size:15px}
+</style>
+<rect width="1680" height="900" fill="#101317"/>
+<rect x="492" y="190" width="1090" height="438" rx="10" fill="#181e25"/>
+<text x="72.0" y="78.0" class="title">AEON Ornith NVFP4 on Windows</text>
+<text x="72.0" y="118.0" class="subtitle">Docker vLLM compressed-tensors vs native GGUF llama.cpp on RTX 5090</text>
+<text x="72.0" y="154.0" class="small">Native GGUF bars show llama.cpp decode speed. Docker/vLLM bars are full-wall proxy because the decode split was not captured.</text>
+<line x1="520.0" y1="214" x2="520.0" y2="652" stroke="#303842" stroke-width="1"/>
+<text x="520.0" y="684.0" class="axis" text-anchor="middle">0</text>
+<line x1="648.8" y1="214" x2="648.8" y2="652" stroke="#303842" stroke-width="1"/>
+<text x="648.8" y="684.0" class="axis" text-anchor="middle">20</text>
+<line x1="777.5" y1="214" x2="777.5" y2="652" stroke="#303842" stroke-width="1"/>
+<text x="777.5" y="684.0" class="axis" text-anchor="middle">40</text>
+<line x1="906.2" y1="214" x2="906.2" y2="652" stroke="#303842" stroke-width="1"/>
+<text x="906.2" y="684.0" class="axis" text-anchor="middle">60</text>
+<line x1="1035.0" y1="214" x2="1035.0" y2="652" stroke="#303842" stroke-width="1"/>
+<text x="1035.0" y="684.0" class="axis" text-anchor="middle">80</text>
+<line x1="1163.8" y1="214" x2="1163.8" y2="652" stroke="#303842" stroke-width="1"/>
+<text x="1163.8" y="684.0" class="axis" text-anchor="middle">100</text>
+<line x1="1292.5" y1="214" x2="1292.5" y2="652" stroke="#303842" stroke-width="1"/>
+<text x="1292.5" y="684.0" class="axis" text-anchor="middle">120</text>
+<line x1="1421.2" y1="214" x2="1421.2" y2="652" stroke="#303842" stroke-width="1"/>
+<text x="1421.2" y="684.0" class="axis" text-anchor="middle">140</text>
+<line x1="1550.0" y1="214" x2="1550.0" y2="652" stroke="#303842" stroke-width="1"/>
+<text x="1550.0" y="684.0" class="axis" text-anchor="middle">160</text>
+<text x="72.0" y="218.0" class="group">10K prompt</text>
+<text x="72.0" y="244.0" class="detail">8,905 prompt tokens</text>
+<text x="492.0" y="264.0" class="runtime" text-anchor="end">Docker / vLLM</text>
+<rect x="520" y="232" width="299.8" height="38" rx="5" fill="#f2a23a" opacity="0.97"/>
+<rect x="520" y="232" width="299.8" height="38" rx="5" fill="none" stroke="#ffd99c" stroke-opacity="0.72"/>
+<text x="833.8" y="258.0" class="value">46.6 wall proxy tok/s</text>
+<text x="833.8" y="284.0" class="small">22.0s wall; decode split n/a</text>
+<text x="492.0" y="350.0" class="runtime" text-anchor="end">Native GGUF / llama.cpp</text>
+<rect x="520" y="318" width="856.2" height="38" rx="5" fill="#42d0c4" opacity="0.97"/>
+<rect x="520" y="318" width="856.2" height="38" rx="5" fill="none" stroke="#bdf9f4" stroke-opacity="0.72"/>
+<text x="1390.2" y="344.0" class="value">133.0 decode tok/s</text>
+<text x="1390.2" y="370.0" class="small">9.7s wall; 106.0 wall tok/s; prefill 1.9s</text>
+<text x="72.0" y="468.0" class="group">200K prompt</text>
+<text x="72.0" y="494.0" class="detail">174,588 prompt tokens</text>
+<text x="492.0" y="514.0" class="runtime" text-anchor="end">Docker / vLLM</text>
+<rect x="520" y="482" width="202.7" height="38" rx="5" fill="#f2a23a" opacity="0.97"/>
+<rect x="520" y="482" width="202.7" height="38" rx="5" fill="none" stroke="#ffd99c" stroke-opacity="0.72"/>
+<text x="736.7" y="508.0" class="value">31.5 wall proxy tok/s</text>
+<text x="736.7" y="534.0" class="small">32.5s wall; decode split n/a</text>
+<text x="492.0" y="600.0" class="runtime" text-anchor="end">Native GGUF / llama.cpp</text>
+<rect x="520" y="568" width="528.5" height="38" rx="5" fill="#42d0c4" opacity="0.97"/>
+<rect x="520" y="568" width="528.5" height="38" rx="5" fill="none" stroke="#bdf9f4" stroke-opacity="0.72"/>
+<text x="1062.5" y="594.0" class="value">82.1 decode tok/s</text>
+<text x="1062.5" y="620.0" class="small">54.1s wall; 18.9 wall tok/s; prefill 41.0s</text>
+<text x="72.0" y="720.0" class="note">Do not compare Docker bars as decode speed: vLLM only gave us full request wall timing for this run.</text>
+<text x="72.0" y="754.0" class="note">200K native GGUF decode was 82.1 tok/s; full-wall was 18.9 tok/s after 41.0s prompt prefill.</text>
+<text x="72.0" y="788.0" class="note">Docker/vLLM still finished the 200K request faster wall-time here: +66.4% wall throughput.</text>
+<text x="72.0" y="822.0" class="note">Docker first 10K request was 13.7 tok/s because Triton JIT compilation landed in the timed request.</text>
+<text x="72.0" y="858.0" class="small">Source CSVs: results/rtx-5090, prompt hashes match for the 10K and 200K fixtures.</text>
+<text x="1608.0" y="858.0" class="small" text-anchor="end">neko-legends/nvidia-local-llm-profiles</text>
+</svg>

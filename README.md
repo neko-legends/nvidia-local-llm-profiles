@@ -6,8 +6,6 @@ integration for running high-performance local inference on NVIDIA Blackwell.
 Hand this repo to a coding agent and it can download the model, start a local
 OpenAI-compatible endpoint, wire Hermes, run benchmarks, and collect the proof.
 
-![RTX 5090 Qwopus long-context throughput](assets/images/rtx-5090-qwopus-context-ladder.png)
-
 **Current focus:** Qwopus3.6-27B-Coder-MTP Q5_K_M via llama.cpp, plus AEON
 Qwen3.6 27B Multimodal NVFP4 MTP-XS via vLLM.
 
@@ -167,7 +165,7 @@ Endpoint defaults:
 ## RTX 5090 Benchmark Results
 
 **GPU:** RTX 5090 32GB — **Driver:** 610.62 — **Dates:** 2026-06-22 to
-2026-06-25
+2026-06-27
 
 BookContext prompt ladder — gen=1024 tok — temperature=0 — 3 measured runs
 
@@ -176,6 +174,8 @@ BookContext prompt ladder — gen=1024 tok — temperature=0 — 3 measured runs
 ### Qwopus3.6-27B-Coder-MTP-Q5_K_M
 
 llama.cpp b9761 — ctx=256k — MTP n=2
+
+![RTX 5090 Qwopus long-context throughput](assets/images/rtx-5090-qwopus-context-ladder.png)
 
 | Context | avg tok/s | Power | Temp |
 | ---: | ---: | ---: | ---: |
@@ -203,6 +203,20 @@ NVFP4 throughput. A possible culprit is the modelopt NVFP4 path on this specific
 Windows/container/driver stack rather than a simple VRAM limit.
 
 Full per-run CSVs: `results/rtx-5090/`
+
+### AEON Ornith 1.0 35B NVFP4 — Docker vLLM vs native GGUF
+
+![AEON Ornith NVFP4 on Windows, Docker vLLM vs native GGUF llama.cpp](assets/images/aeon-ornith-windows-docker-vs-gguf.png)
+
+Native Windows GGUF loaded successfully through llama.cpp with
+`BLACKWELL_NATIVE_FP4 = 1`. The chart uses native GGUF decode speed where
+llama.cpp exposed the split. Docker/vLLM bars are labeled as full-request wall
+proxies because that run did not capture a separate decode-only number.
+
+- Native GGUF 10k: **133.0 decode tok/s**, 106.0 full-wall tok/s after 1.9s prefill.
+- Native GGUF 200k: **82.1 decode tok/s**, 18.9 full-wall tok/s after 41.0s prefill.
+- Docker/vLLM finished the 200k full request faster in this run, but only
+  full-wall timing was captured for Docker.
 
 ### Qwen3.6 35B Local Variants
 
@@ -415,6 +429,7 @@ scripts/
     bench-context-ladder.ps1         full context ladder sweep
     bench-openai-chat-endpoint.ps1   single endpoint benchmark
     download-hf-artifact.py          HF download helper
+    render-aeon-ornith-windows-comparison-chart.py  AEON Ornith chart
     render-qwen35-moe-comparison-chart.py     MoE vs Qwopus chart
 docs/
   models/qwopus3.6-27b-coder-mtp-gguf.md   model notes

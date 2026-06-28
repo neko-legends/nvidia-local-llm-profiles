@@ -2,7 +2,7 @@
 
 - **GPU:** NVIDIA GeForce RTX 5090 32GB
 - **Driver:** 610.62
-- **Dates:** 2026-06-22 to 2026-06-25
+- **Dates:** 2026-06-22 to 2026-06-27
 - **Prompt style:** BookContext (synthetic long-document with continuity sections)
 - **Generation:** 1024 tokens, temperature=0, seed=1234. Full ladders use 3
   measured runs per context; two-point smoke tests may use 1 measured run.
@@ -14,6 +14,8 @@
 ![RTX 5090 long-context throughput comparison](../../assets/images/rtx-5090-context-ladder-comparison.png)
 
 ![RTX 5090 local coding-model throughput with automated and manual Studio rows](../../assets/images/rtx-5090-qwen35-moe-vs-qwopus.png)
+
+![AEON Ornith NVFP4 on Windows, Docker vLLM vs native GGUF llama.cpp](../../assets/images/aeon-ornith-windows-docker-vs-gguf.png)
 
 ---
 
@@ -94,6 +96,37 @@ Windows host. The server reported a 200k max context and about 214k GPU KV-cache
 tokens available. Throughput was lower than hoped for NVFP4 on this Windows
 setup, so these results should be read as a Windows driver/container/NVFP4
 compatibility baseline rather than the model's likely ceiling.
+
+### AEON Ornith 1.0 35B Ultimate Uncensored NVFP4 - Windows Docker vs native GGUF
+
+Two-point comparison only, one measured run per context. The Docker rows use
+vLLM with the original compressed-tensors NVFP4 model. The native rows use the
+converted GGUF file:
+`AEON-7/Ornith-1.0-35B-AEON-Ultimate-Uncensored-NVFP4-GGUF/aeon-ornith-1.0-35b-nvfp4.gguf`.
+
+| Runtime | Context target | Prompt tokens | Full-request tok/s | Generation tok/s | Prompt prefill | Wall time | Power | Temp |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+| Docker vLLM, first 10k request | 10k | 8,905 | 13.7 | n/a | n/a | 75.0s | 244W | 44C |
+| Docker vLLM, warm 10k rerun | 10k | 8,905 | 46.6 | n/a | n/a | 22.0s | 147W | 42C |
+| Native GGUF llama.cpp | 10k | 8,905 | 106.0 | 133.0 | 1.9s | 9.7s | 224W | 44C |
+| Docker vLLM | 200k | 174,588 | 31.5 | n/a | n/a | 32.5s | 270W | 50C |
+| Native GGUF llama.cpp | 200k | 174,588 | 18.9 | 82.1 | 41.0s | 54.1s | 321W | 56C |
+
+- **Docker stack:** Docker `vllm/vllm-openai:nightly` -> OpenAI-compatible endpoint at 127.0.0.1:39187
+- **Native stack:** Windows `llama.cpp-b9267-cuda13.1` -> OpenAI-compatible endpoint at 127.0.0.1:39192
+- **Native flags:** `--gpu-layers all --ctx-size 262144 --cache-type-k q4_0 --cache-type-v q4_0 --flash-attn on`
+- **Conversion note:** the successful GGUF conversion used upstream
+  `convert_hf_to_gguf.py --no-mtp`; without `--no-mtp`, llama.cpp expected a
+  missing `blk.40.*` tensor group from the MTP metadata.
+- **Native load note:** llama.cpp reported `BLACKWELL_NATIVE_FP4 = 1`, so the
+  GGUF path is native Windows FP4 rather than Docker-mediated vLLM.
+- **Timing note:** the native GGUF `18.9 tok/s` 200k row is full-request wall
+  throughput, not decode speed and not model warmup. llama.cpp reported
+  **82.1 tok/s generation** after **41.0s prompt prefill** for that same run.
+- **Prompt SHA256:** 10k `785c5b31d1ce77612431b1289c0a097ed51ab1a6d4a07bccfb7a70f59df55f94`; 200k `a794ca243983eb3387bec6728db4b0c72a99ee2a98cfee7223269708e4ae228c`
+- **Chart:** `assets/images/aeon-ornith-windows-docker-vs-gguf.png`; native
+  GGUF bars show llama.cpp decode speed, while Docker/vLLM bars are labeled as
+  full-request wall proxies because the vLLM decode split was not captured.
 
 ### NVIDIA Qwen3.6 35B A3B NVFP4 MoE — vLLM nightly — ctx=200k — fp8 KV
 
