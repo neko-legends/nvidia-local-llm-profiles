@@ -33,3 +33,11 @@ The launcher follows the model card's stock vLLM settings: compressed-tensors
 NVFP4, full 256k context, `--mamba-cache-dtype float32`, qwen3 reasoning parser,
 prefix caching, and trusted remote code. The model card notes that NVFP4 requires
 a Blackwell GPU.
+
+On Windows Docker, serving from the default bind mount can make safetensors load
+through Docker's 9P path. For faster startup, stage the downloaded snapshot into
+the Docker volume `aeon-ornith-35b-nvfp4-model` and launch with
+`MODEL_VOLUME=aeon-ornith-35b-nvfp4-model`.
+
+Benchmark caveat: the first measured request after server startup can include
+Triton kernel JIT latency. Use a warmed run for steady-state 10k decode numbers.
