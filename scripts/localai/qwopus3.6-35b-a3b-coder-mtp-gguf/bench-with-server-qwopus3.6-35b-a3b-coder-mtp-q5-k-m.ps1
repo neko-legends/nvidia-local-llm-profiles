@@ -3,7 +3,8 @@ param(
     [string]$ModelPath = "",
     [int]$Port = 39191,
     [int]$ContextSize = 200000,
-    [int[]]$PromptTokenTargets = @(10000, 200000)
+    [int[]]$PromptTokenTargets = @(10000, 200000),
+    [switch]$EnableThinking
 )
 
 $ErrorActionPreference = "Stop"
@@ -44,6 +45,10 @@ $stamp = Get-Date -Format "yyyyMMdd-HHmmss"
 $outLog = Join-Path $repoRoot "logs\qwopus35-q5-bench-server-$stamp.out.log"
 $errLog = Join-Path $repoRoot "logs\qwopus35-q5-bench-server-$stamp.err.log"
 $modelAlias = "qwopus3.6-35b-a3b-coder-mtp-q5-k-m"
+$casePrefix = "qwopus3.6-35b-a3b-coder-mtp-q5-k-m-llamacpp-ctx200k"
+if (-not $EnableThinking) {
+    $casePrefix += "-request-nothink"
+}
 
 if (-not (Test-Path -LiteralPath $ModelPath)) {
     throw "Model not found at $ModelPath"
@@ -69,7 +74,6 @@ $args = @(
     "--jinja",
     "--metrics",
     "--slots",
-    "--reasoning", "off",
     "--spec-type", "ngram-mod,draft-mtp",
     "--spec-draft-n-max", "2",
     "--spec-draft-p-min", "0.0",
@@ -77,6 +81,10 @@ $args = @(
     "--spec-ngram-mod-n-min", "48",
     "--spec-ngram-mod-n-max", "64"
 )
+if ($EnableThinking) {
+    $args += "--reasoning"
+    $args += "on"
+}
 
 $process = $null
 try {
@@ -118,17 +126,23 @@ try {
         throw "llama-server did not become ready. Check $errLog"
     }
 
-    & $bench `
-        -BaseUrl "http://127.0.0.1:$Port/v1" `
-        -Model $modelAlias `
-        -CasePrefix "qwopus3.6-35b-a3b-coder-mtp-q5-k-m-llamacpp-ctx200k" `
-        -GpuIndex 0 `
-        -PromptTokenTargets $PromptTokenTargets `
-        -MaxTokens 1024 `
-        -Runs 1 `
-        -WarmupRuns 0 `
-        -Temperature 0 `
-        -Seed 1234
+    $benchArgs = @(
+        "-BaseUrl", "http://127.0.0.1:$Port/v1",
+        "-Model", $modelAlias,
+        "-CasePrefix", $casePrefix,
+        "-GpuIndex", "0",
+        "-PromptTokenTargets", $PromptTokenTargets,
+        "-MaxTokens", "1024",
+        "-Runs", "1",
+        "-WarmupRuns", "0",
+        "-Temperature", "0",
+        "-Seed", "1234"
+    )
+    if (-not $EnableThinking) {
+        $benchArgs += "-DisableThinking"
+    }
+
+    & $bench @benchArgs
 
     if ($LASTEXITCODE -ne 0) {
         throw "Benchmark failed with code $LASTEXITCODE"

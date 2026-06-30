@@ -13,6 +13,7 @@ param(
     [string]$PromptFile = "",
     [string]$PromptOutFile = "",
     [switch]$PromptOnly,
+    [switch]$DisableThinking,
     [int]$TargetPromptTokens = 0,
     [ValidateSet("Default", "BookContext")]
     [string]$PromptStyle = "Default"
@@ -173,14 +174,18 @@ function Invoke-ChatRun {
     )
 
     $before = Get-GpuSnapshot -Index $GpuIndex
-    $body = @{
+    $bodyObject = @{
         model = $Model
         messages = @(@{ role = "user"; content = $Prompt })
         max_tokens = $MaxTokens
         temperature = $Temperature
         seed = $Seed
         stream = $false
-    } | ConvertTo-Json -Depth 8
+    }
+    if ($DisableThinking) {
+        $bodyObject.chat_template_kwargs = @{ enable_thinking = $false }
+    }
+    $body = $bodyObject | ConvertTo-Json -Depth 10
 
     $startedAt = Get-Date
     $watch = [System.Diagnostics.Stopwatch]::StartNew()

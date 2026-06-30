@@ -8,7 +8,8 @@ param(
     [int]$Runs = 3,
     [int]$WarmupRuns = 0,
     [double]$Temperature = 0.0,
-    [int]$Seed = 1234
+    [int]$Seed = 1234,
+    [switch]$DisableThinking
 )
 
 $ErrorActionPreference = "Stop"
@@ -63,19 +64,28 @@ foreach ($target in $PromptTokenTargets) {
     Write-Host "Context ladder target: $target prompt tokens" -ForegroundColor Cyan
     Write-Host "Context started: $($contextStartedAt.ToString('o'))"
 
-    & powershell -NoProfile -ExecutionPolicy Bypass -File $bench `
-        -BaseUrl $BaseUrl `
-        -Model $Model `
-        -CaseName $caseName `
-        -GpuIndex $GpuIndex `
-        -MaxTokens $MaxTokens `
-        -Runs $Runs `
-        -WarmupRuns $WarmupRuns `
-        -Temperature $Temperature `
-        -Seed $Seed `
-        -PromptStyle BookContext `
-        -TargetPromptTokens $target `
-        -OutCsv $outCsv
+    $benchArgs = @(
+        "-NoProfile",
+        "-ExecutionPolicy", "Bypass",
+        "-File", $bench,
+        "-BaseUrl", $BaseUrl,
+        "-Model", $Model,
+        "-CaseName", $caseName,
+        "-GpuIndex", "$GpuIndex",
+        "-MaxTokens", "$MaxTokens",
+        "-Runs", "$Runs",
+        "-WarmupRuns", "$WarmupRuns",
+        "-Temperature", "$Temperature",
+        "-Seed", "$Seed",
+        "-PromptStyle", "BookContext",
+        "-TargetPromptTokens", "$target",
+        "-OutCsv", $outCsv
+    )
+    if ($DisableThinking) {
+        $benchArgs += "-DisableThinking"
+    }
+
+    & powershell @benchArgs
     $exitCode = $LASTEXITCODE
 
     $contextTimer.Stop()

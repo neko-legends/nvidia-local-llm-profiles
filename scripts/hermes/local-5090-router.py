@@ -11,6 +11,16 @@ from typing import Any
 
 QWOPUS_MODEL = "qwopus3.6-27b-coder-mtp-q5-k-m"
 QWOPUS35_MODEL = "qwopus3.6-35b-a3b-coder-mtp-q5-k-m"
+QWOPUS35_ALIASES = frozenset(
+    {
+        QWOPUS35_MODEL,
+        "qwopus35",
+        "qwopus-35b",
+        "qwopus35-coder",
+        "qwopus3.6-35b-coder",
+        "qwopus3.6-35b-a3b-coder",
+    }
+)
 DIFFUSION_MODEL = "diffusiongemma"
 ORNITH_MODEL = "ornith-1.0-35b-q4-k-m"
 ORNITH_Q5_MODEL = "ornith-1.0-35b-q5-k-m"
@@ -110,12 +120,6 @@ class Local5090Router(BaseHTTPRequestHandler):
             "qwopus": self.qwopus_base_url,
             "qwopus-coder": self.qwopus_base_url,
             "qwopus-coder-q5": self.qwopus_base_url,
-            QWOPUS35_MODEL: self.qwopus35_base_url,
-            "qwopus35": self.qwopus35_base_url,
-            "qwopus-35b": self.qwopus35_base_url,
-            "qwopus35-coder": self.qwopus35_base_url,
-            "qwopus3.6-35b-coder": self.qwopus35_base_url,
-            "qwopus3.6-35b-a3b-coder": self.qwopus35_base_url,
             DIFFUSION_MODEL: self.diffusiongemma_base_url,
             "diffusiongemma-med": self.diffusiongemma_base_url,
             "diffusiongemma med": self.diffusiongemma_base_url,
@@ -136,7 +140,18 @@ class Local5090Router(BaseHTTPRequestHandler):
             "ornith-aeon-nvfp4": self.aeon_ornith_nvfp4_base_url,
             "ornith-1.0-35b-aeon-nvfp4": self.aeon_ornith_nvfp4_base_url,
         }
+        aliases.update({alias: self.qwopus35_base_url for alias in QWOPUS35_ALIASES})
         return aliases.get(normalize_model(model))
+
+    def _apply_model_request_defaults(self, payload: dict[str, Any]) -> None:
+        if normalize_model(payload.get("model")) not in QWOPUS35_ALIASES:
+            return
+
+        chat_template_kwargs = payload.get("chat_template_kwargs")
+        if not isinstance(chat_template_kwargs, dict):
+            chat_template_kwargs = {}
+            payload["chat_template_kwargs"] = chat_template_kwargs
+        chat_template_kwargs.setdefault("enable_thinking", False)
 
     def _forward_headers(self) -> dict[str, str]:
         blocked = {
@@ -184,6 +199,9 @@ class Local5090Router(BaseHTTPRequestHandler):
         except json.JSONDecodeError:
             self._send_json(400, {"error": {"message": "Request body must be JSON."}})
             return
+        if not isinstance(payload, dict):
+            self._send_json(400, {"error": {"message": "Request body must be a JSON object."}})
+            return
 
         target_base_url = self._target_base_url(normalize_model(payload.get("model")))
         if not target_base_url:
@@ -198,6 +216,9 @@ class Local5090Router(BaseHTTPRequestHandler):
                 },
             )
             return
+
+        self._apply_model_request_defaults(payload)
+        body = json.dumps(payload, separators=(",", ":")).encode("utf-8")
 
         target_url = target_base_url.rstrip("/") + self._proxy_path()
         request = urllib.request.Request(

@@ -22,6 +22,11 @@ DiffusionGemma, AEON Ornith, and GGUF Ornith are served by different local
 endpoints, this repo includes a small local router that exposes one `/v1`
 endpoint for Hermes and routes each request by the `model` field.
 
+For `qwopus3.6-35b-a3b-coder-mtp-q5-k-m`, the router also adds
+`chat_template_kwargs.enable_thinking=false` to chat requests unless the client
+explicitly sets `enable_thinking`. That keeps Qwopus35 in no-thinking mode from
+Hermes without changing the other local models.
+
 Run:
 
 ```bat
@@ -136,12 +141,19 @@ Base URL:     http://127.0.0.1:39190/v1
 Model:        qwopus3.6-35b-a3b-coder-mtp-q5-k-m
 ```
 
+The consolidated `Local 5090` route automatically sends the Qwen chat-template
+no-thinking flag for this model.
+
 Direct endpoint:
 
 ```text
 Base URL:  http://127.0.0.1:39191/v1
 Model:     qwopus3.6-35b-a3b-coder-mtp-q5-k-m
 ```
+
+If you bypass the router and use the direct endpoint from another client, either
+send `chat_template_kwargs.enable_thinking=false` in the request body or run the
+included start script with `THINKING=0`.
 
 ## AEON Qwen3.6 27B Multimodal NVFP4 MTP-XS
 
@@ -220,5 +232,7 @@ For Qwopus3.6 35B Q5_K_M, use port `39191` and model
 - Do not put a real API key in a local no-auth endpoint.
 - Restart Hermes Desktop after changing saved custom provider settings.
 - Keep the `Local 5090` router running when using the consolidated provider.
+- The router intentionally applies the Qwopus35 no-thinking request default only
+  to Qwopus35 aliases, not to Ornith or other reasoning-model profiles.
 - llama.cpp/GGUF startup is usually much faster than vLLM safetensors startup;
   wait for the server log to show that requests are being accepted.

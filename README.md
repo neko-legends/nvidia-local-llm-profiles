@@ -207,14 +207,16 @@ Latest addition:
 
 - `Jackrong/Qwopus3.6-35B-A3B-Coder-MTP-GGUF` Q5_K_M loaded natively at
   `ctx=200000` (`n_ctx=200192`) with q4 target/draft KV,
-  `ngram-mod,draft-mtp`, and `--reasoning off`.
-- No-thinking proof: llama.cpp logs `chat template, thinking = 0`. Use
-  `--reasoning off`; `enable_thinking=false` via chat-template kwargs is
-  deprecated in this llama.cpp build.
-- 10k reference prompt: **143.0 decode tok/s**, 109.1 full-wall tok/s after
+  `ngram-mod,draft-mtp`, and request-level no-thinking.
+- No-thinking proof: on the same server, an auto request produced
+  `reasoning_content`, while a request with
+  `chat_template_kwargs.enable_thinking=false` produced normal content without a
+  reasoning block. The `Local 5090` router now injects that request default for
+  Qwopus35.
+- 10k reference prompt: **149.0 decode tok/s**, 112.8 full-wall tok/s after
   2.1s prefill.
-- 200k reference prompt: **99.2 decode tok/s**, 15.4 full-wall tok/s after
-  55.7s prefill.
+- 200k reference prompt: **100.0 decode tok/s**, 15.4 full-wall tok/s after
+  55.8s prefill.
 - Prompt prefill is the model reading the input prompt into KV cache. No-thinking
   prevents generated reasoning blocks, but it does not skip reading a 200k
   prompt; the fresh 200k run still processed 166,199 new prompt tokens after

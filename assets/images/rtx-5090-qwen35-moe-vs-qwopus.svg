@@ -44,10 +44,10 @@ text{font-family:Segoe UI,Arial,sans-serif;letter-spacing:0}
 <text x="1739.2" y="249.0" class="small">tok/s</text>
 <text x="670.0" y="309.0" class="label" text-anchor="end">Qwopus3.6 35B A3B Coder Q5_K_M</text>
 <text x="670.0" y="331.0" class="detail" text-anchor="end">8,907 prompt tokens; prefill 2.1s</text>
-<rect x="700" y="288" width="686.4" height="34" rx="5" fill="#45d6c9" opacity="0.95"/>
-<rect x="700" y="288" width="686.4" height="34" rx="5" fill="none" stroke="#d9fff8" stroke-opacity="0.50"/>
-<text x="1398.4" y="313.0" class="value">143.0</text>
-<text x="1458.4" y="313.0" class="small">tok/s</text>
+<rect x="700" y="288" width="715.2" height="34" rx="5" fill="#45d6c9" opacity="0.95"/>
+<rect x="700" y="288" width="715.2" height="34" rx="5" fill="none" stroke="#d9fff8" stroke-opacity="0.50"/>
+<text x="1427.2" y="313.0" class="value">149.0</text>
+<text x="1487.2" y="313.0" class="small">tok/s</text>
 <text x="670.0" y="373.0" class="label" text-anchor="end">AEON Ornith NVFP4 base GGUF</text>
 <text x="670.0" y="395.0" class="detail" text-anchor="end">8,905 prompt tokens; prefill 1.9s</text>
 <rect x="700" y="352" width="638.4" height="34" rx="5" fill="#54c7ff" opacity="0.95"/>
@@ -86,11 +86,11 @@ text{font-family:Segoe UI,Arial,sans-serif;letter-spacing:0}
 <text x="1224.2" y="773.0" class="value">106.7</text>
 <text x="1284.2" y="773.0" class="small">tok/s</text>
 <text x="670.0" y="833.0" class="label" text-anchor="end">Qwopus3.6 35B A3B Coder Q5_K_M</text>
-<text x="670.0" y="855.0" class="detail" text-anchor="end">174,590 prompt tokens; prefill 55.7s</text>
-<rect x="700" y="812" width="476.2" height="34" rx="5" fill="#45d6c9" opacity="0.95"/>
-<rect x="700" y="812" width="476.2" height="34" rx="5" fill="none" stroke="#d9fff8" stroke-opacity="0.50"/>
-<text x="1188.2" y="837.0" class="value">99.2</text>
-<text x="1248.2" y="837.0" class="small">tok/s</text>
+<text x="670.0" y="855.0" class="detail" text-anchor="end">174,590 prompt tokens; prefill 55.8s</text>
+<rect x="700" y="812" width="480.0" height="34" rx="5" fill="#45d6c9" opacity="0.95"/>
+<rect x="700" y="812" width="480.0" height="34" rx="5" fill="none" stroke="#d9fff8" stroke-opacity="0.50"/>
+<text x="1192.0" y="837.0" class="value">100.0</text>
+<text x="1252.0" y="837.0" class="small">tok/s</text>
 <text x="670.0" y="897.0" class="label" text-anchor="end">Unsloth Qwen3.6 35B UD-Q4_K_XL</text>
 <text x="670.0" y="919.0" class="detail" text-anchor="end">174,590 prompt tokens; prefill 57.1s</text>
 <rect x="700" y="876" width="429.6" height="34" rx="5" fill="#9d82ff" opacity="0.95"/>
