@@ -10,17 +10,34 @@ from typing import Any
 
 
 QWOPUS_MODEL = "qwopus3.6-27b-coder-mtp-q5-k-m"
-QWOPUS35_MODEL = "qwopus3.6-35b-a3b-coder-mtp-q5-k-m"
-QWOPUS35_ALIASES = frozenset(
+QWOPUS35_Q5_MODEL = "qwopus3.6-35b-a3b-coder-mtp-q5-k-m"
+QWOPUS35_Q4_MODEL = "qwopus3.6-35b-a3b-coder-mtp-q4-k-m"
+QWOPUS35_Q5_ALIASES = frozenset(
     {
-        QWOPUS35_MODEL,
+        QWOPUS35_Q5_MODEL,
         "qwopus35",
         "qwopus-35b",
         "qwopus35-coder",
         "qwopus3.6-35b-coder",
         "qwopus3.6-35b-a3b-coder",
+        "qwopus35-q5",
+        "qwopus-35b-q5",
+        "qwopus35-coder-q5",
+        "qwopus3.6-35b-coder-q5",
+        "qwopus3.6-35b-a3b-coder-q5",
     }
 )
+QWOPUS35_Q4_ALIASES = frozenset(
+    {
+        QWOPUS35_Q4_MODEL,
+        "qwopus35-q4",
+        "qwopus-35b-q4",
+        "qwopus35-coder-q4",
+        "qwopus3.6-35b-coder-q4",
+        "qwopus3.6-35b-a3b-coder-q4",
+    }
+)
+QWOPUS35_NO_THINK_ALIASES = QWOPUS35_Q5_ALIASES | QWOPUS35_Q4_ALIASES
 DIFFUSION_MODEL = "diffusiongemma"
 ORNITH_MODEL = "ornith-1.0-35b-q4-k-m"
 ORNITH_Q5_MODEL = "ornith-1.0-35b-q5-k-m"
@@ -33,6 +50,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--port", type=int, default=39190)
     parser.add_argument("--qwopus-base-url", default="http://127.0.0.1:39182/v1")
     parser.add_argument("--qwopus35-base-url", default="http://127.0.0.1:39191/v1")
+    parser.add_argument("--qwopus35-q4-base-url", default="http://127.0.0.1:39193/v1")
     parser.add_argument("--diffusiongemma-base-url", default="http://127.0.0.1:8890/v1")
     parser.add_argument("--ornith-base-url", default="http://127.0.0.1:39188/v1")
     parser.add_argument("--ornith-q5-base-url", default="http://127.0.0.1:39189/v1")
@@ -49,6 +67,7 @@ class Local5090Router(BaseHTTPRequestHandler):
 
     qwopus_base_url: str
     qwopus35_base_url: str
+    qwopus35_q4_base_url: str
     diffusiongemma_base_url: str
     ornith_base_url: str
     ornith_q5_base_url: str
@@ -74,7 +93,14 @@ class Local5090Router(BaseHTTPRequestHandler):
                         "context_length": 262144,
                     },
                     {
-                        "id": QWOPUS35_MODEL,
+                        "id": QWOPUS35_Q5_MODEL,
+                        "object": "model",
+                        "created": 0,
+                        "owned_by": "Local 5090",
+                        "context_length": 200000,
+                    },
+                    {
+                        "id": QWOPUS35_Q4_MODEL,
                         "object": "model",
                         "created": 0,
                         "owned_by": "Local 5090",
@@ -140,11 +166,12 @@ class Local5090Router(BaseHTTPRequestHandler):
             "ornith-aeon-nvfp4": self.aeon_ornith_nvfp4_base_url,
             "ornith-1.0-35b-aeon-nvfp4": self.aeon_ornith_nvfp4_base_url,
         }
-        aliases.update({alias: self.qwopus35_base_url for alias in QWOPUS35_ALIASES})
+        aliases.update({alias: self.qwopus35_base_url for alias in QWOPUS35_Q5_ALIASES})
+        aliases.update({alias: self.qwopus35_q4_base_url for alias in QWOPUS35_Q4_ALIASES})
         return aliases.get(normalize_model(model))
 
     def _apply_model_request_defaults(self, payload: dict[str, Any]) -> None:
-        if normalize_model(payload.get("model")) not in QWOPUS35_ALIASES:
+        if normalize_model(payload.get("model")) not in QWOPUS35_NO_THINK_ALIASES:
             return
 
         chat_template_kwargs = payload.get("chat_template_kwargs")
@@ -210,7 +237,8 @@ class Local5090Router(BaseHTTPRequestHandler):
                 {
                     "error": {
                         "message": "Unknown local model. Use diffusiongemma or "
-                        f"{QWOPUS_MODEL}, {QWOPUS35_MODEL}, {ORNITH_MODEL}, {ORNITH_Q5_MODEL}, "
+                        f"{QWOPUS_MODEL}, {QWOPUS35_Q5_MODEL}, {QWOPUS35_Q4_MODEL}, "
+                        f"{ORNITH_MODEL}, {ORNITH_Q5_MODEL}, "
                         f"or {AEON_ORNITH_NVFP4_MODEL}."
                     }
                 },
@@ -260,6 +288,7 @@ def main() -> int:
     args = parse_args()
     Local5090Router.qwopus_base_url = args.qwopus_base_url
     Local5090Router.qwopus35_base_url = args.qwopus35_base_url
+    Local5090Router.qwopus35_q4_base_url = args.qwopus35_q4_base_url
     Local5090Router.diffusiongemma_base_url = args.diffusiongemma_base_url
     Local5090Router.ornith_base_url = args.ornith_base_url
     Local5090Router.ornith_q5_base_url = args.ornith_q5_base_url

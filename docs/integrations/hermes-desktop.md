@@ -10,6 +10,7 @@ lists the local model servers:
 
 - `qwopus3.6-27b-coder-mtp-q5-k-m`
 - `qwopus3.6-35b-a3b-coder-mtp-q5-k-m`
+- `qwopus3.6-35b-a3b-coder-mtp-q4-k-m`
 - `diffusiongemma`
 - `aeon-ornith-1.0-35b-nvfp4`
 - `ornith-1.0-35b-q4-k-m`
@@ -22,7 +23,8 @@ DiffusionGemma, AEON Ornith, and GGUF Ornith are served by different local
 endpoints, this repo includes a small local router that exposes one `/v1`
 endpoint for Hermes and routes each request by the `model` field.
 
-For `qwopus3.6-35b-a3b-coder-mtp-q5-k-m`, the router also adds
+For `qwopus3.6-35b-a3b-coder-mtp-q4-k-m` and
+`qwopus3.6-35b-a3b-coder-mtp-q5-k-m`, the router also adds
 `chat_template_kwargs.enable_thinking=false` to chat requests unless the client
 explicitly sets `enable_thinking`. That keeps Qwopus35 in no-thinking mode from
 Hermes without changing the other local models.
@@ -61,6 +63,9 @@ custom_providers:
     qwopus3.6-35b-a3b-coder-mtp-q5-k-m:
       context_length: 200000
       supports_vision: false
+    qwopus3.6-35b-a3b-coder-mtp-q4-k-m:
+      context_length: 200000
+      supports_vision: false
     aeon-ornith-1.0-35b-nvfp4:
       context_length: 262144
       supports_vision: true
@@ -80,6 +85,7 @@ Hermes -> http://127.0.0.1:39190/v1
   diffusiongemma                     -> http://127.0.0.1:8890/v1
   qwopus3.6-27b-coder-mtp-q5-k-m     -> http://127.0.0.1:39182/v1
   qwopus3.6-35b-a3b-coder-mtp-q5-k-m -> http://127.0.0.1:39191/v1
+  qwopus3.6-35b-a3b-coder-mtp-q4-k-m -> http://127.0.0.1:39193/v1
   aeon-ornith-1.0-35b-nvfp4          -> http://127.0.0.1:39187/v1
   ornith-1.0-35b-q4-k-m              -> http://127.0.0.1:39188/v1
   ornith-1.0-35b-q5-k-m              -> http://127.0.0.1:39189/v1
@@ -125,11 +131,12 @@ If the client cannot connect, run once as admin on the server:
 allow-qwopus3.6-coder-mtp-server-firewall-admin.bat
 ```
 
-## Qwopus3.6-35B-A3B-Coder-MTP Q5_K_M
+## Qwopus3.6-35B-A3B-Coder-MTP Q4_K_M and Q5_K_M
 
-Start the server from the repo checkout:
+Start one server from the repo checkout:
 
 ```bat
+scripts\localai\qwopus3.6-35b-a3b-coder-mtp-gguf\start-qwopus3.6-35b-a3b-coder-mtp-q4-k-m-server.bat
 scripts\localai\qwopus3.6-35b-a3b-coder-mtp-gguf\start-qwopus3.6-35b-a3b-coder-mtp-q5-k-m-server.bat
 ```
 
@@ -138,17 +145,19 @@ Wire into Hermes through the consolidated provider:
 ```text
 Provider/API: Local 5090
 Base URL:     http://127.0.0.1:39190/v1
-Model:        qwopus3.6-35b-a3b-coder-mtp-q5-k-m
+Model:        qwopus3.6-35b-a3b-coder-mtp-q4-k-m
 ```
 
 The consolidated `Local 5090` route automatically sends the Qwen chat-template
-no-thinking flag for this model.
+no-thinking flag for both Qwopus35 quantizations.
 
 Direct endpoint:
 
 ```text
-Base URL:  http://127.0.0.1:39191/v1
-Model:     qwopus3.6-35b-a3b-coder-mtp-q5-k-m
+Q4 Base URL:  http://127.0.0.1:39193/v1
+Q4 Model:     qwopus3.6-35b-a3b-coder-mtp-q4-k-m
+Q5 Base URL:  http://127.0.0.1:39191/v1
+Q5 Model:     qwopus3.6-35b-a3b-coder-mtp-q5-k-m
 ```
 
 If you bypass the router and use the direct endpoint from another client, either
@@ -223,7 +232,8 @@ For AEON Ornith NVFP4, use port `39187` and model
 
 For Ornith Q5_K_M, use port `39189` and model `ornith-1.0-35b-q5-k-m`.
 
-For Qwopus3.6 35B Q5_K_M, use port `39191` and model
+For Qwopus3.6 35B Q4_K_M, use port `39193` and model
+`qwopus3.6-35b-a3b-coder-mtp-q4-k-m`. For Q5_K_M, use port `39191` and model
 `qwopus3.6-35b-a3b-coder-mtp-q5-k-m`.
 
 ## Notes

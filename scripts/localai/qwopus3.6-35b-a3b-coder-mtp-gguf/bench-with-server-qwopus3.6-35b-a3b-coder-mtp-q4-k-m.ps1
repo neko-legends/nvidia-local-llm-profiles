@@ -1,9 +1,10 @@
 param(
     [string]$LlamaDir = "",
     [string]$ModelPath = "",
-    [int]$Port = 39191,
+    [int]$Port = 39193,
     [int]$ContextSize = 200000,
     [int[]]$PromptTokenTargets = @(10000, 200000),
+    [int]$SpecDraftNMax = 2,
     [switch]$EnableThinking
 )
 
@@ -12,7 +13,7 @@ $ErrorActionPreference = "Stop"
 $repoRoot = (Resolve-Path -LiteralPath (Join-Path $PSScriptRoot "..\..\..")).Path
 $checkoutParent = Split-Path -Parent $repoRoot
 if (-not $ModelPath) {
-    $ModelPath = Join-Path $checkoutParent ".local-model-cache\Jackrong\Qwopus3.6-35B-A3B-Coder-MTP-GGUF\Qwopus3.6-35B-A3B-Coder-MTP-Q5_K_M.gguf"
+    $ModelPath = Join-Path $checkoutParent ".local-model-cache\Jackrong\Qwopus3.6-35B-A3B-Coder-MTP-GGUF\Qwopus3.6-35B-A3B-Coder-MTP-Q4_K_M.gguf"
 }
 
 function Resolve-LlamaServer {
@@ -42,10 +43,10 @@ $llamaServer = Resolve-LlamaServer -Dir $LlamaDir
 $resolvedLlamaDir = Split-Path -Parent $llamaServer
 $bench = Join-Path $repoRoot "scripts\benchmarks\bench-context-ladder.ps1"
 $stamp = Get-Date -Format "yyyyMMdd-HHmmss"
-$outLog = Join-Path $repoRoot "logs\qwopus35-q5-bench-server-$stamp.out.log"
-$errLog = Join-Path $repoRoot "logs\qwopus35-q5-bench-server-$stamp.err.log"
-$modelAlias = "qwopus3.6-35b-a3b-coder-mtp-q5-k-m"
-$casePrefix = "qwopus3.6-35b-a3b-coder-mtp-q5-k-m-llamacpp-ctx200k"
+$outLog = Join-Path $repoRoot "logs\qwopus35-q4-bench-server-$stamp.out.log"
+$errLog = Join-Path $repoRoot "logs\qwopus35-q4-bench-server-$stamp.err.log"
+$modelAlias = "qwopus3.6-35b-a3b-coder-mtp-q4-k-m"
+$casePrefix = "qwopus3.6-35b-a3b-coder-mtp-q4-k-m-llamacpp-ctx200k-mtpn$SpecDraftNMax"
 if (-not $EnableThinking) {
     $casePrefix += "-request-nothink"
 }
@@ -75,7 +76,7 @@ $args = @(
     "--metrics",
     "--slots",
     "--spec-type", "ngram-mod,draft-mtp",
-    "--spec-draft-n-max", "2",
+    "--spec-draft-n-max", "$SpecDraftNMax",
     "--spec-draft-p-min", "0.0",
     "--spec-ngram-mod-n-match", "24",
     "--spec-ngram-mod-n-min", "48",

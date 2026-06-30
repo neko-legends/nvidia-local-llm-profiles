@@ -34,6 +34,12 @@ MODEL_SPECS = [
     ),
     ModelSpec(
         "Jackrong/Qwopus3.6-35B-A3B-Coder-MTP-GGUF",
+        "Qwopus3.6-35B-A3B-Coder-MTP-Q4_K_M.gguf",
+        "Qwopus3.6 35B A3B Coder Q4_K_M",
+        "#f2b846",
+    ),
+    ModelSpec(
+        "Jackrong/Qwopus3.6-35B-A3B-Coder-MTP-GGUF",
         "Qwopus3.6-35B-A3B-Coder-MTP-Q5_K_M.gguf",
         "Qwopus3.6 35B A3B Coder Q5_K_M",
         "#45d6c9",

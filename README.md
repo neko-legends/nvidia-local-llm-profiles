@@ -6,9 +6,9 @@ integration for running high-performance local inference on NVIDIA Blackwell.
 Hand this repo to a coding agent and it can download the model, start a local
 OpenAI-compatible endpoint, wire Hermes, run benchmarks, and collect the proof.
 
-**Current focus:** Qwopus3.6-35B-A3B-Coder-MTP Q5_K_M via native llama.cpp,
-with Qwopus27, Ornith, AEON Ornith, and Unsloth Qwen35 kept as RTX 5090
-comparison baselines.
+**Current focus:** Qwopus3.6-35B-A3B-Coder-MTP Q4_K_M and Q5_K_M via native
+llama.cpp, with Qwopus27, Ornith, AEON Ornith, and Unsloth Qwen35 kept as RTX
+5090 comparison baselines.
 
 ---
 
@@ -104,7 +104,8 @@ scripts\vllm\qwen36-35b-a3b-nvfp4\
 
 Native llama.cpp support for
 [Jackrong/Qwopus3.6-35B-A3B-Coder-MTP-GGUF](https://huggingface.co/Jackrong/Qwopus3.6-35B-A3B-Coder-MTP-GGUF),
-using `Qwopus3.6-35B-A3B-Coder-MTP-Q5_K_M.gguf`.
+using `Qwopus3.6-35B-A3B-Coder-MTP-Q4_K_M.gguf` or
+`Qwopus3.6-35B-A3B-Coder-MTP-Q5_K_M.gguf`.
 
 Launcher folder:
 
@@ -115,6 +116,10 @@ scripts\localai\qwopus3.6-35b-a3b-coder-mtp-gguf\
 Quick path:
 
 ```bat
+download-qwopus3.6-35b-a3b-coder-mtp-q4-k-m.bat
+start-qwopus3.6-35b-a3b-coder-mtp-q4-k-m-server.bat
+bench-qwopus3.6-35b-a3b-coder-mtp-q4-k-m-two-point.bat
+
 download-qwopus3.6-35b-a3b-coder-mtp-q5-k-m.bat
 start-qwopus3.6-35b-a3b-coder-mtp-q5-k-m-server.bat
 bench-qwopus3.6-35b-a3b-coder-mtp-q5-k-m-two-point.bat
@@ -122,8 +127,10 @@ bench-qwopus3.6-35b-a3b-coder-mtp-q5-k-m-two-point.bat
 
 Endpoint defaults:
 
-- Base URL: `http://127.0.0.1:39191/v1`
-- Model: `qwopus3.6-35b-a3b-coder-mtp-q5-k-m`
+- Q4 Base URL: `http://127.0.0.1:39193/v1`
+- Q4 Model: `qwopus3.6-35b-a3b-coder-mtp-q4-k-m`
+- Q5 Base URL: `http://127.0.0.1:39191/v1`
+- Q5 Model: `qwopus3.6-35b-a3b-coder-mtp-q5-k-m`
 - Context cap: `200000`
 - Serving path: native Windows llama.cpp only; no Docker profile is needed.
 
@@ -205,8 +212,8 @@ separately. Docker/vLLM and manual UI observations are kept in
 
 Latest addition:
 
-- `Jackrong/Qwopus3.6-35B-A3B-Coder-MTP-GGUF` Q5_K_M loaded natively at
-  `ctx=200000` (`n_ctx=200192`) with q4 target/draft KV,
+- `Jackrong/Qwopus3.6-35B-A3B-Coder-MTP-GGUF` Q4_K_M and Q5_K_M loaded
+  natively at `ctx=200000` (`n_ctx=200192`) with q4 target/draft KV,
   `ngram-mod,draft-mtp`, and request-level no-thinking.
 - No-thinking proof: on the same server, an auto request produced
   `reasoning_content`, while a request with
@@ -217,6 +224,9 @@ Latest addition:
   2.1s prefill.
 - 200k reference prompt: **100.0 decode tok/s**, 15.4 full-wall tok/s after
   55.8s prefill.
+- Q4_K_M no-thinking result: **181.0 decode tok/s** at 10k and **91.2 decode
+  tok/s** at 200k. A Q4 n=3 MTP trial was slower than n=2 on the 10k check, so
+  the chart uses `--spec-draft-n-max 2`.
 - Prompt prefill is the model reading the input prompt into KV cache. No-thinking
   prevents generated reasoning blocks, but it does not skip reading a 200k
   prompt; the fresh 200k run still processed 166,199 new prompt tokens after
@@ -303,6 +313,7 @@ scripts\localai\qwopus3.6-27b-coder-mtp-gguf\start-qwopus3.6-27b-coder-mtp-q5-se
 Or Qwopus 35B:
 
 ```bat
+scripts\localai\qwopus3.6-35b-a3b-coder-mtp-gguf\start-qwopus3.6-35b-a3b-coder-mtp-q4-k-m-server.bat
 scripts\localai\qwopus3.6-35b-a3b-coder-mtp-gguf\start-qwopus3.6-35b-a3b-coder-mtp-q5-k-m-server.bat
 ```
 
@@ -312,13 +323,14 @@ router:
 
 ```text
 Base URL: http://127.0.0.1:39190/v1
-Model:    qwopus3.6-35b-a3b-coder-mtp-q5-k-m
+Model:    qwopus3.6-35b-a3b-coder-mtp-q4-k-m
 ```
 
 The installer updates Hermes Desktop with a single `Local 5090` provider:
 
 - `qwopus3.6-27b-coder-mtp-q5-k-m` routes to `http://127.0.0.1:39182/v1`
 - `qwopus3.6-35b-a3b-coder-mtp-q5-k-m` routes to `http://127.0.0.1:39191/v1`
+- `qwopus3.6-35b-a3b-coder-mtp-q4-k-m` routes to `http://127.0.0.1:39193/v1`
 - `diffusiongemma` routes to `http://127.0.0.1:8890/v1`
 - `aeon-ornith-1.0-35b-nvfp4` routes to `http://127.0.0.1:39187/v1`
 - `ornith-1.0-35b-q4-k-m` routes to `http://127.0.0.1:39188/v1`

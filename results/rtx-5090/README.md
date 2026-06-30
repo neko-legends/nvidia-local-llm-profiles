@@ -55,6 +55,34 @@ loaded at `n_ctx=200192` from the repo-relative local model cache path.
   and `qwopus3.6-35b-a3b-coder-mtp-q5-k-m-llamacpp-ctx200k-request-nothink-prompt200k-gen1024-20260630-004959.csv`
 - **Timing log:** `logs/qwopus35-q5-request-nothink-bench-server-20260630-004937.err.log`
 
+### Qwopus3.6 35B A3B Coder MTP Q4_K_M - llama.cpp b9267 - ctx=200k - MTP + ngram
+
+Two-point native llama.cpp benchmark, one measured run per context. This uses
+the same request-level no-thinking mode and the same saved prompt fixtures as
+the Q5_K_M run.
+
+| Context target | Prompt tokens | Full-request tok/s | Generation tok/s | Prompt read | Power | Temp |
+| ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+| 10k | 8,907 | 128.2 | 181.0 | 2.2s | 175W | 44C |
+| 200k | 174,590 | 15.3 | 91.2 | 55.1s | 226W | 52C |
+
+- **Stack:** llama.cpp server -> OpenAI-compatible endpoint at 127.0.0.1:39193
+- **Model:** `Jackrong/Qwopus3.6-35B-A3B-Coder-MTP-GGUF`
+- **File:** `Qwopus3.6-35B-A3B-Coder-MTP-Q4_K_M.gguf`
+- **Downloaded size:** `21,713,462,432` bytes
+- **SHA256:** `c283cd2321a3cb4c6e7faf9481ac7d946913e4f02e20172eb2872112f567d8d4`
+- **Flags:** `--gpu-layers all --gpu-layers-draft all --ctx-size 200000
+  --cache-type-k q4_0 --cache-type-v q4_0 --cache-type-k-draft q4_0
+  --cache-type-v-draft q4_0 --flash-attn on --spec-type ngram-mod,draft-mtp
+  --spec-draft-n-max 2 --spec-ngram-mod-n-match 24
+  --spec-ngram-mod-n-min 48 --spec-ngram-mod-n-max 64`
+- **MTP depth check:** a 10k `--spec-draft-n-max 3` trial was slower
+  (**163.6 tok/s**) than n=2 (**181.6 tok/s**), so the chart uses n=2.
+- **MTP acceptance:** 10k `688/957 = 71.9%`; 200k `598/1159 = 51.6%`
+- **CSV:** `qwopus3.6-35b-a3b-coder-mtp-q4-k-m-llamacpp-ctx200k-mtpn2-request-nothink-prompt10k-gen1024-20260630-011615.csv`
+  and `qwopus3.6-35b-a3b-coder-mtp-q4-k-m-llamacpp-ctx200k-mtpn2-request-nothink-prompt200k-gen1024-20260630-011625.csv`
+- **Timing log:** `logs/qwopus35-q4-bench-server-20260630-011553.err.log`
+
 ### Qwopus3.6-27B-Coder-MTP-Q5_K_M — llama.cpp b9761 — ctx=256k — MTP n=2
 
 | Context | Prompt tokens | avg tok/s | min | max | Power | Temp |
@@ -273,6 +301,9 @@ Ornith Unsloth Studio long-context proof:
   prompt prefill.
 - The 200k checked-in prompt reached **100.0 tok/s generation** after **55.8s**
   prompt prefill.
+- Qwopus35 Q4_K_M reached **181.0 tok/s generation** at the 10k prompt, but
+  **91.2 tok/s** at the 200k prompt; on this setup Q4 wins short-context
+  latency while Q5 remains better at 200k decode speed.
 - The 200k run stayed under the card's VRAM budget with 28,358 MiB reported
   after the request.
 
