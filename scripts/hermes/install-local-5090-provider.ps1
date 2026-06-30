@@ -2,6 +2,7 @@ param(
   [string]$ProviderName = "Local 5090",
   [int]$RouterPort = 39190,
   [string]$QwopusBaseUrl = "http://127.0.0.1:39182/v1",
+  [string]$Qwopus35BaseUrl = "http://127.0.0.1:39191/v1",
   [string]$DiffusionGemmaBaseUrl = "http://127.0.0.1:8890/v1",
   [string]$OrnithBaseUrl = "http://127.0.0.1:39188/v1",
   [string]$OrnithQ5BaseUrl = "http://127.0.0.1:39189/v1",
@@ -69,6 +70,7 @@ if (-not $Python) {
   --provider-name $ProviderName `
   --router-port $RouterPort `
   --qwopus-base-url $QwopusBaseUrl `
+  --qwopus35-base-url $Qwopus35BaseUrl `
   --diffusiongemma-base-url $DiffusionGemmaBaseUrl `
   --ornith-base-url $OrnithBaseUrl `
   --ornith-q5-base-url $OrnithQ5BaseUrl `
@@ -85,6 +87,7 @@ if (-not $NoStartRouter) {
         $RouterTarget,
         "--port", "$RouterPort",
         "--qwopus-base-url", $QwopusBaseUrl,
+        "--qwopus35-base-url", $Qwopus35BaseUrl,
         "--diffusiongemma-base-url", $DiffusionGemmaBaseUrl,
         "--ornith-base-url", $OrnithBaseUrl,
         "--ornith-q5-base-url", $OrnithQ5BaseUrl,
@@ -104,6 +107,7 @@ Write-Host "Hermes provider '$ProviderName' is configured."
 Write-Host "Router: http://127.0.0.1:$RouterPort/v1"
 Write-Host "Models:"
 Write-Host "  - qwopus3.6-27b-coder-mtp-q5-k-m -> $QwopusBaseUrl"
+Write-Host "  - qwopus3.6-35b-a3b-coder-mtp-q5-k-m -> $Qwopus35BaseUrl"
 Write-Host "  - diffusiongemma -> $DiffusionGemmaBaseUrl"
 Write-Host "  - ornith-1.0-35b-q4-k-m -> $OrnithBaseUrl"
 Write-Host "  - ornith-1.0-35b-q5-k-m -> $OrnithQ5BaseUrl"

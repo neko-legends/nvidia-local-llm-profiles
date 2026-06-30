@@ -7,6 +7,7 @@ from pathlib import Path
 
 
 QWOPUS_MODEL = "qwopus3.6-27b-coder-mtp-q5-k-m"
+QWOPUS35_MODEL = "qwopus3.6-35b-a3b-coder-mtp-q5-k-m"
 DIFFUSION_MODEL = "diffusiongemma"
 ORNITH_MODEL = "ornith-1.0-35b-q4-k-m"
 ORNITH_Q5_MODEL = "ornith-1.0-35b-q5-k-m"
@@ -19,6 +20,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--provider-name", default="Local 5090")
     parser.add_argument("--router-port", default="39190")
     parser.add_argument("--qwopus-base-url", default="http://127.0.0.1:39182/v1")
+    parser.add_argument("--qwopus35-base-url", default="http://127.0.0.1:39191/v1")
     parser.add_argument("--diffusiongemma-base-url", default="http://127.0.0.1:8890/v1")
     parser.add_argument("--ornith-base-url", default="http://127.0.0.1:39188/v1")
     parser.add_argument("--ornith-q5-base-url", default="http://127.0.0.1:39189/v1")
@@ -52,6 +54,10 @@ def provider_config(name: str, router_port: str) -> dict:
                 "context_length": 262144,
                 "supports_vision": False,
             },
+            QWOPUS35_MODEL: {
+                "context_length": 200000,
+                "supports_vision": False,
+            },
             ORNITH_MODEL: {
                 "context_length": 262144,
                 "supports_vision": False,
@@ -82,6 +88,7 @@ def should_remove_provider(provider: object, name: str) -> bool:
         "local 5090",
         "diffusiongemma-local",
         "qwopus-local",
+        "qwopus35-local",
         "ornith-local",
         "ornith-q5-local",
         "aeon-ornith-local",
@@ -90,6 +97,7 @@ def should_remove_provider(provider: object, name: str) -> bool:
     base_urls = {
         "http://127.0.0.1:39190/v1",
         "http://127.0.0.1:39182/v1",
+        "http://127.0.0.1:39191/v1",
         "http://127.0.0.1:8890/v1",
         "http://127.0.0.1:39188/v1",
         "http://127.0.0.1:39189/v1",
@@ -99,6 +107,12 @@ def should_remove_provider(provider: object, name: str) -> bool:
         QWOPUS_MODEL,
         "qwopus",
         "qwopus-coder",
+        QWOPUS35_MODEL,
+        "qwopus35",
+        "qwopus-35b",
+        "qwopus35-coder",
+        "qwopus3.6-35b-coder",
+        "qwopus3.6-35b-a3b-coder",
         "diffusiongemma",
         ORNITH_MODEL,
         "ornith",

@@ -9,6 +9,7 @@ The recommended desktop setup is one Hermes provider named `Local 5090` that
 lists the local model servers:
 
 - `qwopus3.6-27b-coder-mtp-q5-k-m`
+- `qwopus3.6-35b-a3b-coder-mtp-q5-k-m`
 - `diffusiongemma`
 - `aeon-ornith-1.0-35b-nvfp4`
 - `ornith-1.0-35b-q4-k-m`
@@ -52,6 +53,9 @@ custom_providers:
     qwopus3.6-27b-coder-mtp-q5-k-m:
       context_length: 262144
       supports_vision: false
+    qwopus3.6-35b-a3b-coder-mtp-q5-k-m:
+      context_length: 200000
+      supports_vision: false
     aeon-ornith-1.0-35b-nvfp4:
       context_length: 262144
       supports_vision: true
@@ -70,6 +74,7 @@ Default local routes:
 Hermes -> http://127.0.0.1:39190/v1
   diffusiongemma                     -> http://127.0.0.1:8890/v1
   qwopus3.6-27b-coder-mtp-q5-k-m     -> http://127.0.0.1:39182/v1
+  qwopus3.6-35b-a3b-coder-mtp-q5-k-m -> http://127.0.0.1:39191/v1
   aeon-ornith-1.0-35b-nvfp4          -> http://127.0.0.1:39187/v1
   ornith-1.0-35b-q4-k-m              -> http://127.0.0.1:39188/v1
   ornith-1.0-35b-q5-k-m              -> http://127.0.0.1:39189/v1
@@ -113,6 +118,29 @@ If the client cannot connect, run once as admin on the server:
 
 ```bat
 allow-qwopus3.6-coder-mtp-server-firewall-admin.bat
+```
+
+## Qwopus3.6-35B-A3B-Coder-MTP Q5_K_M
+
+Start the server from the repo checkout:
+
+```bat
+scripts\localai\qwopus3.6-35b-a3b-coder-mtp-gguf\start-qwopus3.6-35b-a3b-coder-mtp-q5-k-m-server.bat
+```
+
+Wire into Hermes through the consolidated provider:
+
+```text
+Provider/API: Local 5090
+Base URL:     http://127.0.0.1:39190/v1
+Model:        qwopus3.6-35b-a3b-coder-mtp-q5-k-m
+```
+
+Direct endpoint:
+
+```text
+Base URL:  http://127.0.0.1:39191/v1
+Model:     qwopus3.6-35b-a3b-coder-mtp-q5-k-m
 ```
 
 ## AEON Qwen3.6 27B Multimodal NVFP4 MTP-XS
@@ -182,6 +210,9 @@ For AEON Ornith NVFP4, use port `39187` and model
 `aeon-ornith-1.0-35b-nvfp4`.
 
 For Ornith Q5_K_M, use port `39189` and model `ornith-1.0-35b-q5-k-m`.
+
+For Qwopus3.6 35B Q5_K_M, use port `39191` and model
+`qwopus3.6-35b-a3b-coder-mtp-q5-k-m`.
 
 ## Notes
 

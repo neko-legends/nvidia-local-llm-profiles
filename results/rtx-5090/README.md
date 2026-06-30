@@ -2,24 +2,50 @@
 
 - **GPU:** NVIDIA GeForce RTX 5090 32GB
 - **Driver:** 610.62
-- **Dates:** 2026-06-22 to 2026-06-27
+- **Dates:** 2026-06-22 to 2026-06-30
 - **Prompt style:** BookContext (synthetic long-document with continuity sections)
 - **Generation:** 1024 tokens, temperature=0, seed=1234. Full ladders use 3
   measured runs per context; two-point smoke tests may use 1 measured run.
 - **Token accounting:** raw ladder CSV `tok/s` is completion tokens divided by
-  full request wall time. The local Qwen-family comparison chart uses
-  generation-only timing where llama.cpp or the UI exposed that split, and lists
-  prompt read / prefill seconds separately.
+  full request wall time. The native llama.cpp comparison chart uses
+  generation-only timing where llama.cpp exposed that split, and lists prompt
+  read / prefill seconds separately.
 
 ![RTX 5090 long-context throughput comparison](../../assets/images/rtx-5090-context-ladder-comparison.png)
 
-![RTX 5090 local coding-model throughput with automated and manual Studio rows](../../assets/images/rtx-5090-qwen35-moe-vs-qwopus.png)
+![RTX 5090 native llama.cpp long-context comparison](../../assets/images/rtx-5090-qwen35-moe-vs-qwopus.png)
 
 ![AEON Ornith Ultimate Uncensored NVFP4 on Windows, Docker vLLM vs native GGUF llama.cpp](../../assets/images/aeon-ornith-windows-docker-vs-gguf.png)
 
 ---
 
 ## Results
+
+### Qwopus3.6 35B A3B Coder MTP Q5_K_M - llama.cpp b9267 - ctx=200k - MTP + ngram
+
+Two-point native llama.cpp benchmark, one measured run per context. The model
+loaded at `n_ctx=200192` from the repo-relative local model cache path.
+
+| Context target | Prompt tokens | Full-request tok/s | Generation tok/s | Prompt read | Power | Temp |
+| ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+| 10k | 8,907 | 106.5 | 142.8 | 2.3s | 189W | 39C |
+| 200k | 174,590 | 15.0 | 95.9 | 57.1s | 228W | 51C |
+
+- **Stack:** llama.cpp server -> OpenAI-compatible endpoint at 127.0.0.1:39191
+- **Model:** `Jackrong/Qwopus3.6-35B-A3B-Coder-MTP-GGUF`
+- **File:** `Qwopus3.6-35B-A3B-Coder-MTP-Q5_K_M.gguf`
+- **Downloaded size:** `25,347,531,936` bytes
+- **Flags:** `--gpu-layers all --gpu-layers-draft all --ctx-size 200000
+  --cache-type-k q4_0 --cache-type-v q4_0 --cache-type-k-draft q4_0
+  --cache-type-v-draft q4_0 --flash-attn on --reasoning off --spec-type
+  ngram-mod,draft-mtp --spec-draft-n-max 2 --spec-ngram-mod-n-match 24
+  --spec-ngram-mod-n-min 48 --spec-ngram-mod-n-max 64`
+- **MTP acceptance:** 10k `572/900 = 63.6%`; 200k `613/943 = 65.0%`
+- **Prompt SHA256:** 10k `785c5b31d1ce77612431b1289c0a097ed51ab1a6d4a07bccfb7a70f59df55f94`; 200k `a794ca243983eb3387bec6728db4b0c72a99ee2a98cfee7223269708e4ae228c`
+- **CSV:** `qwopus3.6-35b-a3b-coder-mtp-q5-k-m-llamacpp-ctx200k-prompt10k-gen1024-20260630-001702.csv`
+  and `qwopus3.6-35b-a3b-coder-mtp-q5-k-m-llamacpp-ctx200k-prompt200k-gen1024-20260630-001816.csv`
+- **Timing log:** `logs/qwopus35-q5-bench-server-20260630-001639.err.log`
+  and `logs/qwopus35-q5-bench-server-20260630-001755.err.log`
 
 ### Qwopus3.6-27B-Coder-MTP-Q5_K_M — llama.cpp b9761 — ctx=256k — MTP n=2
 
@@ -212,9 +238,9 @@ with reasoning mode enabled because Ornith is a reasoning model.
 ### Manual (Unsloth Studio) Observations
 
 These rows come from manual runs in Unsloth Studio where the benchmark text was
-pasted or added as a file. They are charted separately from the endpoint
-benchmarks because the UI may report decode-only speed and may handle added
-files differently than an inline chat prompt.
+pasted or added as a file. They are kept out of the native headline chart
+because the UI may report decode-only speed and may handle added files
+differently than an inline chat prompt.
 
 | Model | Reported context | UI speed | Extra UI details |
 | --- | ---: | ---: | --- |
@@ -232,6 +258,15 @@ Ornith Unsloth Studio long-context proof:
 ---
 
 ## Key Findings
+
+**Qwopus3.6 35B A3B Coder Q5_K_M is a strong native 35B coding-model result on the RTX 5090.**
+
+- The 10k checked-in prompt reached **142.8 tok/s generation** after **2.3s**
+  prompt prefill.
+- The 200k checked-in prompt reached **95.9 tok/s generation** after **57.1s**
+  prompt prefill.
+- The 200k run stayed under the card's VRAM budget with 28,356 MiB reported
+  after the request.
 
 **Qwopus Q5 GGUF via llama.cpp stays interactive across the full 8k-256k ladder.**
 

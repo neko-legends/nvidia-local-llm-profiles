@@ -1,143 +1,126 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="1780" height="1707" viewBox="0 0 1780 1707">
+<svg xmlns="http://www.w3.org/2000/svg" width="1900" height="1372" viewBox="0 0 1900 1372">
 <style>
 text{font-family:Segoe UI,Arial,sans-serif;letter-spacing:0}
 .title{fill:#edf3f7;font-size:42px;font-weight:750}
 .subtitle{fill:#b5bec8;font-size:20px}
-.label{fill:#e8eef4;font-size:21px;font-weight:650}
-.small{fill:#9aa5b1;font-size:16px}
-.detail{fill:#7f8b98;font-size:14px}
+.group{fill:#edf3f7;font-size:24px;font-weight:750}
+.label{fill:#edf3f7;font-size:18px;font-weight:700}
+.detail{fill:#8e99a6;font-size:14px}
 .value{fill:#edf3f7;font-size:21px;font-weight:750}
-.sourceTag{fill:#261218;font-size:15px;font-weight:750}
+.small{fill:#9aa5b1;font-size:16px}
 .axis{fill:#9aa5b1;font-size:15px}
 </style>
-<rect width="1780" height="1707" fill="#111418"/>
-<rect x="594" y="168" width="1116" height="1415" rx="10" fill="#181e25"/>
-<text x="72.0" y="82.0" class="title">RTX 5090: local coding-model throughput</text>
-<text x="72.0" y="122.0" class="subtitle">Bars show generation speed where captured. Prompt read / prefill seconds are labeled separately and are not in those bars.</text>
-<line x1="620.0" y1="182" x2="620.0" y2="1609" stroke="#2f3742" stroke-width="1"/>
-<text x="620.0" y="1637.0" class="axis" text-anchor="middle">0</text>
-<line x1="737.8" y1="182" x2="737.8" y2="1609" stroke="#2f3742" stroke-width="1"/>
-<text x="737.8" y="1637.0" class="axis" text-anchor="middle">25</text>
-<line x1="855.6" y1="182" x2="855.6" y2="1609" stroke="#2f3742" stroke-width="1"/>
-<text x="855.6" y="1637.0" class="axis" text-anchor="middle">50</text>
-<line x1="973.3" y1="182" x2="973.3" y2="1609" stroke="#2f3742" stroke-width="1"/>
-<text x="973.3" y="1637.0" class="axis" text-anchor="middle">75</text>
-<line x1="1091.1" y1="182" x2="1091.1" y2="1609" stroke="#2f3742" stroke-width="1"/>
-<text x="1091.1" y="1637.0" class="axis" text-anchor="middle">100</text>
-<line x1="1208.9" y1="182" x2="1208.9" y2="1609" stroke="#2f3742" stroke-width="1"/>
-<text x="1208.9" y="1637.0" class="axis" text-anchor="middle">125</text>
-<line x1="1326.7" y1="182" x2="1326.7" y2="1609" stroke="#2f3742" stroke-width="1"/>
-<text x="1326.7" y="1637.0" class="axis" text-anchor="middle">150</text>
-<line x1="1444.4" y1="182" x2="1444.4" y2="1609" stroke="#2f3742" stroke-width="1"/>
-<text x="1444.4" y="1637.0" class="axis" text-anchor="middle">175</text>
-<line x1="1562.2" y1="182" x2="1562.2" y2="1609" stroke="#2f3742" stroke-width="1"/>
-<text x="1562.2" y="1637.0" class="axis" text-anchor="middle">200</text>
-<line x1="1680.0" y1="182" x2="1680.0" y2="1609" stroke="#2f3742" stroke-width="1"/>
-<text x="1680.0" y="1637.0" class="axis" text-anchor="middle">225</text>
-<text x="72.0" y="176.0" class="label">Short context</text>
-<text x="592.0" y="216.0" class="small" text-anchor="end">Jackrong/Qwopus3.6-27B-Coder-MTP-GGUF</text>
-<text x="592.0" y="237.0" class="detail" text-anchor="end">Q5_K_M - 8.9k - generation only; prompt read 3.9s</text>
-<rect x="620" y="196" width="374.5" height="34" rx="5" fill="#46d3c7" opacity="0.95"/>
-<rect x="620" y="196" width="374.5" height="34" rx="5" fill="none" stroke="#d9fff8" stroke-opacity="0.55"/>
-<text x="1006.5" y="222.0" class="value">79.5</text>
-<text x="1064.5" y="222.0" class="small">tok/s</text>
-<text x="592.0" y="296.0" class="small" text-anchor="end">Jackrong/Qwopus3.6-27B-Coder-MTP-GGUF</text>
-<text x="592.0" y="317.0" class="detail" text-anchor="end">Q4_K_M - 8.9k - generation only; prompt read 3.8s</text>
-<rect x="620" y="276" width="420.2" height="34" rx="5" fill="#69a8ff" opacity="0.95"/>
-<rect x="620" y="276" width="420.2" height="34" rx="5" fill="none" stroke="#d9fff8" stroke-opacity="0.55"/>
-<text x="1052.2" y="302.0" class="value">89.2</text>
-<text x="1110.2" y="302.0" class="small">tok/s</text>
-<text x="592.0" y="376.0" class="small" text-anchor="end">Jackrong/Qwopus3.6-27B-Coder-MTP-GGUF</text>
-<text x="592.0" y="397.0" class="detail" text-anchor="end">Q5_K_M - 9.5k - pasted inline text (Unsloth Studio); prompt read 3.8s</text>
-<rect x="620" y="356" width="309.5" height="34" rx="5" fill="#ff7a90" opacity="0.95"/>
-<rect x="620" y="356" width="309.5" height="34" rx="5" fill="none" stroke="#d9fff8" stroke-opacity="0.55"/>
-<text x="634.0" y="378.0" class="sourceTag">Unsloth Studio</text>
-<text x="941.5" y="382.0" class="value">65.7</text>
-<text x="999.5" y="382.0" class="small">tok/s</text>
-<text x="592.0" y="456.0" class="small" text-anchor="end">unsloth/Qwen3.6-35B-A3B-MTP-GGUF</text>
-<text x="592.0" y="477.0" class="detail" text-anchor="end">UD-Q4_K_XL - 8.9k - generation only; prompt read 2.4s</text>
-<rect x="620" y="436" width="597.8" height="34" rx="5" fill="#9d82ff" opacity="0.95"/>
-<rect x="620" y="436" width="597.8" height="34" rx="5" fill="none" stroke="#d9fff8" stroke-opacity="0.55"/>
-<text x="1229.8" y="462.0" class="value">126.9</text>
-<text x="1287.8" y="462.0" class="small">tok/s</text>
-<text x="592.0" y="536.0" class="small" text-anchor="end">unsloth/Qwen3.6-35B-A3B-MTP-GGUF</text>
-<text x="592.0" y="557.0" class="detail" text-anchor="end">UD-Q4_K_XL - 13k - file added (Unsloth Studio)</text>
-<rect x="620" y="516" width="570.5" height="34" rx="5" fill="#ff7a90" opacity="0.95"/>
-<rect x="620" y="516" width="570.5" height="34" rx="5" fill="none" stroke="#d9fff8" stroke-opacity="0.55"/>
-<text x="634.0" y="538.0" class="sourceTag">Unsloth Studio</text>
-<text x="1202.5" y="542.0" class="value">121.1</text>
-<text x="1260.5" y="542.0" class="small">tok/s</text>
-<text x="592.0" y="616.0" class="small" text-anchor="end">deepreinforce-ai/Ornith-1.0-35B-GGUF</text>
-<text x="592.0" y="637.0" class="detail" text-anchor="end">Q4_K_M - 8.9k - generation only; prompt read 1.7s</text>
-<rect x="620" y="596" width="949.3" height="34" rx="5" fill="#7edc72" opacity="0.95"/>
-<rect x="620" y="596" width="949.3" height="34" rx="5" fill="none" stroke="#d9fff8" stroke-opacity="0.55"/>
-<text x="1581.3" y="622.0" class="value">201.5</text>
-<text x="1639.3" y="622.0" class="small">tok/s</text>
-<text x="592.0" y="696.0" class="small" text-anchor="end">deepreinforce-ai/Ornith-1.0-35B-GGUF</text>
-<text x="592.0" y="717.0" class="detail" text-anchor="end">Q4_K_M - 9.5k - file added (Unsloth Studio); prompt read 1.8s</text>
-<rect x="620" y="676" width="599.3" height="34" rx="5" fill="#ff7a90" opacity="0.95"/>
-<rect x="620" y="676" width="599.3" height="34" rx="5" fill="none" stroke="#d9fff8" stroke-opacity="0.55"/>
-<text x="634.0" y="698.0" class="sourceTag">Unsloth Studio</text>
-<text x="1231.3" y="702.0" class="value">127.2</text>
-<text x="1289.3" y="702.0" class="small">tok/s</text>
-<text x="592.0" y="776.0" class="small" text-anchor="end">nvidia/Qwen3.6-35B-A3B-NVFP4</text>
-<text x="592.0" y="797.0" class="detail" text-anchor="end">modelopt NVFP4 - 10k reference - full request; timing split unavailable</text>
-<rect x="620" y="756" width="433.3" height="34" rx="5" fill="#f2b846" opacity="0.95"/>
-<rect x="620" y="756" width="433.3" height="34" rx="5" fill="none" stroke="#d9fff8" stroke-opacity="0.55"/>
-<text x="1065.3" y="782.0" class="value">92.0</text>
-<text x="1123.3" y="782.0" class="small">tok/s</text>
-<text x="72.0" y="888.0" class="label">Long context</text>
-<text x="592.0" y="928.0" class="small" text-anchor="end">Jackrong/Qwopus3.6-27B-Coder-MTP-GGUF</text>
-<text x="592.0" y="949.0" class="detail" text-anchor="end">Q5_K_M - 174.6k - generation only; prompt read ~75.6s</text>
-<rect x="620" y="908" width="330.7" height="34" rx="5" fill="#46d3c7" opacity="0.95"/>
-<rect x="620" y="908" width="330.7" height="34" rx="5" fill="none" stroke="#d9fff8" stroke-opacity="0.55"/>
-<text x="962.7" y="934.0" class="value">70.2</text>
-<text x="1020.7" y="934.0" class="small">tok/s</text>
-<text x="592.0" y="1008.0" class="small" text-anchor="end">Jackrong/Qwopus3.6-27B-Coder-MTP-GGUF</text>
-<text x="592.0" y="1029.0" class="detail" text-anchor="end">Q4_K_M - 174.6k - generation only; prompt read 141.1s</text>
-<rect x="620" y="988" width="218.6" height="34" rx="5" fill="#69a8ff" opacity="0.95"/>
-<rect x="620" y="988" width="218.6" height="34" rx="5" fill="none" stroke="#d9fff8" stroke-opacity="0.55"/>
-<text x="850.6" y="1014.0" class="value">46.4</text>
-<text x="908.6" y="1014.0" class="small">tok/s</text>
-<text x="592.0" y="1088.0" class="small" text-anchor="end">Jackrong/Qwopus3.6-27B-Coder-MTP-GGUF</text>
-<text x="592.0" y="1109.0" class="detail" text-anchor="end">Q5_K_M - 176k - file added (Unsloth Studio); prompt read 210.9s</text>
-<rect x="620" y="1068" width="100.8" height="34" rx="5" fill="#ff7a90" opacity="0.95"/>
-<rect x="620" y="1068" width="100.8" height="34" rx="5" fill="none" stroke="#d9fff8" stroke-opacity="0.55"/>
-<text x="634.0" y="1090.0" class="sourceTag">Studio</text>
-<text x="732.8" y="1094.0" class="value">21.4</text>
-<text x="790.8" y="1094.0" class="small">tok/s</text>
-<text x="592.0" y="1168.0" class="small" text-anchor="end">unsloth/Qwen3.6-35B-A3B-MTP-GGUF</text>
-<text x="592.0" y="1189.0" class="detail" text-anchor="end">UD-Q4_K_XL - 174.6k - generation only; prompt read 57.1s</text>
-<rect x="620" y="1148" width="421.6" height="34" rx="5" fill="#9d82ff" opacity="0.95"/>
-<rect x="620" y="1148" width="421.6" height="34" rx="5" fill="none" stroke="#d9fff8" stroke-opacity="0.55"/>
-<text x="1053.6" y="1174.0" class="value">89.5</text>
-<text x="1111.6" y="1174.0" class="small">tok/s</text>
-<text x="592.0" y="1248.0" class="small" text-anchor="end">unsloth/Qwen3.6-35B-A3B-MTP-GGUF</text>
-<text x="592.0" y="1269.0" class="detail" text-anchor="end">UD-Q4_K_XL - 179.5k - file added, 5090 only (Unsloth Studio); prompt read 49.4s</text>
-<rect x="620" y="1228" width="450.9" height="34" rx="5" fill="#ff7a90" opacity="0.95"/>
-<rect x="620" y="1228" width="450.9" height="34" rx="5" fill="none" stroke="#d9fff8" stroke-opacity="0.55"/>
-<text x="634.0" y="1250.0" class="sourceTag">Unsloth Studio</text>
-<text x="1082.9" y="1254.0" class="value">95.7</text>
-<text x="1140.9" y="1254.0" class="small">tok/s</text>
-<text x="592.0" y="1328.0" class="small" text-anchor="end">deepreinforce-ai/Ornith-1.0-35B-GGUF</text>
-<text x="592.0" y="1349.0" class="detail" text-anchor="end">Q4_K_M - 174.6k - generation only; prompt read 40.3s</text>
-<rect x="620" y="1308" width="502.7" height="34" rx="5" fill="#7edc72" opacity="0.95"/>
-<rect x="620" y="1308" width="502.7" height="34" rx="5" fill="none" stroke="#d9fff8" stroke-opacity="0.55"/>
-<text x="1134.7" y="1334.0" class="value">106.7</text>
-<text x="1192.7" y="1334.0" class="small">tok/s</text>
-<text x="592.0" y="1408.0" class="small" text-anchor="end">deepreinforce-ai/Ornith-1.0-35B-GGUF</text>
-<text x="592.0" y="1429.0" class="detail" text-anchor="end">Q4_K_M - 175.2k - file added (Unsloth Studio); prompt read 39.7s</text>
-<rect x="620" y="1388" width="423.5" height="34" rx="5" fill="#ff7a90" opacity="0.95"/>
-<rect x="620" y="1388" width="423.5" height="34" rx="5" fill="none" stroke="#d9fff8" stroke-opacity="0.55"/>
-<text x="634.0" y="1410.0" class="sourceTag">Unsloth Studio</text>
-<text x="1055.5" y="1414.0" class="value">89.9</text>
-<text x="1113.5" y="1414.0" class="small">tok/s</text>
-<text x="592.0" y="1488.0" class="small" text-anchor="end">nvidia/Qwen3.6-35B-A3B-NVFP4</text>
-<text x="592.0" y="1509.0" class="detail" text-anchor="end">modelopt NVFP4 - 200k reference - full request; timing split unavailable</text>
-<rect x="620" y="1468" width="143.6" height="34" rx="5" fill="#f2b846" opacity="0.95"/>
-<rect x="620" y="1468" width="143.6" height="34" rx="5" fill="none" stroke="#d9fff8" stroke-opacity="0.55"/>
-<text x="775.6" y="1494.0" class="value">30.5</text>
-<text x="833.6" y="1494.0" class="small">tok/s</text>
-<text x="72.0" y="1673.0" class="small">vLLM rows are full-request timing because the prompt/generation split was not captured. UI accounting may differ from endpoint benches.</text>
-<text x="1708.0" y="1673.0" class="small" text-anchor="end">neko-legends/nvidia-local-llm-profiles</text>
+<rect width="1900" height="1372" fill="#111418"/>
+<rect x="672" y="188" width="1136" height="1072" rx="10" fill="#181e25"/>
+<text x="72.0" y="76.0" class="title">RTX 5090 Native llama.cpp Long-Context Comparison</text>
+<text x="72.0" y="118.0" class="subtitle">Bars are generation/decode speed only; prompt prefill seconds are shown separately.</text>
+<text x="72.0" y="150.0" class="small">Native GGUF endpoints only. Docker/vLLM and UI-observed rows are intentionally left out of this headline chart.</text>
+<line x1="700.0" y1="212" x2="700.0" y2="1226" stroke="#2f3742" stroke-width="1"/>
+<text x="700.0" y="1250.0" class="axis" text-anchor="middle">0</text>
+<line x1="820.0" y1="212" x2="820.0" y2="1226" stroke="#2f3742" stroke-width="1"/>
+<text x="820.0" y="1250.0" class="axis" text-anchor="middle">25</text>
+<line x1="940.0" y1="212" x2="940.0" y2="1226" stroke="#2f3742" stroke-width="1"/>
+<text x="940.0" y="1250.0" class="axis" text-anchor="middle">50</text>
+<line x1="1060.0" y1="212" x2="1060.0" y2="1226" stroke="#2f3742" stroke-width="1"/>
+<text x="1060.0" y="1250.0" class="axis" text-anchor="middle">75</text>
+<line x1="1180.0" y1="212" x2="1180.0" y2="1226" stroke="#2f3742" stroke-width="1"/>
+<text x="1180.0" y="1250.0" class="axis" text-anchor="middle">100</text>
+<line x1="1300.0" y1="212" x2="1300.0" y2="1226" stroke="#2f3742" stroke-width="1"/>
+<text x="1300.0" y="1250.0" class="axis" text-anchor="middle">125</text>
+<line x1="1420.0" y1="212" x2="1420.0" y2="1226" stroke="#2f3742" stroke-width="1"/>
+<text x="1420.0" y="1250.0" class="axis" text-anchor="middle">150</text>
+<line x1="1540.0" y1="212" x2="1540.0" y2="1226" stroke="#2f3742" stroke-width="1"/>
+<text x="1540.0" y="1250.0" class="axis" text-anchor="middle">175</text>
+<line x1="1660.0" y1="212" x2="1660.0" y2="1226" stroke="#2f3742" stroke-width="1"/>
+<text x="1660.0" y="1250.0" class="axis" text-anchor="middle">200</text>
+<line x1="1780.0" y1="212" x2="1780.0" y2="1226" stroke="#2f3742" stroke-width="1"/>
+<text x="1780.0" y="1250.0" class="axis" text-anchor="middle">225</text>
+<text x="72.0" y="208.0" class="group">10K prompt</text>
+<text x="670.0" y="245.0" class="label" text-anchor="end">Ornith 1.0 35B Q4_K_M</text>
+<text x="670.0" y="267.0" class="detail" text-anchor="end">8,905 prompt tokens; prefill 1.7s</text>
+<rect x="700" y="224" width="967.2" height="34" rx="5" fill="#7edc72" opacity="0.95"/>
+<rect x="700" y="224" width="967.2" height="34" rx="5" fill="none" stroke="#d9fff8" stroke-opacity="0.50"/>
+<text x="1679.2" y="249.0" class="value">201.5</text>
+<text x="1739.2" y="249.0" class="small">tok/s</text>
+<text x="670.0" y="309.0" class="label" text-anchor="end">Qwopus3.6 35B A3B Coder Q5_K_M</text>
+<text x="670.0" y="331.0" class="detail" text-anchor="end">8,907 prompt tokens; prefill 2.3s</text>
+<rect x="700" y="288" width="685.4" height="34" rx="5" fill="#45d6c9" opacity="0.95"/>
+<rect x="700" y="288" width="685.4" height="34" rx="5" fill="none" stroke="#d9fff8" stroke-opacity="0.50"/>
+<text x="1397.4" y="313.0" class="value">142.8</text>
+<text x="1457.4" y="313.0" class="small">tok/s</text>
+<text x="670.0" y="373.0" class="label" text-anchor="end">AEON Ornith NVFP4 base GGUF</text>
+<text x="670.0" y="395.0" class="detail" text-anchor="end">8,905 prompt tokens; prefill 1.9s</text>
+<rect x="700" y="352" width="638.4" height="34" rx="5" fill="#54c7ff" opacity="0.95"/>
+<rect x="700" y="352" width="638.4" height="34" rx="5" fill="none" stroke="#d9fff8" stroke-opacity="0.50"/>
+<text x="1350.4" y="377.0" class="value">133.0</text>
+<text x="1410.4" y="377.0" class="small">tok/s</text>
+<text x="670.0" y="437.0" class="label" text-anchor="end">AEON Ornith Uncensored NVFP4 MTP</text>
+<text x="670.0" y="459.0" class="detail" text-anchor="end">8,905 prompt tokens; prefill 2.2s</text>
+<rect x="700" y="416" width="631.2" height="34" rx="5" fill="#82d56f" opacity="0.95"/>
+<rect x="700" y="416" width="631.2" height="34" rx="5" fill="none" stroke="#d9fff8" stroke-opacity="0.50"/>
+<text x="1343.2" y="441.0" class="value">131.5</text>
+<text x="1403.2" y="441.0" class="small">tok/s</text>
+<text x="670.0" y="501.0" class="label" text-anchor="end">Unsloth Qwen3.6 35B UD-Q4_K_XL</text>
+<text x="670.0" y="523.0" class="detail" text-anchor="end">8,907 prompt tokens; prefill 2.4s</text>
+<rect x="700" y="480" width="609.1" height="34" rx="5" fill="#9d82ff" opacity="0.95"/>
+<rect x="700" y="480" width="609.1" height="34" rx="5" fill="none" stroke="#d9fff8" stroke-opacity="0.50"/>
+<text x="1321.1" y="505.0" class="value">126.9</text>
+<text x="1381.1" y="505.0" class="small">tok/s</text>
+<text x="670.0" y="565.0" class="label" text-anchor="end">Qwopus3.6 27B Coder Q4_K_M</text>
+<text x="670.0" y="587.0" class="detail" text-anchor="end">8,908 prompt tokens; prefill 3.8s</text>
+<rect x="700" y="544" width="428.2" height="34" rx="5" fill="#f2b846" opacity="0.95"/>
+<rect x="700" y="544" width="428.2" height="34" rx="5" fill="none" stroke="#d9fff8" stroke-opacity="0.50"/>
+<text x="1140.2" y="569.0" class="value">89.2</text>
+<text x="1200.2" y="569.0" class="small">tok/s</text>
+<text x="670.0" y="629.0" class="label" text-anchor="end">Qwopus3.6 27B Coder Q5_K_M</text>
+<text x="670.0" y="651.0" class="detail" text-anchor="end">8,907 prompt tokens; prefill 3.9s</text>
+<rect x="700" y="608" width="381.6" height="34" rx="5" fill="#60a5ff" opacity="0.95"/>
+<rect x="700" y="608" width="381.6" height="34" rx="5" fill="none" stroke="#d9fff8" stroke-opacity="0.50"/>
+<text x="1093.6" y="633.0" class="value">79.5</text>
+<text x="1153.6" y="633.0" class="small">tok/s</text>
+<text x="72.0" y="732.0" class="group">200K prompt</text>
+<text x="670.0" y="769.0" class="label" text-anchor="end">Ornith 1.0 35B Q4_K_M</text>
+<text x="670.0" y="791.0" class="detail" text-anchor="end">174,588 prompt tokens; prefill 40.3s</text>
+<rect x="700" y="748" width="512.2" height="34" rx="5" fill="#7edc72" opacity="0.95"/>
+<rect x="700" y="748" width="512.2" height="34" rx="5" fill="none" stroke="#d9fff8" stroke-opacity="0.50"/>
+<text x="1224.2" y="773.0" class="value">106.7</text>
+<text x="1284.2" y="773.0" class="small">tok/s</text>
+<text x="670.0" y="833.0" class="label" text-anchor="end">Qwopus3.6 35B A3B Coder Q5_K_M</text>
+<text x="670.0" y="855.0" class="detail" text-anchor="end">174,590 prompt tokens; prefill 57.1s</text>
+<rect x="700" y="812" width="460.3" height="34" rx="5" fill="#45d6c9" opacity="0.95"/>
+<rect x="700" y="812" width="460.3" height="34" rx="5" fill="none" stroke="#d9fff8" stroke-opacity="0.50"/>
+<text x="1172.3" y="837.0" class="value">95.9</text>
+<text x="1232.3" y="837.0" class="small">tok/s</text>
+<text x="670.0" y="897.0" class="label" text-anchor="end">Unsloth Qwen3.6 35B UD-Q4_K_XL</text>
+<text x="670.0" y="919.0" class="detail" text-anchor="end">174,590 prompt tokens; prefill 57.1s</text>
+<rect x="700" y="876" width="429.6" height="34" rx="5" fill="#9d82ff" opacity="0.95"/>
+<rect x="700" y="876" width="429.6" height="34" rx="5" fill="none" stroke="#d9fff8" stroke-opacity="0.50"/>
+<text x="1141.6" y="901.0" class="value">89.5</text>
+<text x="1201.6" y="901.0" class="small">tok/s</text>
+<text x="670.0" y="961.0" class="label" text-anchor="end">AEON Ornith Uncensored NVFP4 MTP</text>
+<text x="670.0" y="983.0" class="detail" text-anchor="end">174,588 prompt tokens; prefill 52.1s</text>
+<rect x="700" y="940" width="412.8" height="34" rx="5" fill="#82d56f" opacity="0.95"/>
+<rect x="700" y="940" width="412.8" height="34" rx="5" fill="none" stroke="#d9fff8" stroke-opacity="0.50"/>
+<text x="1124.8" y="965.0" class="value">86.0</text>
+<text x="1184.8" y="965.0" class="small">tok/s</text>
+<text x="670.0" y="1025.0" class="label" text-anchor="end">AEON Ornith NVFP4 base GGUF</text>
+<text x="670.0" y="1047.0" class="detail" text-anchor="end">174,588 prompt tokens; prefill 41.0s</text>
+<rect x="700" y="1004" width="394.1" height="34" rx="5" fill="#54c7ff" opacity="0.95"/>
+<rect x="700" y="1004" width="394.1" height="34" rx="5" fill="none" stroke="#d9fff8" stroke-opacity="0.50"/>
+<text x="1106.1" y="1029.0" class="value">82.1</text>
+<text x="1166.1" y="1029.0" class="small">tok/s</text>
+<text x="670.0" y="1089.0" class="label" text-anchor="end">Qwopus3.6 27B Coder Q5_K_M</text>
+<text x="670.0" y="1111.0" class="detail" text-anchor="end">174,588 prompt tokens; prefill ~75.6s; estimated split</text>
+<rect x="700" y="1068" width="337.0" height="34" rx="5" fill="#60a5ff" opacity="0.95"/>
+<rect x="700" y="1068" width="337.0" height="34" rx="5" fill="none" stroke="#d9fff8" stroke-opacity="0.50"/>
+<text x="1049.0" y="1093.0" class="value">70.2</text>
+<text x="1109.0" y="1093.0" class="small">tok/s</text>
+<text x="670.0" y="1153.0" class="label" text-anchor="end">Qwopus3.6 27B Coder Q4_K_M</text>
+<text x="670.0" y="1175.0" class="detail" text-anchor="end">174,591 prompt tokens; prefill 141.1s</text>
+<rect x="700" y="1132" width="222.7" height="34" rx="5" fill="#f2b846" opacity="0.95"/>
+<rect x="700" y="1132" width="222.7" height="34" rx="5" fill="none" stroke="#d9fff8" stroke-opacity="0.50"/>
+<text x="934.7" y="1157.0" class="value">46.4</text>
+<text x="994.7" y="1157.0" class="small">tok/s</text>
+<text x="72.0" y="1322.0" class="small">Same BookContext prompt fixtures, 1024 generated tokens, temperature 0 unless noted in timing CSV.</text>
+<text x="1828.0" y="1322.0" class="small" text-anchor="end">neko-legends/nvidia-local-llm-profiles</text>
 </svg>

@@ -10,6 +10,7 @@ from typing import Any
 
 
 QWOPUS_MODEL = "qwopus3.6-27b-coder-mtp-q5-k-m"
+QWOPUS35_MODEL = "qwopus3.6-35b-a3b-coder-mtp-q5-k-m"
 DIFFUSION_MODEL = "diffusiongemma"
 ORNITH_MODEL = "ornith-1.0-35b-q4-k-m"
 ORNITH_Q5_MODEL = "ornith-1.0-35b-q5-k-m"
@@ -21,6 +22,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--host", default="127.0.0.1")
     parser.add_argument("--port", type=int, default=39190)
     parser.add_argument("--qwopus-base-url", default="http://127.0.0.1:39182/v1")
+    parser.add_argument("--qwopus35-base-url", default="http://127.0.0.1:39191/v1")
     parser.add_argument("--diffusiongemma-base-url", default="http://127.0.0.1:8890/v1")
     parser.add_argument("--ornith-base-url", default="http://127.0.0.1:39188/v1")
     parser.add_argument("--ornith-q5-base-url", default="http://127.0.0.1:39189/v1")
@@ -36,6 +38,7 @@ class Local5090Router(BaseHTTPRequestHandler):
     server_version = "Local5090Router/1.0"
 
     qwopus_base_url: str
+    qwopus35_base_url: str
     diffusiongemma_base_url: str
     ornith_base_url: str
     ornith_q5_base_url: str
@@ -59,6 +62,13 @@ class Local5090Router(BaseHTTPRequestHandler):
                         "created": 0,
                         "owned_by": "Local 5090",
                         "context_length": 262144,
+                    },
+                    {
+                        "id": QWOPUS35_MODEL,
+                        "object": "model",
+                        "created": 0,
+                        "owned_by": "Local 5090",
+                        "context_length": 200000,
                     },
                     {
                         "id": ORNITH_MODEL,
@@ -100,6 +110,12 @@ class Local5090Router(BaseHTTPRequestHandler):
             "qwopus": self.qwopus_base_url,
             "qwopus-coder": self.qwopus_base_url,
             "qwopus-coder-q5": self.qwopus_base_url,
+            QWOPUS35_MODEL: self.qwopus35_base_url,
+            "qwopus35": self.qwopus35_base_url,
+            "qwopus-35b": self.qwopus35_base_url,
+            "qwopus35-coder": self.qwopus35_base_url,
+            "qwopus3.6-35b-coder": self.qwopus35_base_url,
+            "qwopus3.6-35b-a3b-coder": self.qwopus35_base_url,
             DIFFUSION_MODEL: self.diffusiongemma_base_url,
             "diffusiongemma-med": self.diffusiongemma_base_url,
             "diffusiongemma med": self.diffusiongemma_base_url,
@@ -176,7 +192,7 @@ class Local5090Router(BaseHTTPRequestHandler):
                 {
                     "error": {
                         "message": "Unknown local model. Use diffusiongemma or "
-                        f"{QWOPUS_MODEL}, {ORNITH_MODEL}, {ORNITH_Q5_MODEL}, "
+                        f"{QWOPUS_MODEL}, {QWOPUS35_MODEL}, {ORNITH_MODEL}, {ORNITH_Q5_MODEL}, "
                         f"or {AEON_ORNITH_NVFP4_MODEL}."
                     }
                 },
@@ -222,6 +238,7 @@ class Local5090Router(BaseHTTPRequestHandler):
 def main() -> int:
     args = parse_args()
     Local5090Router.qwopus_base_url = args.qwopus_base_url
+    Local5090Router.qwopus35_base_url = args.qwopus35_base_url
     Local5090Router.diffusiongemma_base_url = args.diffusiongemma_base_url
     Local5090Router.ornith_base_url = args.ornith_base_url
     Local5090Router.ornith_q5_base_url = args.ornith_q5_base_url
