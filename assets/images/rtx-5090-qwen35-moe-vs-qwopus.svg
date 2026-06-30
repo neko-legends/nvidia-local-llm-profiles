@@ -5,6 +5,7 @@ text{font-family:Segoe UI,Arial,sans-serif;letter-spacing:0}
 .subtitle{fill:#b5bec8;font-size:20px}
 .group{fill:#edf3f7;font-size:24px;font-weight:750}
 .label{fill:#edf3f7;font-size:18px;font-weight:700}
+.label-highlight{fill:#ff4d4d;font-size:20px;font-weight:900}
 .detail{fill:#8e99a6;font-size:14px}
 .value{fill:#edf3f7;font-size:21px;font-weight:750}
 .small{fill:#9aa5b1;font-size:16px}
@@ -52,7 +53,7 @@ text{font-family:Segoe UI,Arial,sans-serif;letter-spacing:0}
 <rect x="700" y="352" width="802.4" height="34" rx="5" fill="none" stroke="#d9fff8" stroke-opacity="0.50"/>
 <text x="1514.4" y="377.0" class="value">148.6</text>
 <text x="1574.4" y="377.0" class="small">tok/s</text>
-<text x="670.0" y="437.0" class="label" text-anchor="end">NVIDIA Qwen3.6 35B NVFP4 MTP GGUF</text>
+<text x="670.0" y="437.0" class="label-highlight" text-anchor="end">neko-legends/Qwen3.6 35B NVFP4 MTP GGUF</text>
 <text x="670.0" y="459.0" class="detail" text-anchor="end">8,907 prompt tokens; prefill 2.6s</text>
 <rect x="700" y="416" width="792.7" height="34" rx="5" fill="#b6f26a" opacity="0.95"/>
 <rect x="700" y="416" width="792.7" height="34" rx="5" fill="none" stroke="#d9fff8" stroke-opacity="0.50"/>
@@ -113,7 +114,7 @@ text{font-family:Segoe UI,Arial,sans-serif;letter-spacing:0}
 <rect x="700" y="1068" width="483.3" height="34" rx="5" fill="none" stroke="#d9fff8" stroke-opacity="0.50"/>
 <text x="1195.3" y="1093.0" class="value">89.5</text>
 <text x="1255.3" y="1093.0" class="small">tok/s</text>
-<text x="670.0" y="1153.0" class="label" text-anchor="end">NVIDIA Qwen3.6 35B NVFP4 MTP GGUF</text>
+<text x="670.0" y="1153.0" class="label-highlight" text-anchor="end">neko-legends/Qwen3.6 35B NVFP4 MTP GGUF</text>
 <text x="670.0" y="1175.0" class="detail" text-anchor="end">174,590 prompt tokens; prefill 51.8s</text>
 <rect x="700" y="1132" width="477.9" height="34" rx="5" fill="#b6f26a" opacity="0.95"/>
 <rect x="700" y="1132" width="477.9" height="34" rx="5" fill="none" stroke="#d9fff8" stroke-opacity="0.50"/>

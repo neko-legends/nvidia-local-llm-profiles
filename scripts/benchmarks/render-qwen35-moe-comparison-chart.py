@@ -23,6 +23,7 @@ class ModelSpec:
     file: str
     label: str
     color: str
+    highlight: bool = False
 
 
 MODEL_SPECS = [
@@ -65,8 +66,9 @@ MODEL_SPECS = [
     ModelSpec(
         "nvidia/Qwen3.6-35B-A3B-NVFP4",
         "qwen3.6-35b-a3b-nvfp4-mtp.gguf",
-        "NVIDIA Qwen3.6 35B NVFP4 MTP GGUF",
+        "neko-legends/Qwen3.6 35B NVFP4 MTP GGUF",
         "#b6f26a",
+        True,
     ),
     ModelSpec(
         "Jackrong/Qwopus3.6-27B-Coder-MTP-GGUF",
@@ -139,6 +141,7 @@ def latest_rows_by_spec() -> list[dict[str, object]]:
                     "tps": fnum(row["generation_tps"]),
                     "color": spec.color,
                     "file": spec.file,
+                    "highlight": spec.highlight,
                 }
             )
 
@@ -188,6 +191,7 @@ def render_svg(rows: list[dict[str, object]], scale_max: int) -> Path:
         ".subtitle{fill:#b5bec8;font-size:20px}",
         ".group{fill:#edf3f7;font-size:24px;font-weight:750}",
         ".label{fill:#edf3f7;font-size:18px;font-weight:700}",
+        ".label-highlight{fill:#ff4d4d;font-size:20px;font-weight:900}",
         ".detail{fill:#8e99a6;font-size:14px}",
         ".value{fill:#edf3f7;font-size:21px;font-weight:750}",
         ".small{fill:#9aa5b1;font-size:16px}",
@@ -215,7 +219,8 @@ def render_svg(rows: list[dict[str, object]], scale_max: int) -> Path:
 
         value = float(row["tps"])
         bar_w = (value / scale_max) * plot_w
-        parts.append(svg_text(left - 30, ypos - 5, str(row["label"]), class_="label", text_anchor="end"))
+        label_class = "label-highlight" if row.get("highlight") else "label"
+        parts.append(svg_text(left - 30, ypos - 5, str(row["label"]), class_=label_class, text_anchor="end"))
         parts.append(svg_text(left - 30, ypos + 17, str(row["detail"]), class_="detail", text_anchor="end"))
         parts.append(f'<rect x="{left}" y="{ypos - 26}" width="{bar_w:.1f}" height="{bar_h}" rx="5" fill="{row["color"]}" opacity="0.95"/>')
         parts.append(f'<rect x="{left}" y="{ypos - 26}" width="{bar_w:.1f}" height="{bar_h}" rx="5" fill="none" stroke="#d9fff8" stroke-opacity="0.50"/>')
@@ -261,6 +266,7 @@ def render_png(rows: list[dict[str, object]], scale_max: int) -> Path:
     subtitle_font = font("segoeui.ttf", 20)
     group_font = font("segoeuib.ttf", 24)
     label_font = font("segoeuib.ttf", 18)
+    label_highlight_font = font("segoeuib.ttf", 20)
     detail_font = font("segoeui.ttf", 14)
     value_font = font("segoeuib.ttf", 21)
     small_font = font("segoeui.ttf", 16)
@@ -288,8 +294,10 @@ def render_png(rows: list[dict[str, object]], scale_max: int) -> Path:
         bar_w = (value / scale_max) * plot_w
         label = str(row["label"])
         detail = str(row["detail"])
-        bbox = draw.textbbox((0, 0), label, font=label_font)
-        draw.text((left - 30 - (bbox[2] - bbox[0]), ypos - 29), label, fill="#edf3f7", font=label_font)
+        current_label_font = label_highlight_font if row.get("highlight") else label_font
+        label_fill = "#ff4d4d" if row.get("highlight") else "#edf3f7"
+        bbox = draw.textbbox((0, 0), label, font=current_label_font)
+        draw.text((left - 30 - (bbox[2] - bbox[0]), ypos - 31), label, fill=label_fill, font=current_label_font)
         bbox = draw.textbbox((0, 0), detail, font=detail_font)
         draw.text((left - 30 - (bbox[2] - bbox[0]), ypos - 7), detail, fill="#8e99a6", font=detail_font)
         draw.rounded_rectangle([left, ypos - 26, left + bar_w, ypos - 26 + bar_h], radius=5, fill=str(row["color"]), outline="#d9fff8", width=1)
