@@ -5,7 +5,7 @@ param(
     [int]$ContextSize = 200000,
     [int[]]$PromptTokenTargets = @(10000, 200000),
     [ValidateSet("ngram-mod,draft-mtp", "draft-mtp")]
-    [string]$SpecType = "ngram-mod,draft-mtp",
+    [string]$SpecType = "draft-mtp",
     [int]$SpecDraftNMax = 2,
     [switch]$EnableThinking
 )

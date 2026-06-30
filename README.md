@@ -214,20 +214,25 @@ Latest addition:
 
 - `Jackrong/Qwopus3.6-35B-A3B-Coder-MTP-GGUF` Q4_K_M and Q5_K_M loaded
   natively at `ctx=200000` (`n_ctx=200192`) with q4 target/draft KV,
-  `ngram-mod,draft-mtp`, and request-level no-thinking.
+  request-level no-thinking, Q5 on pure `draft-mtp`, and Q4 on
+  `ngram-mod,draft-mtp`.
 - No-thinking proof: on the same server, an auto request produced
   `reasoning_content`, while a request with
   `chat_template_kwargs.enable_thinking=false` produced normal content without a
   reasoning block. The `Local 5090` router now injects that request default for
   Qwopus35.
-- 10k reference prompt: **149.0 decode tok/s**, 112.8 full-wall tok/s after
+- 10k reference prompt: **148.6 decode tok/s**, 111.8 full-wall tok/s after
   2.1s prefill.
-- 200k reference prompt: **100.0 decode tok/s**, 15.4 full-wall tok/s after
-  55.8s prefill.
+- 200k reference prompt: **102.5 decode tok/s**, 15.5 full-wall tok/s after
+  55.5s prefill.
+- Q5_K_M spec-type check: pure `draft-mtp` n=2 beat the previous
+  `ngram-mod,draft-mtp` n=2 profile at 200k (**102.5** vs **100.0** decode
+  tok/s), while landing essentially tied at 10k (**148.6** vs **149.0**).
 - Q5_K_M MTP depth check: `--spec-draft-n-max 3` improves the 10k generation
   check to **153.8 decode tok/s**, but the 200k generation check drops to
-  **94.6 decode tok/s**. The chart keeps Q5 on n=2 because this comparison is
-  anchored on the long-context profile rather than per-context cherry-picks.
+  **94.6 decode tok/s**. The chart keeps Q5 on pure `draft-mtp` n=2 because
+  this comparison is anchored on the long-context profile rather than
+  per-context cherry-picks.
 - Q4_K_M no-thinking result: **181.0 decode tok/s** at 10k and **91.2 decode
   tok/s** at 200k. A Q4 n=3 MTP trial was slower than n=2 on the 10k check, so
   the chart uses `--spec-draft-n-max 2`.
@@ -235,7 +240,8 @@ Latest addition:
   prevents generated reasoning blocks, but it does not skip reading a 200k
   prompt; the fresh 200k run still processed 166,199 new prompt tokens after
   reusing the 10k prefix from the previous request.
-- Peak observed memory after request: 27.6 GiB at 10k and 28.4 GiB at 200k
+- Peak observed memory after request for the current Q5 profile: 27.0 GiB at
+  10k and 27.6 GiB at 200k
   from the recorded `nvidia-smi` MiB fields.
 
 The 10k and 200k reference prompts are checked in at

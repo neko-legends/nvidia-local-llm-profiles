@@ -17,7 +17,10 @@ set "HOST=0.0.0.0"
 set "PORT=39191"
 set "CTX_SIZE=200000"
 set "THINKING=0"
+if not defined SPEC_TYPE set "SPEC_TYPE=draft-mtp"
 if not defined SPEC_DRAFT_N_MAX set "SPEC_DRAFT_N_MAX=2"
+set "SPEC_ARGS=--spec-type %SPEC_TYPE% --spec-draft-n-max %SPEC_DRAFT_N_MAX% --spec-draft-p-min 0.0"
+if /i "%SPEC_TYPE%"=="ngram-mod,draft-mtp" set "SPEC_ARGS=%SPEC_ARGS% --spec-ngram-mod-n-match 24 --spec-ngram-mod-n-min 48 --spec-ngram-mod-n-max 64"
 
 set "LLAMA_SERVER="
 if defined LLAMA_DIR (
@@ -66,7 +69,7 @@ echo LAN base URL:      http://^<your-lan-ip^>:%PORT%/v1
 echo Model id:          %MODEL_ALIAS%
 echo Model path:        %MODEL_PATH%
 echo Context:           %CTX_SIZE% tokens
-echo MTP speculative:   ngram-mod + draft-mtp, draft max %SPEC_DRAFT_N_MAX%
+echo MTP speculative:   %SPEC_TYPE%, draft max %SPEC_DRAFT_N_MAX%
 echo Thinking mode:     %THINKING%
 echo.
 echo Press Ctrl+C in this window to stop the server.
@@ -94,12 +97,7 @@ cd /d "%LLAMA_DIR%"
   --metrics ^
   --slots ^
   %REASONING_FLAG% ^
-  --spec-type ngram-mod,draft-mtp ^
-  --spec-draft-n-max %SPEC_DRAFT_N_MAX% ^
-  --spec-draft-p-min 0.0 ^
-  --spec-ngram-mod-n-match 24 ^
-  --spec-ngram-mod-n-min 48 ^
-  --spec-ngram-mod-n-max 64
+  %SPEC_ARGS%
 
 echo.
 echo Server exited with code %ERRORLEVEL%.

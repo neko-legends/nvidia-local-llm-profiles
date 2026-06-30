@@ -21,15 +21,15 @@
 
 ## Results
 
-### Qwopus3.6 35B A3B Coder MTP Q5_K_M - llama.cpp b9267 - ctx=200k - MTP + ngram
+### Qwopus3.6 35B A3B Coder MTP Q5_K_M - llama.cpp b9267 - ctx=200k - MTP
 
 Two-point native llama.cpp benchmark, one measured run per context. The model
 loaded at `n_ctx=200192` from the repo-relative local model cache path.
 
 | Context target | Prompt tokens | Full-request tok/s | Generation tok/s | Prompt read | Power | Temp |
 | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
-| 10k | 8,907 | 112.8 | 149.0 | 2.1s | 205W | 44C |
-| 200k | 174,590 | 15.4 | 100.0 | 55.8s | 218W | 53C |
+| 10k | 8,907 | 111.8 | 148.6 | 2.1s | 184W | 44C |
+| 200k | 174,590 | 15.5 | 102.5 | 55.5s | 232W | 54C |
 
 - **Stack:** llama.cpp server -> OpenAI-compatible endpoint at 127.0.0.1:39191
 - **Model:** `Jackrong/Qwopus3.6-35B-A3B-Coder-MTP-GGUF`
@@ -42,24 +42,26 @@ loaded at `n_ctx=200192` from the repo-relative local model cache path.
   `--chat-template-kwargs` is deprecated in this llama.cpp build.
 - **Flags:** `--gpu-layers all --gpu-layers-draft all --ctx-size 200000
   --cache-type-k q4_0 --cache-type-v q4_0 --cache-type-k-draft q4_0
-  --cache-type-v-draft q4_0 --flash-attn on --spec-type ngram-mod,draft-mtp
-  --spec-draft-n-max 2 --spec-ngram-mod-n-match 24
-  --spec-ngram-mod-n-min 48 --spec-ngram-mod-n-max 64`
+  --cache-type-v-draft q4_0 --flash-attn on --spec-type draft-mtp
+  --spec-draft-n-max 2`
+- **Spec-type check:** pure `draft-mtp` n=2 beat the previous
+  `ngram-mod,draft-mtp` n=2 profile at 200k (**102.5** vs **100.0 tok/s**),
+  while landing essentially tied at 10k (**148.6** vs **149.0 tok/s**).
 - **MTP depth check:** `--spec-draft-n-max 3` improved the 10k check to
   **153.8 tok/s**, but lowered the 200k check to **94.6 tok/s**. A pure
   `draft-mtp` n=3 10k check was effectively tied at **153.3 tok/s**. The chart
-  keeps Q5 on n=2 because n=2 is the stronger 200k profile.
-- **MTP acceptance:** 10k `572/900 = 63.6%`; 200k `640/1031 = 62.1%`
+  keeps Q5 on pure `draft-mtp` n=2 because n=2 is the stronger 200k profile.
+- **MTP acceptance:** 10k `572/900 = 63.6%`; 200k `626/792 = 79.0%`
 - **Prompt prefill note:** no-thinking prevents generated reasoning blocks, but
   it does not skip prompt ingestion. The 200k run followed the 10k run in the
   same server, so llama.cpp reused the shared prefix and still prefilled 166,199
   new prompt tokens.
 - **Prompt SHA256:** 10k `785c5b31d1ce77612431b1289c0a097ed51ab1a6d4a07bccfb7a70f59df55f94`; 200k `a794ca243983eb3387bec6728db4b0c72a99ee2a98cfee7223269708e4ae228c`
-- **CSV:** `qwopus3.6-35b-a3b-coder-mtp-q5-k-m-llamacpp-ctx200k-request-nothink-prompt10k-gen1024-20260630-004959.csv`
-  and `qwopus3.6-35b-a3b-coder-mtp-q5-k-m-llamacpp-ctx200k-request-nothink-prompt200k-gen1024-20260630-004959.csv`
+- **CSV:** `qwopus3.6-35b-a3b-coder-mtp-q5-k-m-llamacpp-ctx200k-draft-mtp-mtpn2-request-nothink-prompt10k-gen1024-20260630-013212.csv`
+  and `qwopus3.6-35b-a3b-coder-mtp-q5-k-m-llamacpp-ctx200k-draft-mtp-mtpn2-request-nothink-prompt200k-gen1024-20260630-013223.csv`
 - **Probe CSV:** `qwopus3.6-35b-a3b-coder-mtp-q5-k-m-llamacpp-ctx200k-ngram-mod-draft-mtp-mtpn3-request-nothink-prompt10k-gen1024-20260630-012703.csv`
   and `qwopus3.6-35b-a3b-coder-mtp-q5-k-m-llamacpp-ctx200k-ngram-mod-draft-mtp-mtpn3-request-nothink-prompt200k-gen1024-20260630-012714.csv`
-- **Timing log:** `logs/qwopus35-q5-request-nothink-bench-server-20260630-004937.err.log`
+- **Timing log:** `logs/qwopus35-q5-bench-server-20260630-013150.err.log`
 
 ### Qwopus3.6 35B A3B Coder MTP Q4_K_M - llama.cpp b9267 - ctx=200k - MTP + ngram
 
