@@ -265,16 +265,21 @@ with reasoning mode enabled because Ornith is a reasoning model.
 
 | Context target | Prompt tokens | Full-request tok/s | Generation tok/s | Prompt read | Power | Temp |
 | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
-| 10k reference | 8,905 | 149.7 | 201.5 | 1.7s | 327W | 53C |
+| 10k reference | 8,905 | 181.0 warm wall | 184.5 warm avg | 1.7s cold | 208W | 45C |
 | 200k reference | 174,588 | 20.3 | 106.7 | 40.3s | 478W | 66C |
 
 - **Stack:** llama.cpp server -> OpenAI-compatible endpoint at 127.0.0.1:39188
 - **Model:** `deepreinforce-ai/Ornith-1.0-35B-GGUF`
 - **File:** `ornith-1.0-35b-Q4_K_M.gguf`
 - **Flags:** `--gpu-layers all --ctx-size 262144 --cache-type-k q4_0 --cache-type-v q4_0 --flash-attn on --reasoning on`
+- **10k rerun note:** the chart uses the 2026-06-30 rerun for the 10k bar:
+  warm repeat generation averaged **184.5 tok/s** from runs 2-3
+  (`184.14`, `184.76`). The older 2026-06-25 single 10k run measured
+  **201.5 tok/s**, but the repeat check landed in the 180s.
 - **Prompt SHA256:** 10k `785c5b31d1ce77612431b1289c0a097ed51ab1a6d4a07bccfb7a70f59df55f94`; 200k `a794ca243983eb3387bec6728db4b0c72a99ee2a98cfee7223269708e4ae228c`
 - **CSV:** `ornith-1.0-35b-q4-k-m-llamacpp-ctx256k-prompt10k-gen1024-20260625-114352.csv`
-  and `ornith-1.0-35b-q4-k-m-llamacpp-ctx256k-prompt200k-gen1024-20260625-114359.csv`
+  plus rerun `ornith-1.0-35b-q4-k-m-llamacpp-ctx256k-rerun10k-gen1024-20260630-004126.csv`;
+  200k remains `ornith-1.0-35b-q4-k-m-llamacpp-ctx256k-prompt200k-gen1024-20260625-114359.csv`
 - **Timing note:** the 200k prompt read value is exact llama.cpp prompt-eval
   time for 166,199 newly processed prompt tokens after prompt-cache reuse from
   the preceding 10k run.
