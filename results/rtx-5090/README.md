@@ -15,11 +15,30 @@
 
 ![RTX 5090 native llama.cpp long-context comparison](../../assets/images/rtx-5090-qwen35-moe-vs-qwopus.png)
 
+![llama.cpp b9761 vs b9851 Qwen3.6 NVFP4 MTP GGUF decode comparison](../../assets/images/qwen36-llamacpp-b9761-vs-b9851.png)
+
 ![AEON Ornith Ultimate Uncensored NVFP4 on Windows, Docker vLLM vs native GGUF llama.cpp](../../assets/images/aeon-ornith-windows-docker-vs-gguf.png)
 
 ---
 
 ## Results
+
+### NVIDIA Qwen3.6 35B A3B NVFP4 MTP GGUF - llama.cpp b9761 vs b9851
+
+Same GGUF, RTX 5090, CUDA 13.3 Windows builds, `draft-mtp` n=2, no-thinking,
+q4 target/draft KV. This comparison uses llama.cpp `slot print_timing`
+decode/generation speed only; prompt prefill and request wall time are omitted.
+
+| Context target | Prompt tokens | Generated tokens | b9761 decode tok/s | b9851 decode tok/s | Change | Notes |
+| ---: | ---: | ---: | ---: | ---: | ---: | --- |
+| 10k | 8,907 | 1,024 | 146.8 | 152.7 | +4.0% | normal completion |
+| 200k | 174,590 | 1,024 | 88.5 | 90.4 | +2.1% | normal completion |
+| 300k target / 262k cap | 261,960 | 183 | 68.1 | 69.2 | +1.6% | `n_ctx_slot=262144`, stopped truncated at 262,143 total tokens |
+
+- **Latest checked build:** llama.cpp b9851 (`0eca4d490`)
+- **Old baseline:** llama.cpp b9761 (`721354fbd`)
+- **300k prompt SHA256:** `5e3a5f9c15da85d938993ef0c80153d26ba405a13689447fd7082d23355ca4ba`
+- **Curated comparison CSV:** `qwen36-35b-a3b-nvfp4-mtp-gguf-llamacpp-build-comparison-20260630.csv`
 
 ### NVIDIA Qwen3.6 35B A3B NVFP4 MTP GGUF - llama.cpp b9761 - ctx=200k - MTP n=2
 

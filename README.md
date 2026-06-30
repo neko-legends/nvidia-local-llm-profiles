@@ -232,7 +232,24 @@ separately. Docker/vLLM and manual UI observations are kept in
 
 ![RTX 5090 native llama.cpp long-context comparison](assets/images/rtx-5090-qwen35-moe-vs-qwopus.png)
 
-Latest addition:
+llama.cpp build check for `neko-legends/Qwen3.6-35B-A3B-NVFP4-MTP-GGUF`:
+
+![llama.cpp b9761 vs b9851 Qwen3.6 NVFP4 MTP GGUF decode comparison](assets/images/qwen36-llamacpp-b9761-vs-b9851.png)
+
+- Latest checked build: **llama.cpp b9851** (`0eca4d490`), CUDA 13.3 Windows
+  release.
+- Same GGUF, RTX 5090, `draft-mtp` n=2, no-thinking, q4 target/draft KV.
+- Decode-only `slot print_timing` improved from **146.8 -> 152.7 tok/s** at
+  10k, **88.5 -> 90.4 tok/s** at 200k, and **68.1 -> 69.2 tok/s** at the
+  300k-target / 262k-cap edge.
+- The 300k target prompt tokenized to **261,960 prompt tokens**. llama.cpp
+  capped the slot at **262,144** and stopped truncated after **183 generated
+  tokens**, so that row is a max-context stress check rather than a normal
+  1024-token completion.
+- This chart intentionally omits wall-rate numbers; it uses llama.cpp
+  decode/generation timing only.
+
+Additional model notes:
 
 - `Jackrong/Qwopus3.6-35B-A3B-Coder-MTP-GGUF` Q4_K_M and Q5_K_M loaded
   natively at `ctx=200000` (`n_ctx=200192`) with q4 target/draft KV,
@@ -268,9 +285,11 @@ Latest addition:
 
 The 10k and 200k reference prompts are checked in at
 `benchmarks/prompts/book-context-10k.txt` and
-`benchmarks/prompts/book-context-200k.txt`. Their SHA256 values are
+`benchmarks/prompts/book-context-200k.txt`. The 300k-target stress prompt is
+checked in at `benchmarks/prompts/book-context-300k.txt`. Their SHA256 values are
 `785c5b31d1ce77612431b1289c0a097ed51ab1a6d4a07bccfb7a70f59df55f94` and
-`a794ca243983eb3387bec6728db4b0c72a99ee2a98cfee7223269708e4ae228c`.
+`a794ca243983eb3387bec6728db4b0c72a99ee2a98cfee7223269708e4ae228c`, and
+`5e3a5f9c15da85d938993ef0c80153d26ba405a13689447fd7082d23355ca4ba`.
 
 Detailed CSVs, Docker/vLLM experiments, manual UI observations, the older
 Qwopus27 ladder, and the AEON Ornith Docker-vs-GGUF chart live in

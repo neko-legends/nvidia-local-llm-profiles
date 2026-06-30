@@ -49,7 +49,8 @@ $outLog = Join-Path $repoRoot "logs\qwen36-nvidia-nvfp4-mtp-gguf-bench-server-$s
 $errLog = Join-Path $repoRoot "logs\qwen36-nvidia-nvfp4-mtp-gguf-bench-server-$stamp.err.log"
 $modelAlias = "qwen36-35b-a3b-nvfp4-mtp-gguf"
 $specSlug = $SpecType.Replace(",", "-").Replace("_", "-")
-$casePrefix = "qwen36-35b-a3b-nvfp4-mtp-gguf-llamacpp-ctx200k-$specSlug-mtpn$SpecDraftNMax"
+$ctxSlug = if (($ContextSize % 1000) -eq 0) { "ctx$([int]($ContextSize / 1000))k" } else { "ctx$ContextSize" }
+$casePrefix = "qwen36-35b-a3b-nvfp4-mtp-gguf-llamacpp-$ctxSlug-$specSlug-mtpn$SpecDraftNMax"
 if (-not $EnableThinking) {
     $casePrefix += "-request-nothink"
 }

@@ -38,6 +38,14 @@ RTX 5090 b9761 results:
 | 10k | 8,907 | 105.0 | 146.8 | 2.6s | 67.6% |
 | 200k | 174,590 | 16.0 | 88.5 | 51.8s | 60.2% |
 
+llama.cpp build comparison, decode-only:
+
+| Context | b9761 decode tok/s | b9851 decode tok/s | Change | Notes |
+| ---: | ---: | ---: | ---: | --- |
+| 10k | 146.8 | 152.7 | +4.0% | 8,907 prompt tokens, 1,024 generated |
+| 200k | 88.5 | 90.4 | +2.1% | 174,590 prompt tokens, 1,024 generated |
+| 300k target / 262k cap | 68.1 | 69.2 | +1.6% | 261,960 prompt tokens; truncated after 183 generated tokens |
+
 The server log reported `BLACKWELL_NATIVE_FP4=1` and initialized
 `draft-mtp` with `n_max=2`. The benchmark sent no-thinking requests and the
 server logged `chat template, thinking = 0`.

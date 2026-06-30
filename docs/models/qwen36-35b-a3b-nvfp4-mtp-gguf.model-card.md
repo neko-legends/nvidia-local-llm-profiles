@@ -96,12 +96,32 @@ use llama.cpp decode-only timing; `Full request tok/s` includes prompt prefill.
 | 10k | 8,907 | 105.0 | 146.8 | 2.6s | 67.6% |
 | 200k | 174,590 | 16.0 | 88.5 | 51.8s | 60.2% |
 
+## llama.cpp Build Check
+
+<div style="font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; border: 1px solid #3a2a1f; background: #0f0f13; border-radius: 16px; overflow: hidden; margin: 0 0 24px 0; box-shadow: 0 20px 48px rgba(0,0,0,0.24);">
+  <div style="padding: 14px 18px; background: linear-gradient(90deg, #1a120d 0%, #2b1708 100%); border-bottom: 1px solid rgba(255,122,26,0.35); color: #ffd7ad; font-weight: 950;">llama.cpp b9761 vs b9851 decode-only chart</div>
+  <a href="https://huggingface.co/neko-legends/Qwen3.6-35B-A3B-NVFP4-MTP-GGUF/blob/main/qwen36-llamacpp-b9761-vs-b9851.png" target="_blank" style="display:block; background:#050507;">
+    <img src="https://huggingface.co/neko-legends/Qwen3.6-35B-A3B-NVFP4-MTP-GGUF/resolve/main/qwen36-llamacpp-b9761-vs-b9851.png" alt="llama.cpp b9761 vs b9851 Qwen3.6 NVFP4 MTP GGUF decode comparison" style="display:block; width:100%; border:0;" />
+  </a>
+</div>
+
+Same GGUF, RTX 5090, CUDA 13.3 Windows builds, `draft-mtp` n=2,
+no-thinking, q4 target/draft KV. These are llama.cpp `slot print_timing`
+decode/generation values only.
+
+| Context | b9761 decode tok/s | b9851 decode tok/s | Change | Notes |
+| ---: | ---: | ---: | ---: | --- |
+| 10k | 146.8 | 152.7 | +4.0% | 8,907 prompt tokens, 1,024 generated |
+| 200k | 88.5 | 90.4 | +2.1% | 174,590 prompt tokens, 1,024 generated |
+| 300k target / 262k cap | 68.1 | 69.2 | +1.6% | 261,960 prompt tokens; truncated after 183 generated tokens |
+
 Benchmark prompt files are included in this repo:
 
 | File | SHA256 | Notes |
 | --- | --- | --- |
 | [`benchmark-prompts/book-context-10k.txt`](https://huggingface.co/neko-legends/Qwen3.6-35B-A3B-NVFP4-MTP-GGUF/blob/main/benchmark-prompts/book-context-10k.txt) | `785c5b31d1ce77612431b1289c0a097ed51ab1a6d4a07bccfb7a70f59df55f94` | 42,940 bytes; tokenized as 8,907 prompt tokens in this run |
 | [`benchmark-prompts/book-context-200k.txt`](https://huggingface.co/neko-legends/Qwen3.6-35B-A3B-NVFP4-MTP-GGUF/blob/main/benchmark-prompts/book-context-200k.txt) | `a794ca243983eb3387bec6728db4b0c72a99ee2a98cfee7223269708e4ae228c` | 840,403 bytes; tokenized as 174,590 prompt tokens in this run |
+| [`benchmark-prompts/book-context-300k.txt`](https://huggingface.co/neko-legends/Qwen3.6-35B-A3B-NVFP4-MTP-GGUF/blob/main/benchmark-prompts/book-context-300k.txt) | `5e3a5f9c15da85d938993ef0c80153d26ba405a13689447fd7082d23355ca4ba` | 1,260,986 bytes; tokenized as 261,960 prompt tokens and reaches the 262,144-token context cap |
 
 Serving flags used for the benchmark:
 

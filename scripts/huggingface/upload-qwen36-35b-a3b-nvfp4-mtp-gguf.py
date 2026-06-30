@@ -22,9 +22,13 @@ GGUF_PATH = Path(
 )
 MODEL_CARD_PATH = ROOT / "docs" / "models" / "qwen36-35b-a3b-nvfp4-mtp-gguf.model-card.md"
 CHART_PATH = ROOT / "assets" / "images" / "rtx-5090-qwen35-moe-vs-qwopus.png"
+EXTRA_CHART_PATHS = [
+    ROOT / "assets" / "images" / "qwen36-llamacpp-b9761-vs-b9851.png",
+]
 PROMPT_PATHS = [
     ROOT / "benchmarks" / "prompts" / "book-context-10k.txt",
     ROOT / "benchmarks" / "prompts" / "book-context-200k.txt",
+    ROOT / "benchmarks" / "prompts" / "book-context-300k.txt",
 ]
 
 
@@ -50,6 +54,14 @@ def main() -> None:
         path_in_repo=CHART_PATH.name,
         commit_message="Upload RTX 5090 benchmark chart",
     )
+    for chart_path in EXTRA_CHART_PATHS:
+        api.upload_file(
+            repo_id=REPO_ID,
+            repo_type="model",
+            path_or_fileobj=require_file(chart_path),
+            path_in_repo=chart_path.name,
+            commit_message="Upload llama.cpp build comparison chart",
+        )
     for prompt_path in PROMPT_PATHS:
         api.upload_file(
             repo_id=REPO_ID,
