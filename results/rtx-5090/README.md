@@ -28,24 +28,31 @@ loaded at `n_ctx=200192` from the repo-relative local model cache path.
 
 | Context target | Prompt tokens | Full-request tok/s | Generation tok/s | Prompt read | Power | Temp |
 | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
-| 10k | 8,907 | 106.5 | 142.8 | 2.3s | 189W | 39C |
-| 200k | 174,590 | 15.0 | 95.9 | 57.1s | 228W | 51C |
+| 10k | 8,907 | 109.1 | 143.0 | 2.1s | 187W | 41C |
+| 200k | 174,590 | 15.4 | 99.2 | 55.7s | 213W | 50C |
 
 - **Stack:** llama.cpp server -> OpenAI-compatible endpoint at 127.0.0.1:39191
 - **Model:** `Jackrong/Qwopus3.6-35B-A3B-Coder-MTP-GGUF`
 - **File:** `Qwopus3.6-35B-A3B-Coder-MTP-Q5_K_M.gguf`
 - **Downloaded size:** `25,347,531,936` bytes
+- **No-thinking mode:** use `--reasoning off`. This llama.cpp build maps that
+  to `enable_thinking=false`; the server log printed
+  `chat template, thinking = 0`. Passing `enable_thinking=false` through
+  `--chat-template-kwargs` is deprecated.
 - **Flags:** `--gpu-layers all --gpu-layers-draft all --ctx-size 200000
   --cache-type-k q4_0 --cache-type-v q4_0 --cache-type-k-draft q4_0
   --cache-type-v-draft q4_0 --flash-attn on --reasoning off --spec-type
   ngram-mod,draft-mtp --spec-draft-n-max 2 --spec-ngram-mod-n-match 24
   --spec-ngram-mod-n-min 48 --spec-ngram-mod-n-max 64`
-- **MTP acceptance:** 10k `572/900 = 63.6%`; 200k `613/943 = 65.0%`
+- **MTP acceptance:** 10k `572/900 = 63.6%`; 200k `640/1031 = 62.1%`
+- **Prompt prefill note:** no-thinking prevents generated reasoning blocks, but
+  it does not skip prompt ingestion. The 200k run followed the 10k run in the
+  same server, so llama.cpp reused the shared prefix and still prefilled 166,199
+  new prompt tokens.
 - **Prompt SHA256:** 10k `785c5b31d1ce77612431b1289c0a097ed51ab1a6d4a07bccfb7a70f59df55f94`; 200k `a794ca243983eb3387bec6728db4b0c72a99ee2a98cfee7223269708e4ae228c`
-- **CSV:** `qwopus3.6-35b-a3b-coder-mtp-q5-k-m-llamacpp-ctx200k-prompt10k-gen1024-20260630-001702.csv`
-  and `qwopus3.6-35b-a3b-coder-mtp-q5-k-m-llamacpp-ctx200k-prompt200k-gen1024-20260630-001816.csv`
-- **Timing log:** `logs/qwopus35-q5-bench-server-20260630-001639.err.log`
-  and `logs/qwopus35-q5-bench-server-20260630-001755.err.log`
+- **CSV:** `qwopus3.6-35b-a3b-coder-mtp-q5-k-m-llamacpp-ctx200k-prompt10k-gen1024-20260630-003525.csv`
+  and `qwopus3.6-35b-a3b-coder-mtp-q5-k-m-llamacpp-ctx200k-prompt200k-gen1024-20260630-003525.csv`
+- **Timing log:** `logs/qwopus35-q5-bench-server-20260630-003503.err.log`
 
 ### Qwopus3.6-27B-Coder-MTP-Q5_K_M — llama.cpp b9761 — ctx=256k — MTP n=2
 
@@ -259,13 +266,13 @@ Ornith Unsloth Studio long-context proof:
 
 ## Key Findings
 
-**Qwopus3.6 35B A3B Coder Q5_K_M is a strong native 35B coding-model result on the RTX 5090.**
+**Qwopus3.6 35B A3B Coder Q5_K_M is a strong native no-thinking 35B coding-model result on the RTX 5090.**
 
-- The 10k checked-in prompt reached **142.8 tok/s generation** after **2.3s**
+- The 10k checked-in prompt reached **143.0 tok/s generation** after **2.1s**
   prompt prefill.
-- The 200k checked-in prompt reached **95.9 tok/s generation** after **57.1s**
+- The 200k checked-in prompt reached **99.2 tok/s generation** after **55.7s**
   prompt prefill.
-- The 200k run stayed under the card's VRAM budget with 28,356 MiB reported
+- The 200k run stayed under the card's VRAM budget with 28,358 MiB reported
   after the request.
 
 **Qwopus Q5 GGUF via llama.cpp stays interactive across the full 8k-256k ladder.**
