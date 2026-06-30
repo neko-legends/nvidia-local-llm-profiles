@@ -22,6 +22,10 @@ GGUF_PATH = Path(
 )
 MODEL_CARD_PATH = ROOT / "docs" / "models" / "qwen36-35b-a3b-nvfp4-mtp-gguf.model-card.md"
 CHART_PATH = ROOT / "assets" / "images" / "rtx-5090-qwen35-moe-vs-qwopus.png"
+PROMPT_PATHS = [
+    ROOT / "benchmarks" / "prompts" / "book-context-10k.txt",
+    ROOT / "benchmarks" / "prompts" / "book-context-200k.txt",
+]
 
 
 def require_file(path: Path) -> Path:
@@ -46,6 +50,14 @@ def main() -> None:
         path_in_repo=CHART_PATH.name,
         commit_message="Upload RTX 5090 benchmark chart",
     )
+    for prompt_path in PROMPT_PATHS:
+        api.upload_file(
+            repo_id=REPO_ID,
+            repo_type="model",
+            path_or_fileobj=require_file(prompt_path),
+            path_in_repo=f"benchmark-prompts/{prompt_path.name}",
+            commit_message="Upload benchmark prompt fixtures",
+        )
     api.upload_file(
         repo_id=REPO_ID,
         repo_type="model",

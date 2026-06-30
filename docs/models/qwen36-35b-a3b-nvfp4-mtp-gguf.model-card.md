@@ -66,6 +66,10 @@ NVFP4 body and the bundled MTP block from the source snapshot.
     <div style="color:#ffb86b; font-size:12px; font-weight:950; letter-spacing:0.8px; text-transform:uppercase;">Expect</div>
     <p style="margin:8px 0 0 0; color:#e7e5e4; font-size:13px; line-height:1.65;">On RTX 5090, <code>llama.cpp</code> reported <code>BLACKWELL_NATIVE_FP4 = 1</code> and initialized the bundled MTP context.</p>
   </div>
+  <div style="border:1px solid #3a2a1f; background:#111116; border-radius:14px; padding:16px;">
+    <div style="color:#ffb86b; font-size:12px; font-weight:950; letter-spacing:0.8px; text-transform:uppercase;">Benchmark</div>
+    <p style="margin:8px 0 0 0; color:#e7e5e4; font-size:13px; line-height:1.65;">Use the included <code>benchmark-prompts/book-context-10k.txt</code> and <code>benchmark-prompts/book-context-200k.txt</code> fixtures to reproduce the chart rows.</p>
+  </div>
 </div>
 
 ## File
@@ -91,6 +95,13 @@ use llama.cpp decode-only timing; `Full request tok/s` includes prompt prefill.
 | ---: | ---: | ---: | ---: | ---: | ---: |
 | 10k | 8,907 | 105.0 | 146.8 | 2.6s | 67.6% |
 | 200k | 174,590 | 16.0 | 88.5 | 51.8s | 60.2% |
+
+Benchmark prompt files are included in this repo:
+
+| File | SHA256 | Notes |
+| --- | --- | --- |
+| [`benchmark-prompts/book-context-10k.txt`](./benchmark-prompts/book-context-10k.txt) | `785c5b31d1ce77612431b1289c0a097ed51ab1a6d4a07bccfb7a70f59df55f94` | 42,940 bytes; tokenized as 8,907 prompt tokens in this run |
+| [`benchmark-prompts/book-context-200k.txt`](./benchmark-prompts/book-context-200k.txt) | `a794ca243983eb3387bec6728db4b0c72a99ee2a98cfee7223269708e4ae228c` | 840,403 bytes; tokenized as 174,590 prompt tokens in this run |
 
 Serving flags used for the benchmark:
 
