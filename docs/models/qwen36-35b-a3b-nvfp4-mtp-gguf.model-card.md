@@ -15,8 +15,8 @@ tags:
 
 <div style="font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; border: 1px solid #3a2a1f; background: #0f0f13; border-radius: 16px; overflow: hidden; margin: 0 0 28px 0; box-shadow: 0 20px 48px rgba(0,0,0,0.24);">
   <div style="padding: 14px 18px; background: linear-gradient(90deg, #1a120d 0%, #2b1708 100%); border-bottom: 1px solid rgba(255,122,26,0.35); color: #ffd7ad; font-weight: 950;">RTX 5090 native llama.cpp benchmark chart</div>
-  <a href="./rtx-5090-qwen35-moe-vs-qwopus.png" target="_blank" style="display:block; background:#050507;">
-    <img src="./rtx-5090-qwen35-moe-vs-qwopus.png" alt="RTX 5090 native llama.cpp long-context comparison" style="display:block; width:100%; border:0;" />
+  <a href="https://huggingface.co/neko-legends/Qwen3.6-35B-A3B-NVFP4-MTP-GGUF/blob/main/rtx-5090-qwen35-moe-vs-qwopus.png" target="_blank" style="display:block; background:#050507;">
+    <img src="https://huggingface.co/neko-legends/Qwen3.6-35B-A3B-NVFP4-MTP-GGUF/resolve/main/rtx-5090-qwen35-moe-vs-qwopus.png" alt="RTX 5090 native llama.cpp long-context comparison" style="display:block; width:100%; border:0;" />
   </a>
 </div>
 
@@ -100,8 +100,8 @@ Benchmark prompt files are included in this repo:
 
 | File | SHA256 | Notes |
 | --- | --- | --- |
-| [`benchmark-prompts/book-context-10k.txt`](./benchmark-prompts/book-context-10k.txt) | `785c5b31d1ce77612431b1289c0a097ed51ab1a6d4a07bccfb7a70f59df55f94` | 42,940 bytes; tokenized as 8,907 prompt tokens in this run |
-| [`benchmark-prompts/book-context-200k.txt`](./benchmark-prompts/book-context-200k.txt) | `a794ca243983eb3387bec6728db4b0c72a99ee2a98cfee7223269708e4ae228c` | 840,403 bytes; tokenized as 174,590 prompt tokens in this run |
+| [`benchmark-prompts/book-context-10k.txt`](https://huggingface.co/neko-legends/Qwen3.6-35B-A3B-NVFP4-MTP-GGUF/blob/main/benchmark-prompts/book-context-10k.txt) | `785c5b31d1ce77612431b1289c0a097ed51ab1a6d4a07bccfb7a70f59df55f94` | 42,940 bytes; tokenized as 8,907 prompt tokens in this run |
+| [`benchmark-prompts/book-context-200k.txt`](https://huggingface.co/neko-legends/Qwen3.6-35B-A3B-NVFP4-MTP-GGUF/blob/main/benchmark-prompts/book-context-200k.txt) | `a794ca243983eb3387bec6728db4b0c72a99ee2a98cfee7223269708e4ae228c` | 840,403 bytes; tokenized as 174,590 prompt tokens in this run |
 
 Serving flags used for the benchmark:
 
