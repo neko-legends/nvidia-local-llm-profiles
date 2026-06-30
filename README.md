@@ -85,16 +85,38 @@ Endpoint defaults:
 See `docs/models/aeon-qwen36-27b-multimodal-nvfp4-mtp-xs.md` for the model
 notes and serving assumptions.
 
-### NVIDIA Qwen3.6 35B A3B NVFP4 MoE
+### NVIDIA Qwen3.6 35B A3B NVFP4 MTP GGUF
 
-Minimal vLLM/Docker support for
+Native llama.cpp support for a GGUF conversion of
 [nvidia/Qwen3.6-35B-A3B-NVFP4](https://huggingface.co/nvidia/Qwen3.6-35B-A3B-NVFP4).
-This profile only runs the quick two-point check requested here: about 10k and
-200k prompt tokens, one measured run each. The benchmark helper uses the saved
-prompt fixtures in `benchmarks/prompts/` so the NVFP4 rows are tested against
-the same text as the GGUF endpoint rows.
+The converted GGUF keeps NVIDIA's native NVFP4 body and the bundled MTP block,
+so recent llama.cpp builds can serve it with `--spec-type draft-mtp` on
+Blackwell GPUs.
 
 Launcher folder:
+
+```text
+scripts\localai\qwen36-35b-a3b-nvfp4-mtp-gguf\
+```
+
+Quick path:
+
+```bat
+set LLAMA_CPP_SRC=C:\path\to\llama.cpp
+convert-qwen36-35b-a3b-nvfp4-mtp-to-gguf.bat
+
+set LLAMA_DIR=C:\path\to\llama.cpp-cuda-build
+start-qwen36-35b-a3b-nvfp4-mtp-gguf-server.bat
+bench-qwen36-35b-a3b-nvfp4-mtp-gguf-two-point.bat
+```
+
+Output GGUF:
+
+```text
+<checkout-parent>\.local-model-cache\nvidia\Qwen3.6-35B-A3B-NVFP4-MTP-GGUF\qwen3.6-35b-a3b-nvfp4-mtp.gguf
+```
+
+Docker/vLLM support for the source NVFP4 snapshot is still available here:
 
 ```text
 scripts\vllm\qwen36-35b-a3b-nvfp4\
@@ -405,6 +427,7 @@ scripts/
     qwopus3.6-27b-coder-mtp-gguf/   launchers, download, install
     qwopus3.6-35b-a3b-coder-mtp-gguf/  Qwopus 35B Coder GGUF launcher
     qwen36-35b-a3b-mtp-gguf/        Unsloth Qwen 35B GGUF launcher
+    qwen36-35b-a3b-nvfp4-mtp-gguf/  NVIDIA Qwen 35B NVFP4 MTP GGUF launcher
     ornith-1.0-35b-gguf/            Ornith 35B GGUF launcher
   vllm/
     aeon-ornith-1.0-35b-nvfp4/       AEON Ornith NVFP4 Docker vLLM launcher
@@ -419,6 +442,7 @@ scripts/
 docs/
   models/qwopus3.6-27b-coder-mtp-gguf.md   model notes
   models/aeon-qwen36-27b-multimodal-nvfp4-mtp-xs.md   AEON vLLM notes
+  models/qwen36-35b-a3b-nvfp4-mtp-gguf.md   NVIDIA GGUF notes
   hardware/rtx-5090-power-and-thermal.md    GPU tuning notes
   integrations/hermes-desktop.md            Hermes wiring guide
 results/

@@ -21,6 +21,31 @@
 
 ## Results
 
+### NVIDIA Qwen3.6 35B A3B NVFP4 MTP GGUF - llama.cpp b9761 - ctx=200k - MTP n=2
+
+Two-point native llama.cpp benchmark, one measured run per context. The GGUF was
+converted from `nvidia/Qwen3.6-35B-A3B-NVFP4` with the bundled MTP block kept in
+the main file.
+
+| Context target | Prompt tokens | Full-request tok/s | Generation tok/s | Prompt read | MTP acceptance | Power | Temp |
+| ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+| 10k | 8,907 | 105.0 | 146.8 | 2.6s | 67.6% | 176W | 41C |
+| 200k | 174,590 | 16.0 | 88.5 | 51.8s | 60.2% | 224W | 51C |
+
+- **Stack:** llama.cpp b9761 server -> OpenAI-compatible endpoint at 127.0.0.1:39194
+- **Model:** `nvidia/Qwen3.6-35B-A3B-NVFP4`
+- **File:** `qwen3.6-35b-a3b-nvfp4-mtp.gguf`
+- **Saved size:** `23,850,227,712` bytes (`22.21 GiB`)
+- **SHA256:** `B7C0806BD45428DA1A980A1A8F68279FD85D7D56292D64AAD97C65CB5FDD8C91`
+- **GGUF metadata:** `qwen35moe`, `file_type=39`, `context_length=262144`,
+  `nextn_predict_layers=1`
+- **Flags:** `--gpu-layers all --gpu-layers-draft all --ctx-size 200000 --cache-type-k q4_0 --cache-type-v q4_0 --cache-type-k-draft q4_0 --cache-type-v-draft q4_0 --flash-attn on --reasoning off --spec-type draft-mtp --spec-draft-n-max 2`
+- **No-thinking mode:** server logged `chat template, thinking = 0`, and the
+  benchmark request sent `chat_template_kwargs.enable_thinking=false`.
+- **Prompt SHA256:** 10k `785c5b31d1ce77612431b1289c0a097ed51ab1a6d4a07bccfb7a70f59df55f94`; 200k `a794ca243983eb3387bec6728db4b0c72a99ee2a98cfee7223269708e4ae228c`
+- **CSV:** `qwen36-35b-a3b-nvfp4-mtp-gguf-llamacpp-ctx200k-draft-mtp-mtpn2-request-nothink-prompt10k-gen1024-20260630-104508.csv`
+  and `qwen36-35b-a3b-nvfp4-mtp-gguf-llamacpp-ctx200k-draft-mtp-mtpn2-request-nothink-prompt200k-gen1024-20260630-104519.csv`
+
 ### Qwopus3.6 35B A3B Coder MTP Q5_K_M - llama.cpp b9267 - ctx=200k - MTP
 
 Two-point native llama.cpp benchmark, one measured run per context. The model

@@ -63,6 +63,12 @@ MODEL_SPECS = [
         "#9d82ff",
     ),
     ModelSpec(
+        "nvidia/Qwen3.6-35B-A3B-NVFP4",
+        "qwen3.6-35b-a3b-nvfp4-mtp.gguf",
+        "NVIDIA Qwen3.6 35B NVFP4 MTP GGUF",
+        "#b6f26a",
+    ),
+    ModelSpec(
         "Jackrong/Qwopus3.6-27B-Coder-MTP-GGUF",
         "Qwopus3.6-27B-Coder-MTP-Q5_K_M.gguf",
         "Qwopus3.6 27B Coder Q5_K_M",
