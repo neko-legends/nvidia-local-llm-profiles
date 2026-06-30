@@ -4,6 +4,8 @@ param(
     [int]$Port = 39193,
     [int]$ContextSize = 200000,
     [int[]]$PromptTokenTargets = @(10000, 200000),
+    [ValidateSet("ngram-mod,draft-mtp", "draft-mtp")]
+    [string]$SpecType = "ngram-mod,draft-mtp",
     [int]$SpecDraftNMax = 2,
     [switch]$EnableThinking
 )
@@ -46,7 +48,8 @@ $stamp = Get-Date -Format "yyyyMMdd-HHmmss"
 $outLog = Join-Path $repoRoot "logs\qwopus35-q4-bench-server-$stamp.out.log"
 $errLog = Join-Path $repoRoot "logs\qwopus35-q4-bench-server-$stamp.err.log"
 $modelAlias = "qwopus3.6-35b-a3b-coder-mtp-q4-k-m"
-$casePrefix = "qwopus3.6-35b-a3b-coder-mtp-q4-k-m-llamacpp-ctx200k-mtpn$SpecDraftNMax"
+$specSlug = $SpecType.Replace(",", "-").Replace("_", "-")
+$casePrefix = "qwopus3.6-35b-a3b-coder-mtp-q4-k-m-llamacpp-ctx200k-$specSlug-mtpn$SpecDraftNMax"
 if (-not $EnableThinking) {
     $casePrefix += "-request-nothink"
 }
@@ -75,13 +78,17 @@ $args = @(
     "--jinja",
     "--metrics",
     "--slots",
-    "--spec-type", "ngram-mod,draft-mtp",
+    "--spec-type", $SpecType,
     "--spec-draft-n-max", "$SpecDraftNMax",
-    "--spec-draft-p-min", "0.0",
-    "--spec-ngram-mod-n-match", "24",
-    "--spec-ngram-mod-n-min", "48",
-    "--spec-ngram-mod-n-max", "64"
+    "--spec-draft-p-min", "0.0"
 )
+if ($SpecType -like "*ngram-mod*") {
+    $args += @(
+        "--spec-ngram-mod-n-match", "24",
+        "--spec-ngram-mod-n-min", "48",
+        "--spec-ngram-mod-n-max", "64"
+    )
+}
 if ($EnableThinking) {
     $args += "--reasoning"
     $args += "on"

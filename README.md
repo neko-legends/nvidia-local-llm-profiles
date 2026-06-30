@@ -224,6 +224,10 @@ Latest addition:
   2.1s prefill.
 - 200k reference prompt: **100.0 decode tok/s**, 15.4 full-wall tok/s after
   55.8s prefill.
+- Q5_K_M MTP depth check: `--spec-draft-n-max 3` improves the 10k generation
+  check to **153.8 decode tok/s**, but the 200k generation check drops to
+  **94.6 decode tok/s**. The chart keeps Q5 on n=2 because this comparison is
+  anchored on the long-context profile rather than per-context cherry-picks.
 - Q4_K_M no-thinking result: **181.0 decode tok/s** at 10k and **91.2 decode
   tok/s** at 200k. A Q4 n=3 MTP trial was slower than n=2 on the 10k check, so
   the chart uses `--spec-draft-n-max 2`.

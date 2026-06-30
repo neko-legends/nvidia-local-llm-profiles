@@ -45,6 +45,10 @@ loaded at `n_ctx=200192` from the repo-relative local model cache path.
   --cache-type-v-draft q4_0 --flash-attn on --spec-type ngram-mod,draft-mtp
   --spec-draft-n-max 2 --spec-ngram-mod-n-match 24
   --spec-ngram-mod-n-min 48 --spec-ngram-mod-n-max 64`
+- **MTP depth check:** `--spec-draft-n-max 3` improved the 10k check to
+  **153.8 tok/s**, but lowered the 200k check to **94.6 tok/s**. A pure
+  `draft-mtp` n=3 10k check was effectively tied at **153.3 tok/s**. The chart
+  keeps Q5 on n=2 because n=2 is the stronger 200k profile.
 - **MTP acceptance:** 10k `572/900 = 63.6%`; 200k `640/1031 = 62.1%`
 - **Prompt prefill note:** no-thinking prevents generated reasoning blocks, but
   it does not skip prompt ingestion. The 200k run followed the 10k run in the
@@ -53,6 +57,8 @@ loaded at `n_ctx=200192` from the repo-relative local model cache path.
 - **Prompt SHA256:** 10k `785c5b31d1ce77612431b1289c0a097ed51ab1a6d4a07bccfb7a70f59df55f94`; 200k `a794ca243983eb3387bec6728db4b0c72a99ee2a98cfee7223269708e4ae228c`
 - **CSV:** `qwopus3.6-35b-a3b-coder-mtp-q5-k-m-llamacpp-ctx200k-request-nothink-prompt10k-gen1024-20260630-004959.csv`
   and `qwopus3.6-35b-a3b-coder-mtp-q5-k-m-llamacpp-ctx200k-request-nothink-prompt200k-gen1024-20260630-004959.csv`
+- **Probe CSV:** `qwopus3.6-35b-a3b-coder-mtp-q5-k-m-llamacpp-ctx200k-ngram-mod-draft-mtp-mtpn3-request-nothink-prompt10k-gen1024-20260630-012703.csv`
+  and `qwopus3.6-35b-a3b-coder-mtp-q5-k-m-llamacpp-ctx200k-ngram-mod-draft-mtp-mtpn3-request-nothink-prompt200k-gen1024-20260630-012714.csv`
 - **Timing log:** `logs/qwopus35-q5-request-nothink-bench-server-20260630-004937.err.log`
 
 ### Qwopus3.6 35B A3B Coder MTP Q4_K_M - llama.cpp b9267 - ctx=200k - MTP + ngram

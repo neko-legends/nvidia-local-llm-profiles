@@ -17,7 +17,7 @@ set "HOST=0.0.0.0"
 set "PORT=39193"
 set "CTX_SIZE=200000"
 set "THINKING=0"
-set "SPEC_DRAFT_N_MAX=2"
+if not defined SPEC_DRAFT_N_MAX set "SPEC_DRAFT_N_MAX=2"
 
 set "LLAMA_SERVER="
 if defined LLAMA_DIR (

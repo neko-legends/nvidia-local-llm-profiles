@@ -9,6 +9,10 @@
 
 The launcher uses q4 target and draft KV cache, flash attention, and
 `ngram-mod,draft-mtp` speculative decoding with `--spec-draft-n-max 2`.
+The benchmark wrapper also accepts `-SpecDraftNMax 3` and
+`-SpecType draft-mtp` for quick sweeps. On RTX 5090, Q5 n=3 was faster at the
+10k prompt but slower at the 200k prompt, so n=2 remains the default long-context
+profile.
 
 The model is downloaded to the repo checkout parent:
 
