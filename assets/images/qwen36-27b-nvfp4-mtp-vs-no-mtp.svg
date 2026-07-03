@@ -1,0 +1,58 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1900" height="760" viewBox="0 0 1900 760">
+<style>
+text{font-family:Segoe UI,Arial,sans-serif;letter-spacing:0}
+.title{fill:#f3f5f7;font-size:42px;font-weight:800}
+.subtitle{fill:#b8c2cc;font-size:20px}
+.note{fill:#9aa6b2;font-size:15px}
+.group{fill:#f3f5f7;font-size:24px;font-weight:800}
+.detail{fill:#8f9ba8;font-size:14px}
+.mode{fill:#e8edf2;font-size:18px;font-weight:750}
+.value{fill:#f3f5f7;font-size:22px;font-weight:800}
+.axis{fill:#8f9ba8;font-size:15px}
+.speedup{fill:#ffb86b;font-size:18px;font-weight:800}
+</style>
+<rect width="1900" height="760" fill="#101318"/>
+<rect x="732" y="187" width="1106" height="489" rx="10" fill="#171d24"/>
+<text x="70.0" y="76.0" class="title">Qwen3.6 27B NVFP4 GGUF: MTP vs No MTP</text>
+<text x="70.0" y="118.0" class="subtitle">RTX 5090, llama.cpp b9851, native Windows GGUF, ctx=200k, no-thinking, q4 KV.</text>
+<text x="70.0" y="152.0" class="note">Bars show server-side llama.cpp decode tok/s. Row details include prompt prefill, full request wall-rate, VRAM, and draft acceptance.</text>
+<text x="70.0" y="178.0" class="note">Same BookContext 10k and 200k prompts with 1024 generated tokens.</text>
+<line x1="760.0" y1="211" x2="760.0" y2="642" stroke="#2d3540" stroke-width="1"/>
+<text x="760.0" y="670.0" class="axis" text-anchor="middle">0</text>
+<line x1="1110.0" y1="211" x2="1110.0" y2="642" stroke="#2d3540" stroke-width="1"/>
+<text x="1110.0" y="670.0" class="axis" text-anchor="middle">25</text>
+<line x1="1460.0" y1="211" x2="1460.0" y2="642" stroke="#2d3540" stroke-width="1"/>
+<text x="1460.0" y="670.0" class="axis" text-anchor="middle">50</text>
+<line x1="1810.0" y1="211" x2="1810.0" y2="642" stroke="#2d3540" stroke-width="1"/>
+<text x="1810.0" y="670.0" class="axis" text-anchor="middle">75</text>
+<text x="70.0" y="225.0" class="group">10K prompt</text>
+<text x="70.0" y="255.0" class="speedup">draft-mtp n=2 +40.7% decode</text>
+<text x="726.0" y="286.0" class="mode" text-anchor="end">No MTP</text>
+<text x="726.0" y="309.0" class="detail" text-anchor="end">8,907 prompt tokens; prefill 2.9s; wall 42.1 tok/s; 29.2 GiB</text>
+<rect x="760" y="264" width="674.9" height="34" rx="5" fill="#8fa3ba" opacity="0.96"/>
+<rect x="760" y="264" width="674.9" height="34" rx="5" fill="none" stroke="#f5fff9" stroke-opacity="0.44"/>
+<text x="1448.9" y="289.0" class="value">48.2</text>
+<text x="1512.9" y="289.0" class="axis">tok/s</text>
+<text x="726.0" y="358.0" class="mode" text-anchor="end">draft-mtp n=2</text>
+<text x="726.0" y="381.0" class="detail" text-anchor="end">8,907 prompt tokens; prefill 3.1s; wall 55.9 tok/s; 30.8 GiB; accept 66.9%</text>
+<rect x="760" y="336" width="949.9" height="34" rx="5" fill="#ff4d4d" opacity="0.96"/>
+<rect x="760" y="336" width="949.9" height="34" rx="5" fill="none" stroke="#f5fff9" stroke-opacity="0.44"/>
+<text x="1723.9" y="361.0" class="value">67.9</text>
+<text x="1787.9" y="361.0" class="axis">tok/s</text>
+<text x="70.0" y="425.0" class="group">200K prompt</text>
+<text x="70.0" y="455.0" class="speedup">draft-mtp n=2 +25.6% decode</text>
+<text x="726.0" y="486.0" class="mode" text-anchor="end">No MTP</text>
+<text x="726.0" y="509.0" class="detail" text-anchor="end">174,590 prompt tokens; prefill 121.4s; wall 6.7 tok/s; 29.2 GiB</text>
+<rect x="760" y="464" width="460.0" height="34" rx="5" fill="#8fa3ba" opacity="0.96"/>
+<rect x="760" y="464" width="460.0" height="34" rx="5" fill="none" stroke="#f5fff9" stroke-opacity="0.44"/>
+<text x="1234.0" y="489.0" class="value">32.9</text>
+<text x="1298.0" y="489.0" class="axis">tok/s</text>
+<text x="726.0" y="558.0" class="mode" text-anchor="end">draft-mtp n=2</text>
+<text x="726.0" y="581.0" class="detail" text-anchor="end">174,590 prompt tokens; prefill 131.8s; wall 6.5 tok/s; 30.8 GiB; accept 68.3%</text>
+<rect x="760" y="536" width="577.6" height="34" rx="5" fill="#ff4d4d" opacity="0.96"/>
+<rect x="760" y="536" width="577.6" height="34" rx="5" fill="none" stroke="#f5fff9" stroke-opacity="0.44"/>
+<text x="1351.6" y="561.0" class="value">41.3</text>
+<text x="1415.6" y="561.0" class="axis">tok/s</text>
+<text x="70.0" y="708.0" class="note">Source: results/rtx-5090/qwen36-27b-nvfp4-gguf-mtp-comparison-20260703.csv</text>
+<text x="1830.0" y="708.0" class="note" text-anchor="end">neko-legends/nvidia-local-llm-profiles</text>
+</svg>

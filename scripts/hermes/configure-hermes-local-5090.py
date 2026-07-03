@@ -78,7 +78,7 @@ def provider_config(name: str, router_port: str) -> dict:
                 "supports_vision": True,
             },
             QWEN36_27B_NVFP4_MODEL: {
-                "context_length": 262144,
+                "context_length": 200000,
                 "supports_vision": False,
             },
         },

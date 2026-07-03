@@ -48,13 +48,13 @@ Why this profile uses it:
 
 ## Additional Model Support
 
-### NVIDIA Qwen3.6 27B NVFP4 GGUF
+### NVIDIA Qwen3.6 27B NVFP4 MTP GGUF
 
 Native llama.cpp scaffolding for a GGUF conversion of
 [nvidia/Qwen3.6-27B-NVFP4](https://huggingface.co/nvidia/Qwen3.6-27B-NVFP4).
 NVIDIA publishes the source checkpoint as a ModelOpt/NVFP4 safetensors release
-with vLLM as the supported runtime; this folder adds the repo's native Windows
-GGUF test path.
+with vLLM as the supported runtime. The source snapshot includes an MTP block,
+and this folder keeps it in the native Windows GGUF path.
 
 Launcher folder:
 
@@ -78,7 +78,7 @@ Storage:
 
 ```text
 <checkout-parent>\.local-model-cache\nvidia\Qwen3.6-27B-NVFP4\
-<checkout-parent>\.local-model-cache\nvidia\Qwen3.6-27B-NVFP4-GGUF\qwen3.6-27b-nvfp4.gguf
+<checkout-parent>\.local-model-cache\nvidia\Qwen3.6-27B-NVFP4-GGUF\qwen3.6-27b-nvfp4-mtp.gguf
 ```
 
 Hermes:
@@ -91,7 +91,8 @@ Endpoint defaults:
 
 - Base URL: `http://127.0.0.1:39195/v1`
 - Model: `qwen36-27b-nvfp4-gguf`
-- Context: `262144`
+- Context: `200000` on RTX 5090
+- MTP: enabled by default with `draft-mtp`, `--spec-draft-n-max 2`
 - Thinking: disabled by the launcher and Local 5090 router
 
 ### AEON Qwen3.6 27B Multimodal NVFP4 MTP-XS
@@ -284,7 +285,7 @@ Examples:
 
 ```text
 D:\forPublic\.local-model-cache\nvidia\Qwen3.6-27B-NVFP4\
-D:\forPublic\.local-model-cache\nvidia\Qwen3.6-27B-NVFP4-GGUF\qwen3.6-27b-nvfp4.gguf
+D:\forPublic\.local-model-cache\nvidia\Qwen3.6-27B-NVFP4-GGUF\qwen3.6-27b-nvfp4-mtp.gguf
 D:\forPublic\.local-model-cache\nvidia\Qwen3.6-35B-A3B-NVFP4-MTP-GGUF\qwen3.6-35b-a3b-nvfp4-mtp.gguf
 D:\forPublic\.local-model-cache\Jackrong\Qwopus3.6-35B-A3B-Coder-MTP-GGUF\
 D:\forPublic\.local-model-cache\deepreinforce-ai\Ornith-1.0-35B-GGUF\
@@ -299,7 +300,7 @@ Most scripts also accept environment overrides such as `MODEL_DIR`,
 ## RTX 5090 Benchmark Results
 
 **GPU:** RTX 5090 32GB - **Driver:** 610.62 - **Dates:** 2026-06-22 to
-2026-06-30
+2026-07-03
 
 Headline chart: native Windows llama.cpp GGUF endpoints only, using the checked-in
 BookContext 10k and 200k prompts with 1024 generated tokens. Bars are llama.cpp
@@ -312,6 +313,23 @@ separately. Docker/vLLM and manual UI observations are kept in
 llama.cpp build check for `neko-legends/Qwen3.6-35B-A3B-NVFP4-MTP-GGUF`:
 
 ![llama.cpp b9761 vs b9851 Qwen3.6 NVFP4 MTP GGUF decode comparison](assets/images/qwen36-llamacpp-b9761-vs-b9851.png)
+
+NVIDIA Qwen3.6 27B NVFP4 GGUF MTP check:
+
+![Qwen3.6 27B NVFP4 GGUF MTP vs no-MTP decode comparison](assets/images/qwen36-27b-nvfp4-mtp-vs-no-mtp.png)
+
+- Source snapshot: `nvidia/Qwen3.6-27B-NVFP4`; local GGUF:
+  `qwen3.6-27b-nvfp4-mtp.gguf`.
+- The source snapshot has `mtp_num_hidden_layers=1` and `mtp.layers.0.*`
+  tensors. The conversion keeps that MTP block in the GGUF.
+- On RTX 5090 at `ctx=200000`, no-thinking, q4 target/draft KV, llama.cpp
+  b9851, `draft-mtp` n=2 improved decode from **48.2 -> 67.9 tok/s** at 10k
+  and **32.9 -> 41.3 tok/s** at 200k.
+- The MTP run used about **30.8 GiB** after request, versus **29.2 GiB** for the
+  no-MTP baseline. Because of that tight headroom, this repo advertises the
+  local 5090 profile at **200k context**, not the model card's maximum 262k.
+- Curated data:
+  `results/rtx-5090/qwen36-27b-nvfp4-gguf-mtp-comparison-20260703.csv`.
 
 - Latest checked build: **llama.cpp b9851** (`0eca4d490`), CUDA 13.3 Windows
   release.
@@ -445,7 +463,7 @@ scripts\localai\qwopus3.6-35b-a3b-coder-mtp-gguf\start-qwopus3.6-35b-a3b-coder-m
 scripts\localai\qwopus3.6-35b-a3b-coder-mtp-gguf\start-qwopus3.6-35b-a3b-coder-mtp-q5-k-m-server.bat
 ```
 
-Or NVIDIA Qwen3.6 27B NVFP4 GGUF:
+Or NVIDIA Qwen3.6 27B NVFP4 MTP GGUF:
 
 ```bat
 scripts\localai\qwen36-27b-nvfp4-gguf\start-qwen36-27b-nvfp4-gguf-server.bat
@@ -496,6 +514,7 @@ Render the benchmark chart:
 ```powershell
 python scripts\benchmarks\render-rtx5090-context-chart.py
 python scripts\benchmarks\render-qwen35-moe-comparison-chart.py
+python scripts\benchmarks\render-qwen27-nvfp4-mtp-comparison-chart.py
 ```
 
 Requires Matplotlib (`pip install matplotlib`) if your Python environment does
@@ -529,7 +548,7 @@ scripts/
   localai/
     qwopus3.6-27b-coder-mtp-gguf/   launchers, download, install
     qwopus3.6-35b-a3b-coder-mtp-gguf/  Qwopus 35B Coder GGUF launcher
-    qwen36-27b-nvfp4-gguf/          NVIDIA Qwen 27B NVFP4 GGUF launcher
+    qwen36-27b-nvfp4-gguf/          NVIDIA Qwen 27B NVFP4 MTP GGUF launcher
     qwen36-35b-a3b-mtp-gguf/        Unsloth Qwen 35B GGUF launcher
     qwen36-35b-a3b-nvfp4-mtp-gguf/  NVIDIA Qwen 35B NVFP4 MTP GGUF launcher
     ornith-1.0-35b-gguf/            Ornith 35B GGUF launcher
@@ -546,7 +565,7 @@ scripts/
 docs/
   models/qwopus3.6-27b-coder-mtp-gguf.md   model notes
   models/aeon-qwen36-27b-multimodal-nvfp4-mtp-xs.md   AEON vLLM notes
-  models/qwen36-27b-nvfp4-gguf.md           NVIDIA Qwen 27B GGUF notes
+  models/qwen36-27b-nvfp4-gguf.md           NVIDIA Qwen 27B MTP GGUF notes
   models/qwen36-35b-a3b-nvfp4-mtp-gguf.md   NVIDIA GGUF notes
   hardware/rtx-5090-power-and-thermal.md    GPU tuning notes
   integrations/hermes-desktop.md            Hermes wiring guide

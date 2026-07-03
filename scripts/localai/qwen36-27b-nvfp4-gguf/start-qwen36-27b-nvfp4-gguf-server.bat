@@ -2,7 +2,7 @@
 setlocal EnableDelayedExpansion
 
 rem ============================================================
-rem  NVIDIA Qwen3.6 27B NVFP4 GGUF llama.cpp launcher.
+rem  NVIDIA Qwen3.6 27B NVFP4 MTP GGUF llama.cpp launcher.
 rem  Endpoint: http://127.0.0.1:39195/v1
 rem
 rem  Set LLAMA_DIR to your llama.cpp CUDA build folder, or put
@@ -11,12 +11,22 @@ rem ============================================================
 set "SCRIPT_DIR=%~dp0"
 for %%I in ("%SCRIPT_DIR%..\..\..\..") do set "CHECKOUT_PARENT=%%~fI"
 set "MODEL_CACHE_DIR=%CHECKOUT_PARENT%\.local-model-cache\nvidia\Qwen3.6-27B-NVFP4-GGUF"
-set "MODEL_PATH=%MODEL_CACHE_DIR%\qwen3.6-27b-nvfp4.gguf"
+if not defined MODEL_PATH set "MODEL_PATH=%MODEL_CACHE_DIR%\qwen3.6-27b-nvfp4-mtp.gguf"
 set "MODEL_ALIAS=qwen36-27b-nvfp4-gguf"
 set "HOST=0.0.0.0"
 set "PORT=39195"
-set "CTX_SIZE=262144"
+set "CTX_SIZE=200000"
 set "THINKING=0"
+if not defined USE_MTP set "USE_MTP=1"
+if not defined SPEC_TYPE set "SPEC_TYPE=draft-mtp"
+if not defined SPEC_DRAFT_N_MAX set "SPEC_DRAFT_N_MAX=2"
+set "DRAFT_ARGS="
+set "SPEC_ARGS="
+if "%USE_MTP%"=="1" (
+  set "DRAFT_ARGS=--gpu-layers-draft all --cache-type-k-draft q4_0 --cache-type-v-draft q4_0"
+  set "SPEC_ARGS=--spec-type %SPEC_TYPE% --spec-draft-n-max %SPEC_DRAFT_N_MAX% --spec-draft-p-min 0.0"
+  if /i "%SPEC_TYPE%"=="ngram-mod,draft-mtp" set "SPEC_ARGS=!SPEC_ARGS! --spec-ngram-mod-n-match 24 --spec-ngram-mod-n-min 48 --spec-ngram-mod-n-max 64"
+)
 
 set "LLAMA_SERVER="
 if defined LLAMA_DIR (
@@ -66,6 +76,7 @@ echo LAN base URL:      http://^<your-lan-ip^>:%PORT%/v1
 echo Model id:          %MODEL_ALIAS%
 echo Model path:        %MODEL_PATH%
 echo Context:           %CTX_SIZE% tokens
+echo MTP speculative:   %USE_MTP% %SPEC_TYPE% draft max %SPEC_DRAFT_N_MAX%
 echo Thinking mode:     %THINKING%
 echo.
 echo Press Ctrl+C in this window to stop the server.
@@ -83,13 +94,15 @@ cd /d "%LLAMA_DIR%"
   --ctx-size %CTX_SIZE% ^
   --cache-type-k q4_0 ^
   --cache-type-v q4_0 ^
+  %DRAFT_ARGS% ^
   --flash-attn on ^
   --parallel 1 ^
   --cont-batching ^
   --jinja ^
   --metrics ^
   --slots ^
-  %REASONING_FLAG%
+  %REASONING_FLAG% ^
+  %SPEC_ARGS%
 
 echo.
 echo Server exited with code %ERRORLEVEL%.

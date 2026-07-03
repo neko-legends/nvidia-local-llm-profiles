@@ -2,8 +2,11 @@ param(
     [string]$LlamaDir = "",
     [string]$ModelPath = "",
     [int]$Port = 39195,
-    [int]$ContextSize = 262144,
+    [int]$ContextSize = 200000,
     [int[]]$PromptTokenTargets = @(10000, 200000),
+    [ValidateSet("none", "ngram-mod,draft-mtp", "draft-mtp")]
+    [string]$SpecType = "draft-mtp",
+    [int]$SpecDraftNMax = 2,
     [switch]$EnableThinking
 )
 
@@ -12,7 +15,7 @@ $ErrorActionPreference = "Stop"
 $repoRoot = (Resolve-Path -LiteralPath (Join-Path $PSScriptRoot "..\..\..")).Path
 $checkoutParent = Split-Path -Parent $repoRoot
 if (-not $ModelPath) {
-    $ModelPath = Join-Path $checkoutParent ".local-model-cache\nvidia\Qwen3.6-27B-NVFP4-GGUF\qwen3.6-27b-nvfp4.gguf"
+    $ModelPath = Join-Path $checkoutParent ".local-model-cache\nvidia\Qwen3.6-27B-NVFP4-GGUF\qwen3.6-27b-nvfp4-mtp.gguf"
 }
 
 function Resolve-LlamaServer {
@@ -47,8 +50,9 @@ $stamp = Get-Date -Format "yyyyMMdd-HHmmss"
 $outLog = Join-Path $logDir "qwen36-27b-nvfp4-gguf-bench-server-$stamp.out.log"
 $errLog = Join-Path $logDir "qwen36-27b-nvfp4-gguf-bench-server-$stamp.err.log"
 $modelAlias = "qwen36-27b-nvfp4-gguf"
+$specSlug = if ($SpecType -eq "none") { "no-mtp" } else { $SpecType.Replace(",", "-").Replace("_", "-") + "-mtpn$SpecDraftNMax" }
 $ctxSlug = if (($ContextSize % 1000) -eq 0) { "ctx$([int]($ContextSize / 1000))k" } else { "ctx$ContextSize" }
-$casePrefix = "qwen36-27b-nvfp4-gguf-llamacpp-$ctxSlug"
+$casePrefix = "qwen36-27b-nvfp4-gguf-llamacpp-$ctxSlug-$specSlug"
 if (-not $EnableThinking) {
     $casePrefix += "-request-nothink"
 }
@@ -75,6 +79,23 @@ $args = @(
     "--metrics",
     "--slots"
 )
+if ($SpecType -ne "none") {
+    $args += @(
+        "--gpu-layers-draft", "all",
+        "--cache-type-k-draft", "q4_0",
+        "--cache-type-v-draft", "q4_0",
+        "--spec-type", $SpecType,
+        "--spec-draft-n-max", "$SpecDraftNMax",
+        "--spec-draft-p-min", "0.0"
+    )
+    if ($SpecType -like "*ngram-mod*") {
+        $args += @(
+            "--spec-ngram-mod-n-match", "24",
+            "--spec-ngram-mod-n-min", "48",
+            "--spec-ngram-mod-n-max", "64"
+        )
+    }
+}
 if ($EnableThinking) {
     $args += @("--reasoning", "on")
 } else {

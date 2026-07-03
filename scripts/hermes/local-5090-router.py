@@ -149,7 +149,7 @@ class Local5090Router(BaseHTTPRequestHandler):
                         "object": "model",
                         "created": 0,
                         "owned_by": "Local 5090",
-                        "context_length": 262144,
+                        "context_length": 200000,
                     },
                 ],
             },

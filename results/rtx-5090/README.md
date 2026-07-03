@@ -2,7 +2,7 @@
 
 - **GPU:** NVIDIA GeForce RTX 5090 32GB
 - **Driver:** 610.62
-- **Dates:** 2026-06-22 to 2026-06-30
+- **Dates:** 2026-06-22 to 2026-07-03
 - **Prompt style:** BookContext (synthetic long-document with continuity sections)
 - **Generation:** 1024 tokens, temperature=0, seed=1234. Full ladders use 3
   measured runs per context; two-point smoke tests may use 1 measured run.
@@ -16,6 +16,8 @@
 ![RTX 5090 native llama.cpp long-context comparison](../../assets/images/rtx-5090-qwen35-moe-vs-qwopus.png)
 
 ![llama.cpp b9761 vs b9851 Qwen3.6 NVFP4 MTP GGUF decode comparison](../../assets/images/qwen36-llamacpp-b9761-vs-b9851.png)
+
+![Qwen3.6 27B NVFP4 GGUF MTP vs no-MTP decode comparison](../../assets/images/qwen36-27b-nvfp4-mtp-vs-no-mtp.png)
 
 ![AEON Ornith Ultimate Uncensored NVFP4 on Windows, Docker vLLM vs native GGUF llama.cpp](../../assets/images/aeon-ornith-windows-docker-vs-gguf.png)
 
@@ -39,6 +41,35 @@ decode/generation speed only; prompt prefill and request wall time are omitted.
 - **Old baseline:** llama.cpp b9761 (`721354fbd`)
 - **300k prompt SHA256:** `5e3a5f9c15da85d938993ef0c80153d26ba405a13689447fd7082d23355ca4ba`
 - **Curated comparison CSV:** `qwen36-35b-a3b-nvfp4-mtp-gguf-llamacpp-build-comparison-20260630.csv`
+
+### NVIDIA Qwen3.6 27B NVFP4 MTP GGUF - llama.cpp b9851 - ctx=200k - MTP vs no-MTP
+
+The source snapshot from `nvidia/Qwen3.6-27B-NVFP4` includes
+`mtp_num_hidden_layers=1` and `mtp.layers.0.*` tensors. The native GGUF keeps
+that MTP block in `qwen3.6-27b-nvfp4-mtp.gguf`.
+
+| Mode | Context target | Prompt tokens | Full-request tok/s | Generation tok/s | Prompt read | MTP acceptance | VRAM after |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+| No MTP | 10k | 8,907 | 42.1 | 48.2 | 2.9s | - | 29.2 GiB |
+| draft-mtp n=2 | 10k | 8,907 | 55.9 | 67.9 | 3.1s | 66.9% | 30.8 GiB |
+| No MTP | 200k | 174,590 | 6.7 | 32.9 | 121.4s | - | 29.2 GiB |
+| draft-mtp n=2 | 200k | 174,590 | 6.5 | 41.3 | 131.8s | 68.3% | 30.8 GiB |
+
+- **Stack:** llama.cpp b9851 (`0eca4d490`) server -> OpenAI-compatible endpoint
+  at 127.0.0.1:39195
+- **GGUF:** `qwen3.6-27b-nvfp4-mtp.gguf`,
+  `28,230,538,624` bytes, SHA256
+  `5DECEF7638A9324664010695A49BA1C6EABD18FCFC1616B77C0AFF97B412A233`
+- **Flags, MTP:** `--gpu-layers all --gpu-layers-draft all --ctx-size 200000
+  --cache-type-k q4_0 --cache-type-v q4_0 --cache-type-k-draft q4_0
+  --cache-type-v-draft q4_0 --flash-attn on --reasoning off --spec-type
+  draft-mtp --spec-draft-n-max 2`
+- **Flags, no MTP:** same target model, but no speculative flags.
+- **Prompt SHA256:** 10k `785c5b31d1ce77612431b1289c0a097ed51ab1a6d4a07bccfb7a70f59df55f94`; 200k `a794ca243983eb3387bec6728db4b0c72a99ee2a98cfee7223269708e4ae228c`
+- **Curated comparison CSV:** `qwen36-27b-nvfp4-gguf-mtp-comparison-20260703.csv`
+- **Headroom note:** `ctx=200000` already reached about 30.8 GiB with MTP on the
+  RTX 5090, so this local 5090 profile does not advertise the model card's
+  262k maximum context.
 
 ### NVIDIA Qwen3.6 35B A3B NVFP4 MTP GGUF - llama.cpp b9761 - ctx=200k - MTP n=2
 

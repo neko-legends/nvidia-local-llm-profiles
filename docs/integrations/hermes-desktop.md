@@ -78,7 +78,7 @@ custom_providers:
       context_length: 262144
       supports_vision: false
     qwen36-27b-nvfp4-gguf:
-      context_length: 262144
+      context_length: 200000
       supports_vision: false
   name: Local 5090
 ```
@@ -170,7 +170,7 @@ If you bypass the router and use the direct endpoint from another client, either
 send `chat_template_kwargs.enable_thinking=false` in the request body or run the
 included start script with `THINKING=0`.
 
-## NVIDIA Qwen3.6 27B NVFP4 GGUF
+## NVIDIA Qwen3.6 27B NVFP4 MTP GGUF
 
 Download, convert, and start from the repo checkout:
 
@@ -195,12 +195,14 @@ Direct endpoint:
 ```text
 Base URL:  http://127.0.0.1:39195/v1
 Model:     qwen36-27b-nvfp4-gguf
-Context:   262144
+Context:   200000
 ```
 
 The source NVIDIA checkpoint is published for vLLM/modelopt NVFP4. The native
 GGUF conversion path requires a recent llama.cpp checkout with support for this
-architecture and quantization metadata.
+architecture and quantization metadata. The source snapshot includes MTP
+tensors, and the launcher enables `draft-mtp` n=2 by default. Set `USE_MTP=0`
+before running the start script only when you want a baseline comparison.
 
 ## AEON Qwen3.6 27B Multimodal NVFP4 MTP-XS
 
@@ -274,7 +276,7 @@ For Qwopus3.6 35B Q4_K_M, use port `39193` and model
 `qwopus3.6-35b-a3b-coder-mtp-q4-k-m`. For Q5_K_M, use port `39191` and model
 `qwopus3.6-35b-a3b-coder-mtp-q5-k-m`.
 
-For NVIDIA Qwen3.6 27B NVFP4 GGUF, use port `39195` and model
+For NVIDIA Qwen3.6 27B NVFP4 MTP GGUF, use port `39195` and model
 `qwen36-27b-nvfp4-gguf`.
 
 ## Notes
