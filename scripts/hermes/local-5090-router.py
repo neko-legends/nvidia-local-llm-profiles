@@ -42,6 +42,21 @@ DIFFUSION_MODEL = "diffusiongemma"
 ORNITH_MODEL = "ornith-1.0-35b-q4-k-m"
 ORNITH_Q5_MODEL = "ornith-1.0-35b-q5-k-m"
 AEON_ORNITH_NVFP4_MODEL = "aeon-ornith-1.0-35b-nvfp4"
+QWEN36_27B_NVFP4_MODEL = "qwen36-27b-nvfp4-gguf"
+QWEN36_27B_NVFP4_ALIASES = frozenset(
+    {
+        QWEN36_27B_NVFP4_MODEL,
+        "qwen36-27b",
+        "qwen36-27b-nvfp4",
+        "qwen36-27b-gguf",
+        "qwen3.6-27b",
+        "qwen3.6-27b-nvfp4",
+        "qwen3.6-27b-nvfp4-gguf",
+        "nvidia-qwen36-27b-nvfp4",
+        "nvidia-qwen3.6-27b-nvfp4",
+        "nvidia/qwen3.6-27b-nvfp4",
+    }
+)
 
 
 def parse_args() -> argparse.Namespace:
@@ -55,6 +70,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--ornith-base-url", default="http://127.0.0.1:39188/v1")
     parser.add_argument("--ornith-q5-base-url", default="http://127.0.0.1:39189/v1")
     parser.add_argument("--aeon-ornith-nvfp4-base-url", default="http://127.0.0.1:39187/v1")
+    parser.add_argument("--qwen36-27b-nvfp4-base-url", default="http://127.0.0.1:39195/v1")
     return parser.parse_args()
 
 
@@ -72,6 +88,7 @@ class Local5090Router(BaseHTTPRequestHandler):
     ornith_base_url: str
     ornith_q5_base_url: str
     aeon_ornith_nvfp4_base_url: str
+    qwen36_27b_nvfp4_base_url: str
 
     def _models_response(self) -> bytes:
         return json.dumps(
@@ -127,6 +144,13 @@ class Local5090Router(BaseHTTPRequestHandler):
                         "owned_by": "Local 5090",
                         "context_length": 262144,
                     },
+                    {
+                        "id": QWEN36_27B_NVFP4_MODEL,
+                        "object": "model",
+                        "created": 0,
+                        "owned_by": "Local 5090",
+                        "context_length": 262144,
+                    },
                 ],
             },
             separators=(",", ":"),
@@ -168,10 +192,12 @@ class Local5090Router(BaseHTTPRequestHandler):
         }
         aliases.update({alias: self.qwopus35_base_url for alias in QWOPUS35_Q5_ALIASES})
         aliases.update({alias: self.qwopus35_q4_base_url for alias in QWOPUS35_Q4_ALIASES})
+        aliases.update({alias: self.qwen36_27b_nvfp4_base_url for alias in QWEN36_27B_NVFP4_ALIASES})
         return aliases.get(normalize_model(model))
 
     def _apply_model_request_defaults(self, payload: dict[str, Any]) -> None:
-        if normalize_model(payload.get("model")) not in QWOPUS35_NO_THINK_ALIASES:
+        no_think_aliases = QWOPUS35_NO_THINK_ALIASES | QWEN36_27B_NVFP4_ALIASES
+        if normalize_model(payload.get("model")) not in no_think_aliases:
             return
 
         chat_template_kwargs = payload.get("chat_template_kwargs")
@@ -239,7 +265,7 @@ class Local5090Router(BaseHTTPRequestHandler):
                         "message": "Unknown local model. Use diffusiongemma or "
                         f"{QWOPUS_MODEL}, {QWOPUS35_Q5_MODEL}, {QWOPUS35_Q4_MODEL}, "
                         f"{ORNITH_MODEL}, {ORNITH_Q5_MODEL}, "
-                        f"or {AEON_ORNITH_NVFP4_MODEL}."
+                        f"{AEON_ORNITH_NVFP4_MODEL}, or {QWEN36_27B_NVFP4_MODEL}."
                     }
                 },
             )
@@ -293,6 +319,7 @@ def main() -> int:
     Local5090Router.ornith_base_url = args.ornith_base_url
     Local5090Router.ornith_q5_base_url = args.ornith_q5_base_url
     Local5090Router.aeon_ornith_nvfp4_base_url = args.aeon_ornith_nvfp4_base_url
+    Local5090Router.qwen36_27b_nvfp4_base_url = args.qwen36_27b_nvfp4_base_url
 
     server = ThreadingHTTPServer((args.host, args.port), Local5090Router)
     print(f"Local 5090 router listening at http://{args.host}:{args.port}/v1", flush=True)

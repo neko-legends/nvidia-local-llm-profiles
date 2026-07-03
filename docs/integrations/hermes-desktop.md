@@ -15,19 +15,21 @@ lists the local model servers:
 - `aeon-ornith-1.0-35b-nvfp4`
 - `ornith-1.0-35b-q4-k-m`
 - `ornith-1.0-35b-q5-k-m`
+- `qwen36-27b-nvfp4-gguf`
 
 ![Hermes Desktop Local 5090 provider](../../assets/images/hermes-local-5090-provider.png)
 
 Hermes custom providers are anchored to one base URL. Since Qwopus,
-DiffusionGemma, AEON Ornith, and GGUF Ornith are served by different local
-endpoints, this repo includes a small local router that exposes one `/v1`
-endpoint for Hermes and routes each request by the `model` field.
+DiffusionGemma, AEON Ornith, GGUF Ornith, and NVIDIA Qwen GGUF are served by
+different local endpoints, this repo includes a small local router that exposes
+one `/v1` endpoint for Hermes and routes each request by the `model` field.
 
 For `qwopus3.6-35b-a3b-coder-mtp-q4-k-m` and
-`qwopus3.6-35b-a3b-coder-mtp-q5-k-m`, the router also adds
+`qwopus3.6-35b-a3b-coder-mtp-q5-k-m`, plus
+`qwen36-27b-nvfp4-gguf`, the router also adds
 `chat_template_kwargs.enable_thinking=false` to chat requests unless the client
-explicitly sets `enable_thinking`. That keeps Qwopus35 in no-thinking mode from
-Hermes without changing the other local models.
+explicitly sets `enable_thinking`. That keeps the Qwen-family coding profiles in
+no-thinking mode from Hermes without changing the other local models.
 
 Run:
 
@@ -75,6 +77,9 @@ custom_providers:
     ornith-1.0-35b-q5-k-m:
       context_length: 262144
       supports_vision: false
+    qwen36-27b-nvfp4-gguf:
+      context_length: 262144
+      supports_vision: false
   name: Local 5090
 ```
 
@@ -89,6 +94,7 @@ Hermes -> http://127.0.0.1:39190/v1
   aeon-ornith-1.0-35b-nvfp4          -> http://127.0.0.1:39187/v1
   ornith-1.0-35b-q4-k-m              -> http://127.0.0.1:39188/v1
   ornith-1.0-35b-q5-k-m              -> http://127.0.0.1:39189/v1
+  qwen36-27b-nvfp4-gguf              -> http://127.0.0.1:39195/v1
 ```
 
 Restart Hermes Desktop after running the installer so the model menu refreshes.
@@ -164,6 +170,38 @@ If you bypass the router and use the direct endpoint from another client, either
 send `chat_template_kwargs.enable_thinking=false` in the request body or run the
 included start script with `THINKING=0`.
 
+## NVIDIA Qwen3.6 27B NVFP4 GGUF
+
+Download, convert, and start from the repo checkout:
+
+```bat
+scripts\localai\qwen36-27b-nvfp4-gguf\download-qwen36-27b-nvfp4.bat
+set LLAMA_CPP_SRC=C:\path\to\llama.cpp
+scripts\localai\qwen36-27b-nvfp4-gguf\convert-qwen36-27b-nvfp4-to-gguf.bat
+set LLAMA_DIR=C:\path\to\llama.cpp-cuda-build
+scripts\localai\qwen36-27b-nvfp4-gguf\start-qwen36-27b-nvfp4-gguf-server.bat
+```
+
+Wire into Hermes through the consolidated provider:
+
+```text
+Provider/API: Local 5090
+Base URL:     http://127.0.0.1:39190/v1
+Model:        qwen36-27b-nvfp4-gguf
+```
+
+Direct endpoint:
+
+```text
+Base URL:  http://127.0.0.1:39195/v1
+Model:     qwen36-27b-nvfp4-gguf
+Context:   262144
+```
+
+The source NVIDIA checkpoint is published for vLLM/modelopt NVFP4. The native
+GGUF conversion path requires a recent llama.cpp checkout with support for this
+architecture and quantization metadata.
+
 ## AEON Qwen3.6 27B Multimodal NVFP4 MTP-XS
 
 Start the vLLM Docker server:
@@ -236,13 +274,17 @@ For Qwopus3.6 35B Q4_K_M, use port `39193` and model
 `qwopus3.6-35b-a3b-coder-mtp-q4-k-m`. For Q5_K_M, use port `39191` and model
 `qwopus3.6-35b-a3b-coder-mtp-q5-k-m`.
 
+For NVIDIA Qwen3.6 27B NVFP4 GGUF, use port `39195` and model
+`qwen36-27b-nvfp4-gguf`.
+
 ## Notes
 
 - Start the model server before Hermes tries to use it.
 - Do not put a real API key in a local no-auth endpoint.
 - Restart Hermes Desktop after changing saved custom provider settings.
 - Keep the `Local 5090` router running when using the consolidated provider.
-- The router intentionally applies the Qwopus35 no-thinking request default only
-  to Qwopus35 aliases, not to Ornith or other reasoning-model profiles.
+- The router intentionally applies the Qwen no-thinking request default only to
+  Qwopus35 and NVIDIA Qwen 27B aliases, not to Ornith or other reasoning-model
+  profiles.
 - llama.cpp/GGUF startup is usually much faster than vLLM safetensors startup;
   wait for the server log to show that requests are being accepted.

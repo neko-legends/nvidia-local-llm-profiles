@@ -13,6 +13,7 @@ DIFFUSION_MODEL = "diffusiongemma"
 ORNITH_MODEL = "ornith-1.0-35b-q4-k-m"
 ORNITH_Q5_MODEL = "ornith-1.0-35b-q5-k-m"
 AEON_ORNITH_NVFP4_MODEL = "aeon-ornith-1.0-35b-nvfp4"
+QWEN36_27B_NVFP4_MODEL = "qwen36-27b-nvfp4-gguf"
 
 
 def parse_args() -> argparse.Namespace:
@@ -26,6 +27,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--ornith-base-url", default="http://127.0.0.1:39188/v1")
     parser.add_argument("--ornith-q5-base-url", default="http://127.0.0.1:39189/v1")
     parser.add_argument("--aeon-ornith-nvfp4-base-url", default="http://127.0.0.1:39187/v1")
+    parser.add_argument("--qwen36-27b-nvfp4-base-url", default="http://127.0.0.1:39195/v1")
     return parser.parse_args()
 
 
@@ -75,6 +77,10 @@ def provider_config(name: str, router_port: str) -> dict:
                 "context_length": 262144,
                 "supports_vision": True,
             },
+            QWEN36_27B_NVFP4_MODEL: {
+                "context_length": 262144,
+                "supports_vision": False,
+            },
         },
         "name": name,
     }
@@ -99,6 +105,8 @@ def should_remove_provider(provider: object, name: str) -> bool:
         "ornith-q5-local",
         "aeon-ornith-local",
         "aeon-ornith-nvfp4-local",
+        "qwen36-27b-local",
+        "qwen36-27b-nvfp4-local",
     }
     base_urls = {
         "http://127.0.0.1:39190/v1",
@@ -109,6 +117,7 @@ def should_remove_provider(provider: object, name: str) -> bool:
         "http://127.0.0.1:39188/v1",
         "http://127.0.0.1:39189/v1",
         "http://127.0.0.1:39187/v1",
+        "http://127.0.0.1:39195/v1",
     }
     models = {
         QWOPUS_MODEL,
@@ -143,6 +152,14 @@ def should_remove_provider(provider: object, name: str) -> bool:
         "aeon-ornith-nvfp4",
         "ornith-aeon-nvfp4",
         "ornith-1.0-35b-aeon-nvfp4",
+        QWEN36_27B_NVFP4_MODEL,
+        "qwen36-27b-local",
+        "qwen36-27b",
+        "qwen36-27b-nvfp4",
+        "qwen3.6-27b",
+        "qwen3.6-27b-nvfp4",
+        "nvidia-qwen36-27b-nvfp4",
+        "nvidia/qwen3.6-27b-nvfp4",
     }
 
     return provider_name in names or base_url in base_urls or model in models

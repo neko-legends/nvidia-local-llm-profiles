@@ -7,8 +7,8 @@ Hand this repo to a coding agent and it can download the model, start a local
 OpenAI-compatible endpoint, wire Hermes, run benchmarks, and collect the proof.
 
 **Current focus:** Qwopus3.6-35B-A3B-Coder-MTP Q4_K_M and Q5_K_M via native
-llama.cpp, with Qwopus27, Ornith, AEON Ornith, and Unsloth Qwen35 kept as RTX
-5090 comparison baselines.
+llama.cpp, with Qwopus27, NVIDIA Qwen NVFP4, Ornith, AEON Ornith, and Unsloth
+Qwen35 kept as RTX 5090 comparison baselines.
 
 ---
 
@@ -47,6 +47,52 @@ Why this profile uses it:
 ---
 
 ## Additional Model Support
+
+### NVIDIA Qwen3.6 27B NVFP4 GGUF
+
+Native llama.cpp scaffolding for a GGUF conversion of
+[nvidia/Qwen3.6-27B-NVFP4](https://huggingface.co/nvidia/Qwen3.6-27B-NVFP4).
+NVIDIA publishes the source checkpoint as a ModelOpt/NVFP4 safetensors release
+with vLLM as the supported runtime; this folder adds the repo's native Windows
+GGUF test path.
+
+Launcher folder:
+
+```text
+scripts\localai\qwen36-27b-nvfp4-gguf\
+```
+
+Quick path:
+
+```bat
+download-qwen36-27b-nvfp4.bat
+
+set LLAMA_CPP_SRC=C:\path\to\llama.cpp
+convert-qwen36-27b-nvfp4-to-gguf.bat
+
+set LLAMA_DIR=C:\path\to\llama.cpp-cuda-build
+start-qwen36-27b-nvfp4-gguf-server.bat
+```
+
+Storage:
+
+```text
+<checkout-parent>\.local-model-cache\nvidia\Qwen3.6-27B-NVFP4\
+<checkout-parent>\.local-model-cache\nvidia\Qwen3.6-27B-NVFP4-GGUF\qwen3.6-27b-nvfp4.gguf
+```
+
+Hermes:
+
+```bat
+scripts\localai\qwen36-27b-nvfp4-gguf\install-hermes-qwen36-27b-nvfp4-gguf.bat
+```
+
+Endpoint defaults:
+
+- Base URL: `http://127.0.0.1:39195/v1`
+- Model: `qwen36-27b-nvfp4-gguf`
+- Context: `262144`
+- Thinking: disabled by the launcher and Local 5090 router
 
 ### AEON Qwen3.6 27B Multimodal NVFP4 MTP-XS
 
@@ -219,6 +265,37 @@ Endpoint defaults:
 
 ---
 
+## Model Storage
+
+The launchers store downloaded and converted models outside the repo checkout,
+under the checkout parent's shared cache:
+
+```text
+<checkout-parent>\.local-model-cache\
+```
+
+For this checkout at `D:\forPublic\nvidia-local-llm-profiles`, that resolves to:
+
+```text
+D:\forPublic\.local-model-cache\
+```
+
+Examples:
+
+```text
+D:\forPublic\.local-model-cache\nvidia\Qwen3.6-27B-NVFP4\
+D:\forPublic\.local-model-cache\nvidia\Qwen3.6-27B-NVFP4-GGUF\qwen3.6-27b-nvfp4.gguf
+D:\forPublic\.local-model-cache\nvidia\Qwen3.6-35B-A3B-NVFP4-MTP-GGUF\qwen3.6-35b-a3b-nvfp4-mtp.gguf
+D:\forPublic\.local-model-cache\Jackrong\Qwopus3.6-35B-A3B-Coder-MTP-GGUF\
+D:\forPublic\.local-model-cache\deepreinforce-ai\Ornith-1.0-35B-GGUF\
+```
+
+Most scripts also accept environment overrides such as `MODEL_DIR`,
+`MODEL_PATH`, `SOURCE_MODEL_DIR`, `OUT_DIR`, `OUTFILE`, `LLAMA_DIR`, and
+`LLAMA_CPP_SRC` when you want to use a different disk.
+
+---
+
 ## RTX 5090 Benchmark Results
 
 **GPU:** RTX 5090 32GB - **Driver:** 610.62 - **Dates:** 2026-06-22 to
@@ -368,6 +445,12 @@ scripts\localai\qwopus3.6-35b-a3b-coder-mtp-gguf\start-qwopus3.6-35b-a3b-coder-m
 scripts\localai\qwopus3.6-35b-a3b-coder-mtp-gguf\start-qwopus3.6-35b-a3b-coder-mtp-q5-k-m-server.bat
 ```
 
+Or NVIDIA Qwen3.6 27B NVFP4 GGUF:
+
+```bat
+scripts\localai\qwen36-27b-nvfp4-gguf\start-qwen36-27b-nvfp4-gguf-server.bat
+```
+
 Then restart or open Hermes Desktop, choose the `Local 5090` provider, and pick
 the model you started. You can also point any OpenAI-compatible client at the
 router:
@@ -386,6 +469,7 @@ The installer updates Hermes Desktop with a single `Local 5090` provider:
 - `aeon-ornith-1.0-35b-nvfp4` routes to `http://127.0.0.1:39187/v1`
 - `ornith-1.0-35b-q4-k-m` routes to `http://127.0.0.1:39188/v1`
 - `ornith-1.0-35b-q5-k-m` routes to `http://127.0.0.1:39189/v1`
+- `qwen36-27b-nvfp4-gguf` routes to `http://127.0.0.1:39195/v1`
 - Hermes talks to the local router at `http://127.0.0.1:39190/v1`
 - The script backs up `%LOCALAPPDATA%\hermes\config.yaml` before editing it.
 
@@ -445,6 +529,7 @@ scripts/
   localai/
     qwopus3.6-27b-coder-mtp-gguf/   launchers, download, install
     qwopus3.6-35b-a3b-coder-mtp-gguf/  Qwopus 35B Coder GGUF launcher
+    qwen36-27b-nvfp4-gguf/          NVIDIA Qwen 27B NVFP4 GGUF launcher
     qwen36-35b-a3b-mtp-gguf/        Unsloth Qwen 35B GGUF launcher
     qwen36-35b-a3b-nvfp4-mtp-gguf/  NVIDIA Qwen 35B NVFP4 MTP GGUF launcher
     ornith-1.0-35b-gguf/            Ornith 35B GGUF launcher
@@ -461,6 +546,7 @@ scripts/
 docs/
   models/qwopus3.6-27b-coder-mtp-gguf.md   model notes
   models/aeon-qwen36-27b-multimodal-nvfp4-mtp-xs.md   AEON vLLM notes
+  models/qwen36-27b-nvfp4-gguf.md           NVIDIA Qwen 27B GGUF notes
   models/qwen36-35b-a3b-nvfp4-mtp-gguf.md   NVIDIA GGUF notes
   hardware/rtx-5090-power-and-thermal.md    GPU tuning notes
   integrations/hermes-desktop.md            Hermes wiring guide
