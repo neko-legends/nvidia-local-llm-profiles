@@ -30,16 +30,29 @@ class Row:
     completion_tokens: int
     context_slot: int
     decode_tps: float
-    prefill_seconds: float
+    prefill_seconds: float | None
     wall_tps: float
     draft_acceptance: float | None
     memory_after_mib: int
     temperature_c: int
+    note: str = ""
 
 
 MODE_COLORS = {
-    "No MTP": "#8fa3ba",
-    "draft-mtp n=2": "#ff4d4d",
+    "Native GGUF draft-mtp n=2": "#ff4d4d",
+    "Native GGUF no MTP": "#8fa3ba",
+    "Docker vLLM no MTP": "#4aa3ff",
+}
+
+MODE_ORDER = {
+    "Native GGUF draft-mtp n=2": 0,
+    "Native GGUF no MTP": 1,
+    "Docker vLLM no MTP": 2,
+}
+
+VLLM_ENGINE_DECODE_TPS = {
+    "10K prompt": 34.8,
+    "200K prompt": 30.9,
 }
 
 
@@ -56,9 +69,14 @@ def read_rows() -> list[Row]:
     with RESULTS_CSV.open(newline="", encoding="utf-8-sig") as handle:
         for raw in csv.DictReader(handle):
             draft = raw["draft_acceptance"]
+            mode = (
+                "Native GGUF no MTP"
+                if raw["mode"] == "No MTP"
+                else "Native GGUF draft-mtp n=2"
+            )
             rows.append(
                 Row(
-                    mode=raw["mode"],
+                    mode=mode,
                     context_label=raw["context_label"],
                     target_prompt_tokens=int(raw["target_prompt_tokens"]),
                     prompt_tokens=int(raw["prompt_tokens"]),
@@ -72,6 +90,56 @@ def read_rows() -> list[Row]:
                     temperature_c=int(raw["temperature_c"]),
                 )
             )
+    rows.extend(read_vllm_rows())
+    return rows
+
+
+def latest_csv(pattern: str) -> Path | None:
+    matches = sorted((ROOT / "results" / "rtx-5090").glob(pattern))
+    return matches[-1] if matches else None
+
+
+def read_single_result(path: Path) -> dict[str, str]:
+    with path.open(newline="", encoding="utf-8-sig") as handle:
+        return next(csv.DictReader(handle))
+
+
+def read_vllm_rows() -> list[Row]:
+    rows: list[Row] = []
+    specs = [
+        (
+            "10K prompt",
+            "qwen36-27b-nvfp4-vllm-docker-fp8kv-noautotune-ctx200k-request-nothink-prompt10k-gen1024-warm2-*.csv",
+            "warmed; Win11 Docker",
+        ),
+        (
+            "200K prompt",
+            "qwen36-27b-nvfp4-vllm-docker-fp8kv-noautotune-ctx200k-request-nothink-prompt200k-gen1024-*.csv",
+            "Win11 Docker; KV cap 223,880",
+        ),
+    ]
+    for context_label, pattern, note in specs:
+        path = latest_csv(pattern)
+        if path is None:
+            continue
+        raw = read_single_result(path)
+        rows.append(
+            Row(
+                mode="Docker vLLM no MTP",
+                context_label=context_label,
+                target_prompt_tokens=int(raw["target_prompt_tokens"]),
+                prompt_tokens=int(raw["prompt_tokens"]),
+                completion_tokens=int(raw["completion_tokens"]),
+                context_slot=200000,
+                decode_tps=VLLM_ENGINE_DECODE_TPS[context_label],
+                prefill_seconds=None,
+                wall_tps=float(raw["wall_completion_tps"]),
+                draft_acceptance=None,
+                memory_after_mib=int(raw["memory_after_mib"]),
+                temperature_c=int(raw["temp_after_c"]),
+                note=note,
+            )
+        )
     return rows
 
 
@@ -80,13 +148,13 @@ def grouped(rows: list[Row]) -> list[tuple[str, list[Row]]]:
     for label in ("10K prompt", "200K prompt"):
         group_rows = [row for row in rows if row.context_label == label]
         if group_rows:
-            result.append((label, sorted(group_rows, key=lambda row: row.mode != "No MTP")))
+            result.append((label, sorted(group_rows, key=lambda row: MODE_ORDER[row.mode])))
     return result
 
 
 def speedup(rows: list[Row]) -> float | None:
-    base = next((row.decode_tps for row in rows if row.mode == "No MTP"), None)
-    mtp = next((row.decode_tps for row in rows if row.mode == "draft-mtp n=2"), None)
+    base = next((row.decode_tps for row in rows if row.mode == "Native GGUF no MTP"), None)
+    mtp = next((row.decode_tps for row in rows if row.mode == "Native GGUF draft-mtp n=2"), None)
     if base is None or mtp is None or base == 0:
         return None
     return (mtp / base) - 1
@@ -95,12 +163,15 @@ def speedup(rows: list[Row]) -> float | None:
 def detail(row: Row) -> str:
     parts = [
         f"{row.prompt_tokens:,} prompt tokens",
-        f"prefill {fmt_one(row.prefill_seconds)}s",
         f"wall {fmt_one(row.wall_tps)} tok/s",
         f"{fmt_gib(row.memory_after_mib)} GiB",
     ]
+    if row.prefill_seconds is not None:
+        parts.insert(1, f"prefill {fmt_one(row.prefill_seconds)}s")
     if row.draft_acceptance is not None:
         parts.append(f"accept {row.draft_acceptance * 100:.1f}%")
+    if row.note:
+        parts.append(row.note)
     return "; ".join(parts)
 
 
@@ -115,13 +186,13 @@ def svg_text(x: float, y: float, text: str, **attrs: str) -> str:
 
 def render_svg(rows: list[Row]) -> Path:
     groups = grouped(rows)
-    width = 1900
-    height = 760
-    left = 760
-    right = 90
-    top = 245
+    width = 2000
+    height = 900
+    left = 850
+    right = 100
+    top = 265
     row_h = 72
-    group_gap = 200
+    group_gap = 250
     bar_h = 34
     plot_w = width - left - right
     panel_bottom = height - 118
@@ -145,10 +216,10 @@ def render_svg(rows: list[Row]) -> Path:
         f'<rect x="{left - 28}" y="{top - 58}" width="{plot_w + 56}" height="{panel_bottom - top + 92}" rx="10" fill="#171d24"/>',
     ]
 
-    parts.append(svg_text(70, 76, "Qwen3.6 27B NVFP4 GGUF: MTP vs No MTP", class_="title"))
-    parts.append(svg_text(70, 118, "RTX 5090, llama.cpp b9851, native Windows GGUF, ctx=200k, no-thinking, q4 KV.", class_="subtitle"))
-    parts.append(svg_text(70, 152, "Bars show server-side llama.cpp decode tok/s. Row details include prompt prefill, full request wall-rate, VRAM, and draft acceptance.", class_="note"))
-    parts.append(svg_text(70, 178, "Same BookContext 10k and 200k prompts with 1024 generated tokens.", class_="note"))
+    parts.append(svg_text(70, 76, "Qwen3.6 27B NVFP4 on RTX 5090 Windows 11", class_="title"))
+    parts.append(svg_text(70, 118, "Native Windows GGUF llama.cpp vs Windows 11 host + Docker Desktop vLLM, ctx=200k, no-thinking, 1024 generated tokens.", class_="subtitle"))
+    parts.append(svg_text(70, 152, "Bars show decode/generation tok/s. Docker vLLM rows use engine log throughput; row details include full-request wall-rate and VRAM.", class_="note"))
+    parts.append(svg_text(70, 178, "vLLM is recommended for NVIDIA NVFP4 safetensors, but this Windows 11 Docker path is not the fast native Linux vLLM path.", class_="note"))
 
     for tick in range(0, scale_max + 1, 25):
         x = left + (tick / scale_max) * plot_w
@@ -160,7 +231,7 @@ def render_svg(rows: list[Row]) -> Path:
         parts.append(svg_text(70, y - 20, group_label, class_="group"))
         pct = speedup(group_rows)
         if pct is not None:
-            parts.append(svg_text(70, y + 10, f"draft-mtp n=2 {pct:+.1%} decode", class_="speedup"))
+            parts.append(svg_text(70, y + 10, f"native draft-mtp n=2 {pct:+.1%} decode", class_="speedup"))
         for index, row in enumerate(group_rows):
             row_y = y + 46 + index * row_h
             bar_w = (row.decode_tps / scale_max) * plot_w
@@ -173,7 +244,7 @@ def render_svg(rows: list[Row]) -> Path:
             parts.append(svg_text(left + bar_w + 78, row_y - 2, "tok/s", class_="axis"))
         y += group_gap
 
-    parts.append(svg_text(70, height - 52, "Source: results/rtx-5090/qwen36-27b-nvfp4-gguf-mtp-comparison-20260703.csv", class_="note"))
+    parts.append(svg_text(70, height - 52, "Sources: native GGUF curated CSV plus Docker vLLM noautotune CSVs/logs, Windows 11 host, driver 610.62.", class_="note"))
     parts.append(svg_text(width - 70, height - 52, "neko-legends/nvidia-local-llm-profiles", class_="note", text_anchor="end"))
     parts.append("</svg>")
 
@@ -190,13 +261,13 @@ def render_png(rows: list[Row]) -> Path:
         raise SystemExit("Pillow is required to render the PNG chart.") from exc
 
     groups = grouped(rows)
-    width = 1900
-    height = 760
-    left = 760
-    right = 90
-    top = 245
+    width = 2000
+    height = 900
+    left = 850
+    right = 100
+    top = 265
     row_h = 72
-    group_gap = 200
+    group_gap = 250
     bar_h = 34
     plot_w = width - left - right
     panel_bottom = height - 118
@@ -223,10 +294,10 @@ def render_png(rows: list[Row]) -> Path:
     speedup_font = font("segoeuib.ttf", 18)
 
     draw.rounded_rectangle([left - 28, top - 58, left - 28 + plot_w + 56, panel_bottom + 34], radius=10, fill="#171d24")
-    draw.text((70, 42), "Qwen3.6 27B NVFP4 GGUF: MTP vs No MTP", fill="#f3f5f7", font=title_font)
-    draw.text((70, 100), "RTX 5090, llama.cpp b9851, native Windows GGUF, ctx=200k, no-thinking, q4 KV.", fill="#b8c2cc", font=subtitle_font)
-    draw.text((70, 138), "Bars show server-side llama.cpp decode tok/s. Row details include prompt prefill, full request wall-rate, VRAM, and draft acceptance.", fill="#9aa6b2", font=note_font)
-    draw.text((70, 166), "Same BookContext 10k and 200k prompts with 1024 generated tokens.", fill="#9aa6b2", font=note_font)
+    draw.text((70, 42), "Qwen3.6 27B NVFP4 on RTX 5090 Windows 11", fill="#f3f5f7", font=title_font)
+    draw.text((70, 100), "Native Windows GGUF llama.cpp vs Windows 11 host + Docker Desktop vLLM, ctx=200k, no-thinking, 1024 generated tokens.", fill="#b8c2cc", font=subtitle_font)
+    draw.text((70, 138), "Bars show decode/generation tok/s. Docker vLLM rows use engine log throughput; row details include full-request wall-rate and VRAM.", fill="#9aa6b2", font=note_font)
+    draw.text((70, 166), "vLLM is recommended for NVIDIA NVFP4 safetensors, but this Windows 11 Docker path is not the fast native Linux vLLM path.", fill="#9aa6b2", font=note_font)
 
     for tick in range(0, scale_max + 1, 25):
         x = left + (tick / scale_max) * plot_w
@@ -240,7 +311,7 @@ def render_png(rows: list[Row]) -> Path:
         draw.text((70, y - 50), group_label, fill="#f3f5f7", font=group_font)
         pct = speedup(group_rows)
         if pct is not None:
-            draw.text((70, y - 20), f"draft-mtp n=2 {pct:+.1%} decode", fill="#ffb86b", font=speedup_font)
+            draw.text((70, y - 20), f"native draft-mtp n=2 {pct:+.1%} decode", fill="#ffb86b", font=speedup_font)
         for index, row in enumerate(group_rows):
             row_y = y + 19 + index * row_h
             bar_w = (row.decode_tps / scale_max) * plot_w
@@ -256,7 +327,7 @@ def render_png(rows: list[Row]) -> Path:
             draw.text((left + bar_w + 78, row_y - 22), "tok/s", fill="#8f9ba8", font=axis_font)
         y += group_gap
 
-    draw.text((70, height - 64), "Source: results/rtx-5090/qwen36-27b-nvfp4-gguf-mtp-comparison-20260703.csv", fill="#9aa6b2", font=note_font)
+    draw.text((70, height - 64), "Sources: native GGUF curated CSV plus Docker vLLM noautotune CSVs/logs, Windows 11 host, driver 610.62.", fill="#9aa6b2", font=note_font)
     repo = "neko-legends/nvidia-local-llm-profiles"
     bbox = draw.textbbox((0, 0), repo, font=note_font)
     draw.text((width - 70 - (bbox[2] - bbox[0]), height - 64), repo, fill="#9aa6b2", font=note_font)

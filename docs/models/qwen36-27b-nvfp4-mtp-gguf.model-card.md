@@ -21,9 +21,9 @@ tags:
 ---
 
 <div style="font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; border: 1px solid #3a2a1f; background: #0f0f13; border-radius: 16px; overflow: hidden; margin: 0 0 28px 0; box-shadow: 0 20px 48px rgba(0,0,0,0.24);">
-  <div style="padding: 14px 18px; background: linear-gradient(90deg, #1a120d 0%, #2b1708 100%); border-bottom: 1px solid rgba(255,122,26,0.35); color: #ffd7ad; font-weight: 950;">RTX 5090 native llama.cpp benchmark chart</div>
+  <div style="padding: 14px 18px; background: linear-gradient(90deg, #1a120d 0%, #2b1708 100%); border-bottom: 1px solid rgba(255,122,26,0.35); color: #ffd7ad; font-weight: 950;">RTX 5090 Windows benchmark chart</div>
   <a href="https://huggingface.co/neko-legends/Qwen3.6-27B-NVFP4-MTP-GGUF/blob/main/qwen36-27b-nvfp4-mtp-vs-no-mtp.png" target="_blank" style="display:block; background:#050507;">
-    <img src="https://huggingface.co/neko-legends/Qwen3.6-27B-NVFP4-MTP-GGUF/resolve/main/qwen36-27b-nvfp4-mtp-vs-no-mtp.png" alt="RTX 5090 native llama.cpp Qwen3.6 27B NVFP4 MTP versus no-MTP benchmark chart" style="display:block; width:100%; border:0;" />
+    <img src="https://huggingface.co/neko-legends/Qwen3.6-27B-NVFP4-MTP-GGUF/resolve/main/qwen36-27b-nvfp4-mtp-vs-no-mtp.png" alt="RTX 5090 Windows Qwen3.6 27B NVFP4 native GGUF versus Docker vLLM benchmark chart" style="display:block; width:100%; border:0;" />
   </a>
 </div>
 
@@ -91,7 +91,7 @@ llama-server \
 
 ## RTX 5090 Benchmark
 
-Windows native `llama.cpp` b9851, RTX 5090, CUDA, q4 target KV, no-thinking request mode, 1024 generated tokens, temperature 0, seed 1234. The chart uses decode-only `llama.cpp` generation timing; full request tok/s includes prompt processing.
+The chart compares native Windows GGUF/`llama.cpp` against a Windows 11 host + Docker Desktop vLLM baseline for the original NVIDIA safetensors checkpoint. vLLM is the recommended path for NVIDIA ModelOpt NVFP4 safetensors, but the measured Docker rows are a Windows compatibility baseline rather than a native Linux vLLM result. The native table below used `llama.cpp` b9851, RTX 5090, CUDA, q4 target KV, no-thinking request mode, 1024 generated tokens, temperature 0, seed 1234. Native chart bars use decode-only `llama.cpp` generation timing; full request tok/s includes prompt processing.
 
 | Mode | Prompt | Prompt tokens | Full request tok/s | Decode tok/s | Prompt read | VRAM after | MTP acceptance |
 | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: |

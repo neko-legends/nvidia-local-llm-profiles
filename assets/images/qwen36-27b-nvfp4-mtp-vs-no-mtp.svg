@@ -1,4 +1,4 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="1900" height="760" viewBox="0 0 1900 760">
+<svg xmlns="http://www.w3.org/2000/svg" width="2000" height="900" viewBox="0 0 2000 900">
 <style>
 text{font-family:Segoe UI,Arial,sans-serif;letter-spacing:0}
 .title{fill:#f3f5f7;font-size:42px;font-weight:800}
@@ -11,48 +11,60 @@ text{font-family:Segoe UI,Arial,sans-serif;letter-spacing:0}
 .axis{fill:#8f9ba8;font-size:15px}
 .speedup{fill:#ffb86b;font-size:18px;font-weight:800}
 </style>
-<rect width="1900" height="760" fill="#101318"/>
-<rect x="732" y="187" width="1106" height="489" rx="10" fill="#171d24"/>
-<text x="70.0" y="76.0" class="title">Qwen3.6 27B NVFP4 GGUF: MTP vs No MTP</text>
-<text x="70.0" y="118.0" class="subtitle">RTX 5090, llama.cpp b9851, native Windows GGUF, ctx=200k, no-thinking, q4 KV.</text>
-<text x="70.0" y="152.0" class="note">Bars show server-side llama.cpp decode tok/s. Row details include prompt prefill, full request wall-rate, VRAM, and draft acceptance.</text>
-<text x="70.0" y="178.0" class="note">Same BookContext 10k and 200k prompts with 1024 generated tokens.</text>
-<line x1="760.0" y1="211" x2="760.0" y2="642" stroke="#2d3540" stroke-width="1"/>
-<text x="760.0" y="670.0" class="axis" text-anchor="middle">0</text>
-<line x1="1110.0" y1="211" x2="1110.0" y2="642" stroke="#2d3540" stroke-width="1"/>
-<text x="1110.0" y="670.0" class="axis" text-anchor="middle">25</text>
-<line x1="1460.0" y1="211" x2="1460.0" y2="642" stroke="#2d3540" stroke-width="1"/>
-<text x="1460.0" y="670.0" class="axis" text-anchor="middle">50</text>
-<line x1="1810.0" y1="211" x2="1810.0" y2="642" stroke="#2d3540" stroke-width="1"/>
-<text x="1810.0" y="670.0" class="axis" text-anchor="middle">75</text>
-<text x="70.0" y="225.0" class="group">10K prompt</text>
-<text x="70.0" y="255.0" class="speedup">draft-mtp n=2 +40.7% decode</text>
-<text x="726.0" y="286.0" class="mode" text-anchor="end">No MTP</text>
-<text x="726.0" y="309.0" class="detail" text-anchor="end">8,907 prompt tokens; prefill 2.9s; wall 42.1 tok/s; 29.2 GiB</text>
-<rect x="760" y="264" width="674.9" height="34" rx="5" fill="#8fa3ba" opacity="0.96"/>
-<rect x="760" y="264" width="674.9" height="34" rx="5" fill="none" stroke="#f5fff9" stroke-opacity="0.44"/>
-<text x="1448.9" y="289.0" class="value">48.2</text>
-<text x="1512.9" y="289.0" class="axis">tok/s</text>
-<text x="726.0" y="358.0" class="mode" text-anchor="end">draft-mtp n=2</text>
-<text x="726.0" y="381.0" class="detail" text-anchor="end">8,907 prompt tokens; prefill 3.1s; wall 55.9 tok/s; 30.8 GiB; accept 66.9%</text>
-<rect x="760" y="336" width="949.9" height="34" rx="5" fill="#ff4d4d" opacity="0.96"/>
-<rect x="760" y="336" width="949.9" height="34" rx="5" fill="none" stroke="#f5fff9" stroke-opacity="0.44"/>
-<text x="1723.9" y="361.0" class="value">67.9</text>
-<text x="1787.9" y="361.0" class="axis">tok/s</text>
-<text x="70.0" y="425.0" class="group">200K prompt</text>
-<text x="70.0" y="455.0" class="speedup">draft-mtp n=2 +25.6% decode</text>
-<text x="726.0" y="486.0" class="mode" text-anchor="end">No MTP</text>
-<text x="726.0" y="509.0" class="detail" text-anchor="end">174,590 prompt tokens; prefill 121.4s; wall 6.7 tok/s; 29.2 GiB</text>
-<rect x="760" y="464" width="460.0" height="34" rx="5" fill="#8fa3ba" opacity="0.96"/>
-<rect x="760" y="464" width="460.0" height="34" rx="5" fill="none" stroke="#f5fff9" stroke-opacity="0.44"/>
-<text x="1234.0" y="489.0" class="value">32.9</text>
-<text x="1298.0" y="489.0" class="axis">tok/s</text>
-<text x="726.0" y="558.0" class="mode" text-anchor="end">draft-mtp n=2</text>
-<text x="726.0" y="581.0" class="detail" text-anchor="end">174,590 prompt tokens; prefill 131.8s; wall 6.5 tok/s; 30.8 GiB; accept 68.3%</text>
-<rect x="760" y="536" width="577.6" height="34" rx="5" fill="#ff4d4d" opacity="0.96"/>
-<rect x="760" y="536" width="577.6" height="34" rx="5" fill="none" stroke="#f5fff9" stroke-opacity="0.44"/>
-<text x="1351.6" y="561.0" class="value">41.3</text>
-<text x="1415.6" y="561.0" class="axis">tok/s</text>
-<text x="70.0" y="708.0" class="note">Source: results/rtx-5090/qwen36-27b-nvfp4-gguf-mtp-comparison-20260703.csv</text>
-<text x="1830.0" y="708.0" class="note" text-anchor="end">neko-legends/nvidia-local-llm-profiles</text>
+<rect width="2000" height="900" fill="#101318"/>
+<rect x="822" y="207" width="1106" height="609" rx="10" fill="#171d24"/>
+<text x="70.0" y="76.0" class="title">Qwen3.6 27B NVFP4 on RTX 5090 Windows 11</text>
+<text x="70.0" y="118.0" class="subtitle">Native Windows GGUF llama.cpp vs Windows 11 host + Docker Desktop vLLM, ctx=200k, no-thinking, 1024 generated tokens.</text>
+<text x="70.0" y="152.0" class="note">Bars show decode/generation tok/s. Docker vLLM rows use engine log throughput; row details include full-request wall-rate and VRAM.</text>
+<text x="70.0" y="178.0" class="note">vLLM is recommended for NVIDIA NVFP4 safetensors, but this Windows 11 Docker path is not the fast native Linux vLLM path.</text>
+<line x1="850.0" y1="231" x2="850.0" y2="782" stroke="#2d3540" stroke-width="1"/>
+<text x="850.0" y="810.0" class="axis" text-anchor="middle">0</text>
+<line x1="1200.0" y1="231" x2="1200.0" y2="782" stroke="#2d3540" stroke-width="1"/>
+<text x="1200.0" y="810.0" class="axis" text-anchor="middle">25</text>
+<line x1="1550.0" y1="231" x2="1550.0" y2="782" stroke="#2d3540" stroke-width="1"/>
+<text x="1550.0" y="810.0" class="axis" text-anchor="middle">50</text>
+<line x1="1900.0" y1="231" x2="1900.0" y2="782" stroke="#2d3540" stroke-width="1"/>
+<text x="1900.0" y="810.0" class="axis" text-anchor="middle">75</text>
+<text x="70.0" y="245.0" class="group">10K prompt</text>
+<text x="70.0" y="275.0" class="speedup">native draft-mtp n=2 +40.7% decode</text>
+<text x="816.0" y="306.0" class="mode" text-anchor="end">Native GGUF draft-mtp n=2</text>
+<text x="816.0" y="329.0" class="detail" text-anchor="end">8,907 prompt tokens; prefill 3.1s; wall 55.9 tok/s; 30.8 GiB; accept 66.9%</text>
+<rect x="850" y="284" width="949.9" height="34" rx="5" fill="#ff4d4d" opacity="0.96"/>
+<rect x="850" y="284" width="949.9" height="34" rx="5" fill="none" stroke="#f5fff9" stroke-opacity="0.44"/>
+<text x="1813.9" y="309.0" class="value">67.9</text>
+<text x="1877.9" y="309.0" class="axis">tok/s</text>
+<text x="816.0" y="378.0" class="mode" text-anchor="end">Native GGUF no MTP</text>
+<text x="816.0" y="401.0" class="detail" text-anchor="end">8,907 prompt tokens; prefill 2.9s; wall 42.1 tok/s; 29.2 GiB</text>
+<rect x="850" y="356" width="674.9" height="34" rx="5" fill="#8fa3ba" opacity="0.96"/>
+<rect x="850" y="356" width="674.9" height="34" rx="5" fill="none" stroke="#f5fff9" stroke-opacity="0.44"/>
+<text x="1538.9" y="381.0" class="value">48.2</text>
+<text x="1602.9" y="381.0" class="axis">tok/s</text>
+<text x="816.0" y="450.0" class="mode" text-anchor="end">Docker vLLM no MTP</text>
+<text x="816.0" y="473.0" class="detail" text-anchor="end">8,907 prompt tokens; wall 32.1 tok/s; 30.6 GiB; warmed; Win11 Docker</text>
+<rect x="850" y="428" width="487.2" height="34" rx="5" fill="#4aa3ff" opacity="0.96"/>
+<rect x="850" y="428" width="487.2" height="34" rx="5" fill="none" stroke="#f5fff9" stroke-opacity="0.44"/>
+<text x="1351.2" y="453.0" class="value">34.8</text>
+<text x="1415.2" y="453.0" class="axis">tok/s</text>
+<text x="70.0" y="495.0" class="group">200K prompt</text>
+<text x="70.0" y="525.0" class="speedup">native draft-mtp n=2 +25.6% decode</text>
+<text x="816.0" y="556.0" class="mode" text-anchor="end">Native GGUF draft-mtp n=2</text>
+<text x="816.0" y="579.0" class="detail" text-anchor="end">174,590 prompt tokens; prefill 131.8s; wall 6.5 tok/s; 30.8 GiB; accept 68.3%</text>
+<rect x="850" y="534" width="577.6" height="34" rx="5" fill="#ff4d4d" opacity="0.96"/>
+<rect x="850" y="534" width="577.6" height="34" rx="5" fill="none" stroke="#f5fff9" stroke-opacity="0.44"/>
+<text x="1441.6" y="559.0" class="value">41.3</text>
+<text x="1505.6" y="559.0" class="axis">tok/s</text>
+<text x="816.0" y="628.0" class="mode" text-anchor="end">Native GGUF no MTP</text>
+<text x="816.0" y="651.0" class="detail" text-anchor="end">174,590 prompt tokens; prefill 121.4s; wall 6.7 tok/s; 29.2 GiB</text>
+<rect x="850" y="606" width="460.0" height="34" rx="5" fill="#8fa3ba" opacity="0.96"/>
+<rect x="850" y="606" width="460.0" height="34" rx="5" fill="none" stroke="#f5fff9" stroke-opacity="0.44"/>
+<text x="1324.0" y="631.0" class="value">32.9</text>
+<text x="1388.0" y="631.0" class="axis">tok/s</text>
+<text x="816.0" y="700.0" class="mode" text-anchor="end">Docker vLLM no MTP</text>
+<text x="816.0" y="723.0" class="detail" text-anchor="end">174,590 prompt tokens; wall 9.2 tok/s; 30.6 GiB; Win11 Docker; KV cap 223,880</text>
+<rect x="850" y="678" width="432.6" height="34" rx="5" fill="#4aa3ff" opacity="0.96"/>
+<rect x="850" y="678" width="432.6" height="34" rx="5" fill="none" stroke="#f5fff9" stroke-opacity="0.44"/>
+<text x="1296.6" y="703.0" class="value">30.9</text>
+<text x="1360.6" y="703.0" class="axis">tok/s</text>
+<text x="70.0" y="848.0" class="note">Sources: native GGUF curated CSV plus Docker vLLM noautotune CSVs/logs, Windows 11 host, driver 610.62.</text>
+<text x="1930.0" y="848.0" class="note" text-anchor="end">neko-legends/nvidia-local-llm-profiles</text>
 </svg>

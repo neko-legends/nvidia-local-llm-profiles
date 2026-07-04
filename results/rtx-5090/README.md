@@ -17,7 +17,7 @@
 
 ![llama.cpp b9761 vs b9851 Qwen3.6 NVFP4 MTP GGUF decode comparison](../../assets/images/qwen36-llamacpp-b9761-vs-b9851.png)
 
-![Qwen3.6 27B NVFP4 GGUF MTP vs no-MTP decode comparison](../../assets/images/qwen36-27b-nvfp4-mtp-vs-no-mtp.png)
+![Qwen3.6 27B NVFP4 on RTX 5090 Windows, native GGUF versus Docker vLLM](../../assets/images/qwen36-27b-nvfp4-mtp-vs-no-mtp.png)
 
 ![AEON Ornith Ultimate Uncensored NVFP4 on Windows, Docker vLLM vs native GGUF llama.cpp](../../assets/images/aeon-ornith-windows-docker-vs-gguf.png)
 
@@ -76,6 +76,49 @@ that MTP block in `qwen3.6-27b-nvfp4-mtp-gguf.gguf`.
   CUDA error, and `ctx=229000` or higher failed while creating the MTP context.
   Full `262144` context fit only with MTP disabled.
 - **Context fit CSV:** `qwen36-27b-nvfp4-mtp-gguf-context-fit-20260703.csv`
+
+### NVIDIA Qwen3.6 27B NVFP4 - Windows 11 Docker vLLM - ctx=200k - fp8 KV
+
+Two-point smoke benchmark of the original `nvidia/Qwen3.6-27B-NVFP4`
+safetensors checkpoint, not the converted GGUF. NVIDIA's official/recommended
+ModelOpt NVFP4 serving path is vLLM, but this run was from a **Windows 11 host
+through Docker Desktop** with `vllm/vllm-openai:nightly`, fp8 KV, and no
+MTP/speculative decoding. Treat it as a Windows compatibility baseline rather
+than the expected best-performance native Linux vLLM path.
+
+| Context target | Prompt tokens | Full-request tok/s | Engine generation tok/s | Power after | Temp after |
+| ---: | ---: | ---: | ---: | ---: | ---: |
+| 10k cold request | 8,907 | 28.5 | ~34.8 after first-request JIT | 239W | 52C |
+| 10k warmed rerun | 8,907 | 32.1 | ~34.8 | 39W idle snapshot | 54C |
+| 200k | 174,590 | 9.24 | ~30.9 | 269W | 64C |
+
+- **Stack:** Windows 11 host -> Docker Desktop -> `vllm/vllm-openai:nightly`
+  (`0.23.1rc1.dev301+g04c2a8dea`) -> OpenAI-compatible endpoint at
+  `127.0.0.1:39196`
+- **Model:** `nvidia/Qwen3.6-27B-NVFP4`, mounted from
+  `.local-model-cache\nvidia\Qwen3.6-27B-NVFP4`
+- **Flags:** `--quantization modelopt --kv-cache-dtype fp8
+  --attention-backend flashinfer --max-model-len 200000 --max-num-seqs 1
+  --max-num-batched-tokens 8192 --gpu-memory-utilization 0.93
+  --enable-chunked-prefill --async-scheduling --enable-prefix-caching
+  --no-enable-flashinfer-autotune`
+- **Env:** `VLLM_BLOCKSCALE_FP8_GEMM_FLASHINFER=0`,
+  `VLLM_ENABLE_INDUCTOR_MAX_AUTOTUNE=0`
+- **Capacity:** vLLM reported `223,880` GPU KV-cache tokens and `1.12x`
+  maximum concurrency for 200k tokens per request.
+- **Memory:** idle served footprint was about `28.0 GiB`; benchmark requests
+  reported `31,376 MiB` after request, about `30.6 GiB`.
+- **Startup:** roughly 8 minutes from container start to `/v1/models` readiness
+  after disabling FlashInfer autotune. The default-autotune attempt was stopped
+  after more than 13 minutes of tuning.
+- **Important warning:** vLLM logged that the RTX 5090 path used weight-only FP4
+  compression via Marlin rather than native FP4 compute. Treat this as a
+  Windows Docker compatibility baseline, not an RTX PRO 6000-class or native
+  Linux vLLM NVFP4 result.
+- **CSV:** `qwen36-27b-nvfp4-vllm-docker-fp8kv-noautotune-ctx200k-request-nothink-prompt10k-gen1024-20260703-191919.csv`,
+  `qwen36-27b-nvfp4-vllm-docker-fp8kv-noautotune-ctx200k-request-nothink-prompt10k-gen1024-warm2-20260703-192221.csv`,
+  and `qwen36-27b-nvfp4-vllm-docker-fp8kv-noautotune-ctx200k-request-nothink-prompt200k-gen1024-20260703-192005.csv`
+- **Docker log:** `logs/qwen36-27b-nvfp4-vllm-docker-fp8kv-noautotune-ctx200k-20260704.log`
 
 ### NVIDIA Qwen3.6 35B A3B NVFP4 MTP GGUF - llama.cpp b9761 - ctx=200k - MTP n=2
 

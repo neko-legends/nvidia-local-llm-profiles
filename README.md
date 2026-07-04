@@ -95,6 +95,21 @@ Endpoint defaults:
 - MTP: enabled by default with `draft-mtp`, `--spec-draft-n-max 2`
 - Thinking: disabled by the launcher and Local 5090 router
 
+Official safetensors Docker/vLLM baseline:
+
+```bat
+scripts\vllm\qwen36-27b-nvfp4\start-qwen36-27b-nvfp4-vllm-docker.bat
+scripts\vllm\qwen36-27b-nvfp4\bench-qwen36-27b-nvfp4-vllm-two-point.bat
+```
+
+NVIDIA's official/recommended ModelOpt NVFP4 serving path is vLLM, using the
+original safetensors checkpoint rather than GGUF. This repo's vLLM numbers are
+from a **Windows 11 host with Docker Desktop**, which worked as a compatibility
+path but did not behave like a high-performance native Linux vLLM setup. On the
+RTX 5090 it loaded at 200k context without MTP and reported `223,880` GPU
+KV-cache tokens, but it is tight: about `30.6 GiB` after requests. See
+`scripts\vllm\qwen36-27b-nvfp4\qwen36-27b-nvfp4-vllm-notes.md`.
+
 ### AEON Qwen3.6 27B Multimodal NVFP4 MTP-XS
 
 This repo also includes a vLLM/Docker support folder for
@@ -314,9 +329,9 @@ llama.cpp build check for `neko-legends/Qwen3.6-35B-A3B-NVFP4-MTP-GGUF`:
 
 ![llama.cpp b9761 vs b9851 Qwen3.6 NVFP4 MTP GGUF decode comparison](assets/images/qwen36-llamacpp-b9761-vs-b9851.png)
 
-NVIDIA Qwen3.6 27B NVFP4 GGUF MTP check:
+NVIDIA Qwen3.6 27B NVFP4 Windows GGUF vs Docker check:
 
-![Qwen3.6 27B NVFP4 GGUF MTP vs no-MTP decode comparison](assets/images/qwen36-27b-nvfp4-mtp-vs-no-mtp.png)
+![Qwen3.6 27B NVFP4 on RTX 5090 Windows, native GGUF versus Docker vLLM](assets/images/qwen36-27b-nvfp4-mtp-vs-no-mtp.png)
 
 - Source snapshot: `nvidia/Qwen3.6-27B-NVFP4`; local GGUF:
   `qwen3.6-27b-nvfp4-mtp-gguf.gguf`.
@@ -347,6 +362,26 @@ apps, use the default **200k** profile or lower it further with `CTX_SIZE`;
 
 - Context fit data:
   `results/rtx-5090/qwen36-27b-nvfp4-mtp-gguf-context-fit-20260703.csv`.
+
+Windows 11 Docker/vLLM baseline for the original `nvidia/Qwen3.6-27B-NVFP4`
+safetensors checkpoint. vLLM is the recommended runtime for NVIDIA ModelOpt
+NVFP4 safetensors, but this Windows 11 + Docker Desktop run is a compatibility
+baseline, not the expected best-performance Linux path:
+
+- Stack: Windows 11 host, Docker Desktop, `vllm/vllm-openai:nightly`
+  (`0.23.1rc1.dev301+g04c2a8dea`), ModelOpt NVFP4, fp8 KV, no MTP,
+  `ctx=200000`.
+- vLLM reported `223,880` GPU KV-cache tokens and `1.12x` maximum concurrency
+  for 200k requests. Startup reached the OpenAI endpoint after roughly 8
+  minutes with FlashInfer autotune disabled.
+- 10k warmed request: **32.1 full-wall tok/s**; engine log showed about
+  **34.8 generation tok/s** after prompt/JIT.
+- 200k request: **9.24 full-wall tok/s**; engine log showed about
+  **30.9 generation tok/s** after prompt prefill.
+- vLLM logged that this RTX 5090 run used weight-only FP4 compression through
+  Marlin rather than native FP4 compute, so this Docker result is not comparable
+  to RTX PRO 6000/GB-class vLLM NVFP4 screenshots or native Linux vLLM
+  deployments.
 
 - Latest checked build: **llama.cpp b9851** (`0eca4d490`), CUDA 13.3 Windows
   release.
@@ -572,6 +607,7 @@ scripts/
   vllm/
     aeon-ornith-1.0-35b-nvfp4/       AEON Ornith NVFP4 Docker vLLM launcher
     aeon-qwen36-27b-multimodal-nvfp4-mtp-xs/  Docker vLLM launcher
+    qwen36-27b-nvfp4/                 NVIDIA Qwen 27B NVFP4 Docker vLLM launcher
     qwen36-35b-a3b-nvfp4/            NVIDIA MoE NVFP4 two-point bench
   benchmarks/
     bench-context-ladder.ps1         full context ladder sweep
