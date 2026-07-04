@@ -22,8 +22,8 @@ tags:
 
 <div style="font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; border: 1px solid #3a2a1f; background: #0f0f13; border-radius: 16px; overflow: hidden; margin: 0 0 28px 0; box-shadow: 0 20px 48px rgba(0,0,0,0.24);">
   <div style="padding: 14px 18px; background: linear-gradient(90deg, #1a120d 0%, #2b1708 100%); border-bottom: 1px solid rgba(255,122,26,0.35); color: #ffd7ad; font-weight: 950;">RTX 5090 native llama.cpp benchmark chart</div>
-  <a href="https://huggingface.co/neko-legends/Qwen3.6-27B-NVFP4-GGUF/blob/main/qwen36-27b-nvfp4-mtp-vs-no-mtp.png" target="_blank" style="display:block; background:#050507;">
-    <img src="https://huggingface.co/neko-legends/Qwen3.6-27B-NVFP4-GGUF/resolve/main/qwen36-27b-nvfp4-mtp-vs-no-mtp.png" alt="RTX 5090 native llama.cpp Qwen3.6 27B NVFP4 MTP versus no-MTP benchmark chart" style="display:block; width:100%; border:0;" />
+  <a href="https://huggingface.co/neko-legends/Qwen3.6-27B-NVFP4-MTP-GGUF/blob/main/qwen36-27b-nvfp4-mtp-vs-no-mtp.png" target="_blank" style="display:block; background:#050507;">
+    <img src="https://huggingface.co/neko-legends/Qwen3.6-27B-NVFP4-MTP-GGUF/resolve/main/qwen36-27b-nvfp4-mtp-vs-no-mtp.png" alt="RTX 5090 native llama.cpp Qwen3.6 27B NVFP4 MTP versus no-MTP benchmark chart" style="display:block; width:100%; border:0;" />
   </a>
 </div>
 
@@ -32,7 +32,7 @@ tags:
     <div style="display: flex; flex-wrap: wrap; gap: 14px; align-items: center; justify-content: space-between;">
       <div>
         <div style="font-size: 11px; font-weight: 900; color: #ffb86b; letter-spacing: 1.8px; text-transform: uppercase;">Neko Legends local inference release</div>
-        <h1 style="margin: 8px 0 0 0; color: #fff7ed; font-size: 30px; line-height: 1.12; font-weight: 950; border: 0;">Qwen3.6-27B-NVFP4-GGUF</h1>
+        <h1 style="margin: 8px 0 0 0; color: #fff7ed; font-size: 30px; line-height: 1.12; font-weight: 950; border: 0;">Qwen3.6-27B-NVFP4-MTP-GGUF</h1>
       </div>
       <div style="background: rgba(255,122,26,0.14); border: 1px solid rgba(255,122,26,0.72); color: #ffd7ad; font-size: 12px; font-weight: 900; padding: 8px 12px; border-radius: 999px;">RTX 5090 validated</div>
     </div>
@@ -52,12 +52,14 @@ tags:
 
 ## Quick Start
 
-Use `qwen3.6-27b-nvfp4-mtp.gguf`. This is the NVFP4 GGUF with the source MTP block preserved.
+Repository: [`neko-legends/Qwen3.6-27B-NVFP4-MTP-GGUF`](https://huggingface.co/neko-legends/Qwen3.6-27B-NVFP4-MTP-GGUF)
+
+Use `qwen3.6-27b-nvfp4-mtp-gguf.gguf`. This is the NVFP4 GGUF with the source MTP block preserved.
 
 ```bash
 llama-server \
-  --model qwen3.6-27b-nvfp4-mtp.gguf \
-  --alias qwen36-27b-nvfp4-gguf \
+  --model qwen3.6-27b-nvfp4-mtp-gguf.gguf \
+  --alias qwen36-27b-nvfp4-mtp-gguf \
   --host 0.0.0.0 \
   --port 39195 \
   --device CUDA0 \
@@ -84,7 +86,7 @@ llama-server \
 
 | File | Size | SHA256 |
 | --- | ---: | --- |
-| `qwen3.6-27b-nvfp4-mtp.gguf` | 28,230,538,624 bytes / 26.29 GiB | `5DECEF7638A9324664010695A49BA1C6EABD18FCFC1616B77C0AFF97B412A233` |
+| `qwen3.6-27b-nvfp4-mtp-gguf.gguf` | 28,230,538,624 bytes / 26.29 GiB | `5DECEF7638A9324664010695A49BA1C6EABD18FCFC1616B77C0AFF97B412A233` |
 
 ## RTX 5090 Benchmark
 
@@ -111,7 +113,7 @@ The source snapshot is [`nvidia/Qwen3.6-27B-NVFP4`](https://huggingface.co/nvidi
 ```bash
 python convert_hf_to_gguf.py \
   /path/to/Qwen3.6-27B-NVFP4 \
-  --outfile qwen3.6-27b-nvfp4-mtp.gguf \
+  --outfile qwen3.6-27b-nvfp4-mtp-gguf.gguf \
   --outtype auto \
   --model-name nvidia-Qwen3.6-27B-NVFP4-MTP
 ```

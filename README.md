@@ -78,7 +78,7 @@ Storage:
 
 ```text
 <checkout-parent>\.local-model-cache\nvidia\Qwen3.6-27B-NVFP4\
-<checkout-parent>\.local-model-cache\nvidia\Qwen3.6-27B-NVFP4-GGUF\qwen3.6-27b-nvfp4-mtp.gguf
+<checkout-parent>\.local-model-cache\nvidia\Qwen3.6-27B-NVFP4-MTP-GGUF\qwen3.6-27b-nvfp4-mtp-gguf.gguf
 ```
 
 Hermes:
@@ -90,7 +90,7 @@ scripts\localai\qwen36-27b-nvfp4-gguf\install-hermes-qwen36-27b-nvfp4-gguf.bat
 Endpoint defaults:
 
 - Base URL: `http://127.0.0.1:39195/v1`
-- Model: `qwen36-27b-nvfp4-gguf`
+- Model: `qwen36-27b-nvfp4-mtp-gguf`
 - Context: `200000` on RTX 5090
 - MTP: enabled by default with `draft-mtp`, `--spec-draft-n-max 2`
 - Thinking: disabled by the launcher and Local 5090 router
@@ -285,7 +285,7 @@ Examples:
 
 ```text
 D:\forPublic\.local-model-cache\nvidia\Qwen3.6-27B-NVFP4\
-D:\forPublic\.local-model-cache\nvidia\Qwen3.6-27B-NVFP4-GGUF\qwen3.6-27b-nvfp4-mtp.gguf
+D:\forPublic\.local-model-cache\nvidia\Qwen3.6-27B-NVFP4-MTP-GGUF\qwen3.6-27b-nvfp4-mtp-gguf.gguf
 D:\forPublic\.local-model-cache\nvidia\Qwen3.6-35B-A3B-NVFP4-MTP-GGUF\qwen3.6-35b-a3b-nvfp4-mtp.gguf
 D:\forPublic\.local-model-cache\Jackrong\Qwopus3.6-35B-A3B-Coder-MTP-GGUF\
 D:\forPublic\.local-model-cache\deepreinforce-ai\Ornith-1.0-35B-GGUF\
@@ -319,7 +319,7 @@ NVIDIA Qwen3.6 27B NVFP4 GGUF MTP check:
 ![Qwen3.6 27B NVFP4 GGUF MTP vs no-MTP decode comparison](assets/images/qwen36-27b-nvfp4-mtp-vs-no-mtp.png)
 
 - Source snapshot: `nvidia/Qwen3.6-27B-NVFP4`; local GGUF:
-  `qwen3.6-27b-nvfp4-mtp.gguf`.
+  `qwen3.6-27b-nvfp4-mtp-gguf.gguf`.
 - The source snapshot has `mtp_num_hidden_layers=1` and `mtp.layers.0.*`
   tensors. The conversion keeps that MTP block in the GGUF.
 - On RTX 5090 at `ctx=200000`, no-thinking, q4 target/draft KV, llama.cpp
@@ -487,7 +487,7 @@ The installer updates Hermes Desktop with a single `Local 5090` provider:
 - `aeon-ornith-1.0-35b-nvfp4` routes to `http://127.0.0.1:39187/v1`
 - `ornith-1.0-35b-q4-k-m` routes to `http://127.0.0.1:39188/v1`
 - `ornith-1.0-35b-q5-k-m` routes to `http://127.0.0.1:39189/v1`
-- `qwen36-27b-nvfp4-gguf` routes to `http://127.0.0.1:39195/v1`
+- `qwen36-27b-nvfp4-mtp-gguf` routes to `http://127.0.0.1:39195/v1`
 - Hermes talks to the local router at `http://127.0.0.1:39190/v1`
 - The script backs up `%LOCALAPPDATA%\hermes\config.yaml` before editing it.
 
@@ -565,7 +565,7 @@ scripts/
 docs/
   models/qwopus3.6-27b-coder-mtp-gguf.md   model notes
   models/aeon-qwen36-27b-multimodal-nvfp4-mtp-xs.md   AEON vLLM notes
-  models/qwen36-27b-nvfp4-gguf.md           NVIDIA Qwen 27B MTP GGUF notes
+  models/qwen36-27b-nvfp4-mtp-gguf.md       NVIDIA Qwen 27B MTP GGUF notes
   models/qwen36-35b-a3b-nvfp4-mtp-gguf.md   NVIDIA GGUF notes
   hardware/rtx-5090-power-and-thermal.md    GPU tuning notes
   integrations/hermes-desktop.md            Hermes wiring guide

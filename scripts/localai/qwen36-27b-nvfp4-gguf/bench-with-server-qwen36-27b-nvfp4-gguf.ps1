@@ -15,7 +15,7 @@ $ErrorActionPreference = "Stop"
 $repoRoot = (Resolve-Path -LiteralPath (Join-Path $PSScriptRoot "..\..\..")).Path
 $checkoutParent = Split-Path -Parent $repoRoot
 if (-not $ModelPath) {
-    $ModelPath = Join-Path $checkoutParent ".local-model-cache\nvidia\Qwen3.6-27B-NVFP4-GGUF\qwen3.6-27b-nvfp4-mtp.gguf"
+    $ModelPath = Join-Path $checkoutParent ".local-model-cache\nvidia\Qwen3.6-27B-NVFP4-MTP-GGUF\qwen3.6-27b-nvfp4-mtp-gguf.gguf"
 }
 
 function Resolve-LlamaServer {
@@ -49,10 +49,10 @@ New-Item -ItemType Directory -Force -Path $logDir | Out-Null
 $stamp = Get-Date -Format "yyyyMMdd-HHmmss"
 $outLog = Join-Path $logDir "qwen36-27b-nvfp4-gguf-bench-server-$stamp.out.log"
 $errLog = Join-Path $logDir "qwen36-27b-nvfp4-gguf-bench-server-$stamp.err.log"
-$modelAlias = "qwen36-27b-nvfp4-gguf"
+$modelAlias = "qwen36-27b-nvfp4-mtp-gguf"
 $specSlug = if ($SpecType -eq "none") { "no-mtp" } else { $SpecType.Replace(",", "-").Replace("_", "-") + "-mtpn$SpecDraftNMax" }
 $ctxSlug = if (($ContextSize % 1000) -eq 0) { "ctx$([int]($ContextSize / 1000))k" } else { "ctx$ContextSize" }
-$casePrefix = "qwen36-27b-nvfp4-gguf-llamacpp-$ctxSlug-$specSlug"
+$casePrefix = "qwen36-27b-nvfp4-mtp-gguf-llamacpp-$ctxSlug-$specSlug"
 if (-not $EnableThinking) {
     $casePrefix += "-request-nothink"
 }

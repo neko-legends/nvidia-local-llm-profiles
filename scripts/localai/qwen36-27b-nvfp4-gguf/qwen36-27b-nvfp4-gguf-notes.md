@@ -15,7 +15,7 @@ Local source snapshot:
 Local GGUF target:
 
 ```text
-<checkout-parent>\.local-model-cache\nvidia\Qwen3.6-27B-NVFP4-GGUF\qwen3.6-27b-nvfp4-mtp.gguf
+<checkout-parent>\.local-model-cache\nvidia\Qwen3.6-27B-NVFP4-MTP-GGUF\qwen3.6-27b-nvfp4-mtp-gguf.gguf
 ```
 
 Artifact:
@@ -44,7 +44,7 @@ install-hermes-qwen36-27b-nvfp4-gguf.bat
 Default endpoint:
 
 - Base URL: `http://127.0.0.1:39195/v1`
-- Model: `qwen36-27b-nvfp4-gguf`
+- Model: `qwen36-27b-nvfp4-mtp-gguf`
 - Context: `--ctx-size 200000` on RTX 5090
 - KV cache: `--cache-type-k q4_0 --cache-type-v q4_0`
 - MTP: `--spec-type draft-mtp --spec-draft-n-max 2`

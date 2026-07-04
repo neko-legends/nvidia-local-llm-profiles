@@ -11,14 +11,14 @@ rem  Optional:
 rem    set PYTHON_EXE=py
 rem    set PYTHON_ARGS=-3.12
 rem    set SOURCE_MODEL_DIR=C:\path\to\nvidia\Qwen3.6-27B-NVFP4
-rem    set OUTFILE=C:\path\to\qwen3.6-27b-nvfp4-mtp.gguf
+rem    set OUTFILE=C:\path\to\qwen3.6-27b-nvfp4-mtp-gguf.gguf
 rem ============================================================
 set "SCRIPT_DIR=%~dp0"
 for %%I in ("%SCRIPT_DIR%..\..\..\..") do set "CHECKOUT_PARENT=%%~fI"
 
 if not defined SOURCE_MODEL_DIR set "SOURCE_MODEL_DIR=%CHECKOUT_PARENT%\.local-model-cache\nvidia\Qwen3.6-27B-NVFP4"
-if not defined OUT_DIR set "OUT_DIR=%CHECKOUT_PARENT%\.local-model-cache\nvidia\Qwen3.6-27B-NVFP4-GGUF"
-if not defined OUTFILE set "OUTFILE=%OUT_DIR%\qwen3.6-27b-nvfp4-mtp.gguf"
+if not defined OUT_DIR set "OUT_DIR=%CHECKOUT_PARENT%\.local-model-cache\nvidia\Qwen3.6-27B-NVFP4-MTP-GGUF"
+if not defined OUTFILE set "OUTFILE=%OUT_DIR%\qwen3.6-27b-nvfp4-mtp-gguf.gguf"
 if not defined PYTHON_EXE set "PYTHON_EXE=py"
 if not defined PYTHON_ARGS set "PYTHON_ARGS=-3.12"
 

@@ -13,7 +13,7 @@ DIFFUSION_MODEL = "diffusiongemma"
 ORNITH_MODEL = "ornith-1.0-35b-q4-k-m"
 ORNITH_Q5_MODEL = "ornith-1.0-35b-q5-k-m"
 AEON_ORNITH_NVFP4_MODEL = "aeon-ornith-1.0-35b-nvfp4"
-QWEN36_27B_NVFP4_MODEL = "qwen36-27b-nvfp4-gguf"
+QWEN36_27B_NVFP4_MODEL = "qwen36-27b-nvfp4-mtp-gguf"
 
 
 def parse_args() -> argparse.Namespace:
@@ -107,6 +107,7 @@ def should_remove_provider(provider: object, name: str) -> bool:
         "aeon-ornith-nvfp4-local",
         "qwen36-27b-local",
         "qwen36-27b-nvfp4-local",
+        "qwen36-27b-nvfp4-mtp-local",
     }
     base_urls = {
         "http://127.0.0.1:39190/v1",
@@ -153,6 +154,7 @@ def should_remove_provider(provider: object, name: str) -> bool:
         "ornith-aeon-nvfp4",
         "ornith-1.0-35b-aeon-nvfp4",
         QWEN36_27B_NVFP4_MODEL,
+        "qwen36-27b-nvfp4-gguf",
         "qwen36-27b-local",
         "qwen36-27b",
         "qwen36-27b-nvfp4",

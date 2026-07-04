@@ -15,7 +15,7 @@ lists the local model servers:
 - `aeon-ornith-1.0-35b-nvfp4`
 - `ornith-1.0-35b-q4-k-m`
 - `ornith-1.0-35b-q5-k-m`
-- `qwen36-27b-nvfp4-gguf`
+- `qwen36-27b-nvfp4-mtp-gguf`
 
 ![Hermes Desktop Local 5090 provider](../../assets/images/hermes-local-5090-provider.png)
 
@@ -26,7 +26,7 @@ one `/v1` endpoint for Hermes and routes each request by the `model` field.
 
 For `qwopus3.6-35b-a3b-coder-mtp-q4-k-m` and
 `qwopus3.6-35b-a3b-coder-mtp-q5-k-m`, plus
-`qwen36-27b-nvfp4-gguf`, the router also adds
+`qwen36-27b-nvfp4-mtp-gguf`, the router also adds
 `chat_template_kwargs.enable_thinking=false` to chat requests unless the client
 explicitly sets `enable_thinking`. That keeps the Qwen-family coding profiles in
 no-thinking mode from Hermes without changing the other local models.
@@ -77,7 +77,7 @@ custom_providers:
     ornith-1.0-35b-q5-k-m:
       context_length: 262144
       supports_vision: false
-    qwen36-27b-nvfp4-gguf:
+    qwen36-27b-nvfp4-mtp-gguf:
       context_length: 200000
       supports_vision: false
   name: Local 5090
@@ -94,7 +94,7 @@ Hermes -> http://127.0.0.1:39190/v1
   aeon-ornith-1.0-35b-nvfp4          -> http://127.0.0.1:39187/v1
   ornith-1.0-35b-q4-k-m              -> http://127.0.0.1:39188/v1
   ornith-1.0-35b-q5-k-m              -> http://127.0.0.1:39189/v1
-  qwen36-27b-nvfp4-gguf              -> http://127.0.0.1:39195/v1
+  qwen36-27b-nvfp4-mtp-gguf          -> http://127.0.0.1:39195/v1
 ```
 
 Restart Hermes Desktop after running the installer so the model menu refreshes.
@@ -187,14 +187,14 @@ Wire into Hermes through the consolidated provider:
 ```text
 Provider/API: Local 5090
 Base URL:     http://127.0.0.1:39190/v1
-Model:        qwen36-27b-nvfp4-gguf
+Model:        qwen36-27b-nvfp4-mtp-gguf
 ```
 
 Direct endpoint:
 
 ```text
 Base URL:  http://127.0.0.1:39195/v1
-Model:     qwen36-27b-nvfp4-gguf
+Model:     qwen36-27b-nvfp4-mtp-gguf
 Context:   200000
 ```
 
@@ -277,7 +277,7 @@ For Qwopus3.6 35B Q4_K_M, use port `39193` and model
 `qwopus3.6-35b-a3b-coder-mtp-q5-k-m`.
 
 For NVIDIA Qwen3.6 27B NVFP4 MTP GGUF, use port `39195` and model
-`qwen36-27b-nvfp4-gguf`.
+`qwen36-27b-nvfp4-mtp-gguf`.
 
 ## Notes
 

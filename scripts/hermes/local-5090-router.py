@@ -42,19 +42,23 @@ DIFFUSION_MODEL = "diffusiongemma"
 ORNITH_MODEL = "ornith-1.0-35b-q4-k-m"
 ORNITH_Q5_MODEL = "ornith-1.0-35b-q5-k-m"
 AEON_ORNITH_NVFP4_MODEL = "aeon-ornith-1.0-35b-nvfp4"
-QWEN36_27B_NVFP4_MODEL = "qwen36-27b-nvfp4-gguf"
+QWEN36_27B_NVFP4_MODEL = "qwen36-27b-nvfp4-mtp-gguf"
 QWEN36_27B_NVFP4_ALIASES = frozenset(
     {
         QWEN36_27B_NVFP4_MODEL,
+        "qwen36-27b-nvfp4-gguf",
         "qwen36-27b",
         "qwen36-27b-nvfp4",
         "qwen36-27b-gguf",
+        "qwen36-27b-mtp-gguf",
         "qwen3.6-27b",
         "qwen3.6-27b-nvfp4",
         "qwen3.6-27b-nvfp4-gguf",
+        "qwen3.6-27b-nvfp4-mtp-gguf",
         "nvidia-qwen36-27b-nvfp4",
         "nvidia-qwen3.6-27b-nvfp4",
         "nvidia/qwen3.6-27b-nvfp4",
+        "neko-legends/qwen3.6-27b-nvfp4-mtp-gguf",
     }
 )
 

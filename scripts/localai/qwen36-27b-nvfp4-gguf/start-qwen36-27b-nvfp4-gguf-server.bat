@@ -10,9 +10,9 @@ rem  llama-server.exe on PATH before running this script.
 rem ============================================================
 set "SCRIPT_DIR=%~dp0"
 for %%I in ("%SCRIPT_DIR%..\..\..\..") do set "CHECKOUT_PARENT=%%~fI"
-set "MODEL_CACHE_DIR=%CHECKOUT_PARENT%\.local-model-cache\nvidia\Qwen3.6-27B-NVFP4-GGUF"
-if not defined MODEL_PATH set "MODEL_PATH=%MODEL_CACHE_DIR%\qwen3.6-27b-nvfp4-mtp.gguf"
-set "MODEL_ALIAS=qwen36-27b-nvfp4-gguf"
+set "MODEL_CACHE_DIR=%CHECKOUT_PARENT%\.local-model-cache\nvidia\Qwen3.6-27B-NVFP4-MTP-GGUF"
+if not defined MODEL_PATH set "MODEL_PATH=%MODEL_CACHE_DIR%\qwen3.6-27b-nvfp4-mtp-gguf.gguf"
+set "MODEL_ALIAS=qwen36-27b-nvfp4-mtp-gguf"
 set "HOST=0.0.0.0"
 set "PORT=39195"
 set "CTX_SIZE=200000"
