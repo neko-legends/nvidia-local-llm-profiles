@@ -331,6 +331,23 @@ NVIDIA Qwen3.6 27B NVFP4 GGUF MTP check:
 - Curated data:
   `results/rtx-5090/qwen36-27b-nvfp4-gguf-mtp-comparison-20260703.csv`.
 
+Max-context fit check for `qwen3.6-27b-nvfp4-mtp-gguf.gguf` on RTX 5090:
+
+| Mode | Context | Result | Peak VRAM | Minimum free VRAM | Notes |
+| --- | ---: | --- | ---: | ---: | --- |
+| `draft-mtp n=2` | 220k | 200k prompt fixture passed | 32,088 MiB | 103 MiB | Highest real-prompt-tested MTP context |
+| `draft-mtp n=2` | 228.5k | Loaded, then failed real prompt | 32,162 MiB | 29 MiB | Loads-only edge; not usable for long prompts |
+| `draft-mtp n=2` | 229k+ | Failed to load | - | - | Failed while creating MTP context |
+| No MTP | 262,144 | 200k prompt fixture passed | 31,248 MiB | 943 MiB | Full context fits only without speculative MTP |
+
+MTP costs extra VRAM: at the 200k throughput benchmark it used about **1.6 GiB**
+more than the no-MTP path. If the RTX 5090 is also driving your desktop or other
+apps, use the default **200k** profile or lower it further with `CTX_SIZE`;
+`220k` is an aggressive fit-check setting, not the everyday default.
+
+- Context fit data:
+  `results/rtx-5090/qwen36-27b-nvfp4-mtp-gguf-context-fit-20260703.csv`.
+
 - Latest checked build: **llama.cpp b9851** (`0eca4d490`), CUDA 13.3 Windows
   release.
 - Same GGUF, RTX 5090, `draft-mtp` n=2, no-thinking, q4 target/draft KV.

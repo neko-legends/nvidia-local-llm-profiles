@@ -15,6 +15,10 @@ if not defined MODEL_PATH set "MODEL_PATH=%MODEL_CACHE_DIR%\qwen3.6-27b-nvfp4-mt
 set "MODEL_ALIAS=qwen36-27b-nvfp4-mtp-gguf"
 set "HOST=0.0.0.0"
 set "PORT=39195"
+rem RTX 5090 fit note: 220000 was the highest MTP context that completed the
+rem 200k prompt fixture in one clean run, but it left about 103 MiB free.
+rem Keep 200000 as the default; lower it further if the 5090 is driving your
+rem desktop or other apps are using VRAM.
 set "CTX_SIZE=200000"
 set "THINKING=0"
 if not defined USE_MTP set "USE_MTP=1"

@@ -46,7 +46,7 @@ decode/generation speed only; prompt prefill and request wall time are omitted.
 
 The source snapshot from `nvidia/Qwen3.6-27B-NVFP4` includes
 `mtp_num_hidden_layers=1` and `mtp.layers.0.*` tensors. The native GGUF keeps
-that MTP block in `qwen3.6-27b-nvfp4-mtp.gguf`.
+that MTP block in `qwen3.6-27b-nvfp4-mtp-gguf.gguf`.
 
 | Mode | Context target | Prompt tokens | Full-request tok/s | Generation tok/s | Prompt read | MTP acceptance | VRAM after |
 | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
@@ -57,7 +57,7 @@ that MTP block in `qwen3.6-27b-nvfp4-mtp.gguf`.
 
 - **Stack:** llama.cpp b9851 (`0eca4d490`) server -> OpenAI-compatible endpoint
   at 127.0.0.1:39195
-- **GGUF:** `qwen3.6-27b-nvfp4-mtp.gguf`,
+- **GGUF:** `qwen3.6-27b-nvfp4-mtp-gguf.gguf`,
   `28,230,538,624` bytes, SHA256
   `5DECEF7638A9324664010695A49BA1C6EABD18FCFC1616B77C0AFF97B412A233`
 - **Flags, MTP:** `--gpu-layers all --gpu-layers-draft all --ctx-size 200000
@@ -70,6 +70,12 @@ that MTP block in `qwen3.6-27b-nvfp4-mtp.gguf`.
 - **Headroom note:** `ctx=200000` already reached about 30.8 GiB with MTP on the
   RTX 5090, so this local 5090 profile does not advertise the model card's
   262k maximum context.
+- **MTP fit check:** `ctx=220000` was the highest setting that also completed
+  the 200k prompt fixture with MTP enabled, peaking at `32,088 MiB` used with
+  only `103 MiB` free. `ctx=228500` loaded but failed a real 200k prompt with a
+  CUDA error, and `ctx=229000` or higher failed while creating the MTP context.
+  Full `262144` context fit only with MTP disabled.
+- **Context fit CSV:** `qwen36-27b-nvfp4-mtp-gguf-context-fit-20260703.csv`
 
 ### NVIDIA Qwen3.6 35B A3B NVFP4 MTP GGUF - llama.cpp b9761 - ctx=200k - MTP n=2
 

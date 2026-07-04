@@ -63,6 +63,19 @@ RTX 5090 b9851 result at `ctx=200000`: MTP improved decode from `48.2` to
 prompt. The MTP run used about `30.8 GiB`, so full 262k context is likely too
 tight on a 32GB RTX 5090.
 
+Max-context fit check on the same RTX 5090:
+
+| Mode | Context | Result | Peak VRAM | Minimum free VRAM |
+| --- | ---: | --- | ---: | ---: |
+| `draft-mtp n=2` | 220k | 200k prompt fixture passed | 32,088 MiB | 103 MiB |
+| `draft-mtp n=2` | 228.5k | Loaded, then failed real 200k prompt | 32,162 MiB | 29 MiB |
+| `draft-mtp n=2` | 229k+ | Failed to create MTP context | - | - |
+| No MTP | 262,144 | 200k prompt fixture passed | 31,248 MiB | 943 MiB |
+
+MTP uses extra VRAM. Keep the default `CTX_SIZE=200000` for a primary display
+GPU or when other apps are using the 5090. Use `CTX_SIZE=220000` only when the
+card is clean and you accept very small headroom.
+
 If conversion fails, update llama.cpp first. This model is newer than many
 released converters and depends on support for Qwen3.6 and NVIDIA/ModelOpt
 NVFP4 metadata.

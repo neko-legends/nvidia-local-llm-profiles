@@ -1,0 +1,13 @@
+mode,ctx_size,n_ctx_slot,fit_status,validation,ready_used_mib,after_request_used_mib,max_used_mib,min_free_mib,notes
+draft-mtp n=2,200000,200192,loaded,tiny request ok,31414,31422,31422,,daily default with useful headroom versus higher MTP contexts
+draft-mtp n=2,205000,,loaded,tiny request ok,31554,31562,31562,,
+draft-mtp n=2,210000,,loaded,tiny request ok,31702,31710,31710,,
+draft-mtp n=2,220000,,loaded,200k prompt fixture ok,31982,,32088,103,highest real-prompt-tested MTP context on this RTX 5090 run
+draft-mtp n=2,225000,,loaded,tiny request ok,32122,32130,32130,,loads with tiny request only; too little headroom for default use
+draft-mtp n=2,228000,,loaded,tiny request ok,32148,32156,32156,,loads with tiny request only; too little headroom for default use
+draft-mtp n=2,228500,228608,loaded,200k prompt fixture failed with CUDA error,32162,,32162,29,loads-only edge; not usable for real long prompts
+draft-mtp n=2,229000,,failed,failed to create MTP context,,,,,CUDA OOM allocating about 1199 MiB compute buffer
+draft-mtp n=2,230000,,failed,failed to create MTP context,,,,,CUDA OOM allocating about 1204 MiB compute buffer
+draft-mtp n=2,240000,,failed,failed to create MTP context,,,,,CUDA OOM allocating about 1253 MiB compute buffer
+draft-mtp n=2,262144,,failed,failed to create MTP context,,,,,CUDA OOM allocating about 1360 MiB compute buffer
+no MTP,262144,262144,loaded,200k prompt fixture ok,31226,,31248,943,full model context fits without MTP speculative decoding

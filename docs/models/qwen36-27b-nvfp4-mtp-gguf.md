@@ -62,6 +62,20 @@ The 200k MTP run used about `30.8 GiB` after request on the RTX 5090. That is
 why this repo advertises the local 5090 route at `200000` context instead of the
 model card's maximum 262k context.
 
+Max-context fit check on the same RTX 5090:
+
+| Mode | Context | Result | Peak VRAM | Minimum free VRAM |
+| --- | ---: | --- | ---: | ---: |
+| `draft-mtp n=2` | 220k | 200k prompt fixture passed | 32,088 MiB | 103 MiB |
+| `draft-mtp n=2` | 228.5k | Loaded, then failed real 200k prompt | 32,162 MiB | 29 MiB |
+| `draft-mtp n=2` | 229k+ | Failed to create MTP context | - | - |
+| No MTP | 262,144 | 200k prompt fixture passed | 31,248 MiB | 943 MiB |
+
+MTP uses more VRAM than the non-speculative path. If the RTX 5090 is your main
+display GPU or other apps are open, keep the default `200000` context or lower
+`CTX_SIZE` further. Treat `220000` as an aggressive fit-check value, not the
+portable default.
+
 If conversion fails, update llama.cpp first. This model is newer than many
 released converters and depends on support for Qwen3.6 plus NVIDIA/ModelOpt
 NVFP4 metadata.

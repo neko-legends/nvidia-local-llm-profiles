@@ -46,6 +46,7 @@ tags:
     <div style="background:#111116; padding: 15px 16px;"><span style="display:block; color:#a8a29e; font-size:11px; font-weight:900; text-transform:uppercase;">Quant</span><b style="display:block; margin-top:5px; color:#ffb86b; font-size:18px;">NVFP4</b></div>
     <div style="background:#111116; padding: 15px 16px;"><span style="display:block; color:#a8a29e; font-size:11px; font-weight:900; text-transform:uppercase;">Spec decode</span><b style="display:block; margin-top:5px; color:#fff7ed; font-size:18px;">draft-mtp</b></div>
     <div style="background:#111116; padding: 15px 16px;"><span style="display:block; color:#a8a29e; font-size:11px; font-weight:900; text-transform:uppercase;">Bench ctx</span><b style="display:block; margin-top:5px; color:#ffb86b; font-size:18px;">200k</b></div>
+    <div style="background:#111116; padding: 15px 16px;"><span style="display:block; color:#a8a29e; font-size:11px; font-weight:900; text-transform:uppercase;">MTP fit max</span><b style="display:block; margin-top:5px; color:#fff7ed; font-size:18px;">220k</b></div>
     <div style="background:#111116; padding: 15px 16px;"><span style="display:block; color:#a8a29e; font-size:11px; font-weight:900; text-transform:uppercase;">Artifact</span><b style="display:block; margin-top:5px; color:#fff7ed; font-size:18px;">26.29 GiB</b></div>
   </div>
 </div>
@@ -98,6 +99,25 @@ Windows native `llama.cpp` b9851, RTX 5090, CUDA, q4 target KV, no-thinking requ
 | draft-mtp n=2 | 10k | 8,907 | 55.9 | 67.9 | 3.1s | 30.8 GiB | 66.9% |
 | No MTP | 200k | 174,590 | 6.7 | 32.9 | 121.4s | 29.2 GiB | - |
 | draft-mtp n=2 | 200k | 174,590 | 6.5 | 41.3 | 131.8s | 30.8 GiB | 68.3% |
+
+## RTX 5090 Context Fit
+
+Same GGUF, llama.cpp b9851, q4 target/draft KV, `--spec-type draft-mtp --spec-draft-n-max 2` unless noted.
+
+| Mode | Context | Result | Peak VRAM | Minimum free VRAM |
+| --- | ---: | --- | ---: | ---: |
+| `draft-mtp n=2` | 220k | 200k prompt fixture passed | 32,088 MiB | 103 MiB |
+| `draft-mtp n=2` | 228.5k | Loaded, then failed real 200k prompt | 32,162 MiB | 29 MiB |
+| `draft-mtp n=2` | 229k+ | Failed to create MTP context | - | - |
+| No MTP | 262,144 | 200k prompt fixture passed | 31,248 MiB | 943 MiB |
+
+MTP uses extra VRAM: at the 200k throughput benchmark it used about 1.6 GiB
+more than the no-MTP path. The launcher default stays at `200000` because a
+primary/display RTX 5090, browser tabs, capture tools, or other GPU apps can
+eat the tiny margin. Use `220000` only as an aggressive local override.
+
+Context fit CSV:
+[`benchmarks/qwen36-27b-nvfp4-mtp-gguf-context-fit-20260703.csv`](https://huggingface.co/neko-legends/Qwen3.6-27B-NVFP4-MTP-GGUF/blob/main/benchmarks/qwen36-27b-nvfp4-mtp-gguf-context-fit-20260703.csv)
 
 Benchmark prompt files are in this project:
 
