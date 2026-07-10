@@ -383,11 +383,11 @@ Fresh native Windows source comparison for NVIDIA and Unsloth NVFP4 checkpoints:
   no-thinking, q4_0 target/draft KV, one 1024-token measured completion.
 - Both rows in each panel use the same BookContext source input: 8,907 actual
   prompt tokens for the 10k target and 174,590 for the 200k target.
-- Unsloth 27B was **59.5 vs 56.1 wall tok/s** at 10k and **6.79 vs 6.55** at
+- Unsloth 27B decoded at **72.8 vs 69.0 tok/s** at 10k and **44.1 vs 42.2** at
   200k, while using **26.1 vs 30.8 GiB** after request. It also finished at
   **46 C vs 52 C** at 10k and **60 C vs 61 C** at 200k.
 - The 35B A3B variants were effectively tied, with a slight Unsloth edge:
-  **110.3 vs 110.0** at 10k and **16.52 vs 16.18** at 200k. Unsloth used
+  **151.2 vs 150.9 tok/s** at 10k and **93.2 vs 90.2** at 200k. Unsloth used
   about 2.1 GiB more VRAM but finished **3 C lower** at 10k and **2 C lower**
   at 200k.
 - Curated results: `results/rtx-5090/qwen36-unsloth-nvfp4-native-comparison-20260710.csv`.

@@ -71,6 +71,24 @@ MODEL_SPECS = [
         True,
     ),
     ModelSpec(
+        "unsloth/Qwen3.6-35B-A3B-NVFP4",
+        "qwen3.6-35b-a3b-unsloth-nvfp4-mtp-gguf.gguf",
+        "Unsloth Qwen3.6 35B A3B NVFP4 MTP",
+        "#e7b84b",
+    ),
+    ModelSpec(
+        "nvidia/Qwen3.6-27B-NVFP4",
+        "qwen3.6-27b-nvfp4-mtp-gguf.gguf",
+        "NVIDIA Qwen3.6 27B NVFP4 MTP",
+        "#8fa3ba",
+    ),
+    ModelSpec(
+        "unsloth/Qwen3.6-27B-NVFP4",
+        "qwen3.6-27b-unsloth-nvfp4-mtp-gguf.gguf",
+        "Unsloth Qwen3.6 27B NVFP4 MTP",
+        "#e7b84b",
+    ),
+    ModelSpec(
         "Jackrong/Qwopus3.6-27B-Coder-MTP-GGUF",
         "Qwopus3.6-27B-Coder-MTP-Q5_K_M.gguf",
         "Qwopus3.6 27B Coder Q5_K_M",

@@ -42,12 +42,12 @@ The source checkpoint uses a mixed compressed-tensors layout. The conversion kee
 
 Windows 11, RTX 5090, llama.cpp b9851, `ctx=200000`, q4_0 target/draft KV, `draft-mtp n=2`, no-thinking, identical BookContext prompt fixture, and one measured 1024-token completion.
 
-| Source | 10k wall tok/s | 200k wall tok/s | VRAM after | Temperature after |
+| Source | 10k decode tok/s | 200k decode tok/s | VRAM after | Temperature after |
 | --- | ---: | ---: | ---: | ---: |
-| NVIDIA source GGUF | 56.1 | 6.55 | 30.8 GiB | 52 C / 61 C |
-| Unsloth source GGUF | 59.5 | 6.79 | 26.1 GiB | 46 C / 60 C |
+| NVIDIA source GGUF | 69.0 | 42.2 | 30.8 GiB | 52 C / 61 C |
+| Unsloth source GGUF | 72.8 | 44.1 | 26.1 GiB | 46 C / 60 C |
 
-The Unsloth conversion was about 6% faster at 10k and 4% faster at 200k in this run, while finishing 6 C cooler at 10k and 1 C cooler at 200k.
+`decode tok/s` is llama.cpp `slot print_timing` generation throughput after prompt prefill, matching the repository's all-model chart. The Unsloth conversion was about 6% faster at 10k and 5% faster at 200k in this run, while finishing 6 C cooler at 10k and 1 C cooler at 200k.
 
 ## Quick Start
 

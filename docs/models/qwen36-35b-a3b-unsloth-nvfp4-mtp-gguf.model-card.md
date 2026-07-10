@@ -43,12 +43,18 @@ The source checkpoint uses a mixed compressed-tensors layout. The conversion kee
 
 Windows 11, RTX 5090, llama.cpp b9851, `ctx=200000`, q4_0 target/draft KV, `draft-mtp n=2`, no-thinking, identical BookContext prompt fixture, and one measured 1024-token completion.
 
-| Source | 10k wall tok/s | 200k wall tok/s | VRAM after | Temperature after |
+| Source | 10k decode tok/s | 200k decode tok/s | VRAM after | Temperature after |
 | --- | ---: | ---: | ---: | ---: |
-| NVIDIA source GGUF | 110.0 | 16.18 | 24.6 GiB | 44 C / 52 C |
-| Unsloth source GGUF | 110.3 | 16.52 | 26.7 GiB | 41 C / 50 C |
+| NVIDIA source GGUF | 150.9 | 90.2 | 24.6 GiB | 44 C / 52 C |
+| Unsloth source GGUF | 151.2 | 93.2 | 26.7 GiB | 41 C / 50 C |
 
-The 35B A3B variants are effectively tied, with a small Unsloth edge in this run. The Unsloth conversion finished 3 C cooler at 10k and 2 C cooler at 200k, while using about 2.1 GiB more VRAM.
+`decode tok/s` is llama.cpp `slot print_timing` generation throughput after prompt prefill, matching the repository's all-model chart. The 35B A3B variants are effectively tied, with a small Unsloth edge in this run. The Unsloth conversion finished 3 C cooler at 10k and 2 C lower at 200k, while using about 2.1 GiB more VRAM.
+
+## All-Model Context
+
+![RTX 5090 native llama.cpp all-model decode comparison](https://huggingface.co/neko-legends/Qwen3.6-35B-A3B-NVFP4-MTP-GGUF/resolve/main/rtx-5090-qwen35-moe-vs-qwopus.png)
+
+This native Windows chart uses the same llama.cpp decode-only metric for every row; Docker/vLLM and UI-observed results are excluded.
 
 ## Quick Start
 

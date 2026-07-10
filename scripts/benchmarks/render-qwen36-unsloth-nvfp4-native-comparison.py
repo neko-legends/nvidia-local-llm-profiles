@@ -47,7 +47,7 @@ def read_rows() -> list[Row]:
                 repo=raw["source_repo"],
                 context=raw["context_label"],
                 prompt_tokens=int(raw["prompt_tokens"]),
-                tps=float(raw["wall_completion_tps"]),
+                tps=float(raw["decode_tps"]),
                 memory_mib=int(raw["memory_after_mib"]),
                 temp_c=int(raw["temperature_c"]),
                 file_gib=float(raw["model_file_gib"]),
@@ -101,7 +101,7 @@ def render_svg(rows: list[Row]) -> None:
         [
             text_svg(70, 76, "Qwen3.6 NVFP4: NVIDIA vs Unsloth Native GGUF", class_="title"),
             text_svg(70, 118, "RTX 5090, Windows 11, llama.cpp b9851, ctx=200k, draft-mtp n=2, no-thinking, 1024 generated tokens.", class_="subtitle"),
-            text_svg(70, 150, "Bars are end-to-end wall completion throughput from the identical BookContext fixture. Each panel has its own scale.", class_="note"),
+            text_svg(70, 150, "Bars are llama.cpp decode-only generation throughput after prompt prefill. Each panel has its own scale.", class_="note"),
             text_svg(70, 178, "Unsloth mixed NVFP4/FP8 sources were converted with FP8 stored as Q8_0; FFN tensors remain native NVFP4.", class_="note"),
         ]
     )
@@ -151,7 +151,7 @@ def render_png(rows: list[Row]) -> None:
     axis = font("segoeui.ttf", 14)
     draw.text((70, 40), "Qwen3.6 NVFP4: NVIDIA vs Unsloth Native GGUF", fill="#f5f4ef", font=title)
     draw.text((70, 100), "RTX 5090, Windows 11, llama.cpp b9851, ctx=200k, draft-mtp n=2, no-thinking, 1024 generated tokens.", fill="#c9c6bd", font=subtitle)
-    draw.text((70, 138), "Bars are end-to-end wall completion throughput from the identical BookContext fixture. Each panel has its own scale.", fill="#aaa9a3", font=detail)
+    draw.text((70, 138), "Bars are llama.cpp decode-only generation throughput after prompt prefill. Each panel has its own scale.", fill="#aaa9a3", font=detail)
     draw.text((70, 164), "Unsloth mixed NVFP4/FP8 sources were converted with FP8 stored as Q8_0; FFN tensors remain native NVFP4.", fill="#aaa9a3", font=detail)
     for index, (family, context, group_rows) in enumerate(groups(rows)):
         top = 240 + index * group_h
