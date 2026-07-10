@@ -9,6 +9,8 @@ param(
   [string]$OrnithQ5BaseUrl = "http://127.0.0.1:39189/v1",
   [string]$AeonOrnithNvfp4BaseUrl = "http://127.0.0.1:39187/v1",
   [string]$Qwen36_27bNvfp4BaseUrl = "http://127.0.0.1:39195/v1",
+  [string]$UnslothQwen36_27bNvfp4BaseUrl = "http://127.0.0.1:39196/v1",
+  [string]$UnslothQwen36_35bNvfp4BaseUrl = "http://127.0.0.1:39197/v1",
   [switch]$NoStartRouter
 )
 
@@ -77,7 +79,9 @@ if (-not $Python) {
   --ornith-base-url $OrnithBaseUrl `
   --ornith-q5-base-url $OrnithQ5BaseUrl `
   --aeon-ornith-nvfp4-base-url $AeonOrnithNvfp4BaseUrl `
-  --qwen36-27b-nvfp4-base-url $Qwen36_27bNvfp4BaseUrl
+  --qwen36-27b-nvfp4-base-url $Qwen36_27bNvfp4BaseUrl `
+  --unsloth-qwen36-27b-nvfp4-base-url $UnslothQwen36_27bNvfp4BaseUrl `
+  --unsloth-qwen36-35b-nvfp4-base-url $UnslothQwen36_35bNvfp4BaseUrl
 
 if (-not $NoStartRouter) {
   $OutLog = Join-Path $RouterDir "local-5090-router.out.log"
@@ -96,7 +100,9 @@ if (-not $NoStartRouter) {
         "--ornith-base-url", $OrnithBaseUrl,
         "--ornith-q5-base-url", $OrnithQ5BaseUrl,
         "--aeon-ornith-nvfp4-base-url", $AeonOrnithNvfp4BaseUrl,
-        "--qwen36-27b-nvfp4-base-url", $Qwen36_27bNvfp4BaseUrl
+        "--qwen36-27b-nvfp4-base-url", $Qwen36_27bNvfp4BaseUrl,
+        "--unsloth-qwen36-27b-nvfp4-base-url", $UnslothQwen36_27bNvfp4BaseUrl,
+        "--unsloth-qwen36-35b-nvfp4-base-url", $UnslothQwen36_35bNvfp4BaseUrl
       ) `
       -WorkingDirectory $RouterDir `
       -RedirectStandardOutput $OutLog `
@@ -119,6 +125,8 @@ Write-Host "  - ornith-1.0-35b-q4-k-m -> $OrnithBaseUrl"
 Write-Host "  - ornith-1.0-35b-q5-k-m -> $OrnithQ5BaseUrl"
 Write-Host "  - aeon-ornith-1.0-35b-nvfp4 -> $AeonOrnithNvfp4BaseUrl"
 Write-Host "  - qwen36-27b-nvfp4-mtp-gguf -> $Qwen36_27bNvfp4BaseUrl"
+Write-Host "  - qwen36-27b-unsloth-nvfp4-mtp-gguf -> $UnslothQwen36_27bNvfp4BaseUrl"
+Write-Host "  - qwen36-35b-a3b-unsloth-nvfp4-mtp-gguf -> $UnslothQwen36_35bNvfp4BaseUrl"
 Write-Host ""
 Write-Host "Restart Hermes Desktop, then open the model menu and choose '$ProviderName'."
 Write-Host "Start the model servers separately before using them."

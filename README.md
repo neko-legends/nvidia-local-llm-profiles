@@ -184,6 +184,56 @@ Docker/vLLM support for the source NVFP4 snapshot is still available here:
 scripts\vllm\qwen36-35b-a3b-nvfp4\
 ```
 
+### Unsloth Qwen3.6 NVFP4 MTP GGUFs
+
+Native Windows llama.cpp profiles for Unsloth's mixed NVFP4/FP8 checkpoints:
+[unsloth/Qwen3.6-27B-NVFP4](https://huggingface.co/unsloth/Qwen3.6-27B-NVFP4)
+and [unsloth/Qwen3.6-35B-A3B-NVFP4](https://huggingface.co/unsloth/Qwen3.6-35B-A3B-NVFP4).
+The conversion keeps the bundled MTP block and writes the source FP8 weights as
+Q8_0 while retaining native NVFP4 FFN tensors. That leaves usable KV-cache
+headroom on an RTX 5090.
+
+These source snapshots use a mixed compressed-tensors layout. Run this once if
+your llama.cpp converter reports `Can't handle multiple config groups`:
+
+```bat
+set LLAMA_CPP_SRC=C:\path\to\llama.cpp
+scripts\localai\apply-llama-cpp-mixed-nvfp4-converter-patch.bat
+```
+
+27B quick path:
+
+```bat
+cd scripts\localai\qwen36-27b-unsloth-nvfp4-mtp-gguf
+download-qwen36-27b-unsloth-nvfp4.bat
+convert-qwen36-27b-unsloth-nvfp4-to-gguf.bat
+install-hermes-qwen36-27b-unsloth-nvfp4-mtp-gguf.bat
+
+set LLAMA_DIR=C:\path\to\llama.cpp-cuda-build
+start-qwen36-27b-unsloth-nvfp4-mtp-gguf-server.bat
+```
+
+35B A3B quick path:
+
+```bat
+cd scripts\localai\qwen36-35b-a3b-unsloth-nvfp4-mtp-gguf
+download-qwen36-35b-a3b-unsloth-nvfp4.bat
+convert-qwen36-35b-a3b-unsloth-nvfp4-to-gguf.bat
+install-hermes-qwen36-35b-a3b-unsloth-nvfp4-mtp-gguf.bat
+
+set LLAMA_DIR=C:\path\to\llama.cpp-cuda-build
+start-qwen36-35b-a3b-unsloth-nvfp4-mtp-gguf-server.bat
+```
+
+Both launchers use 200k context, q4_0 target/draft KV caches, `draft-mtp n=2`,
+and no-thinking. Hermes aliases are `qwen36-27b-unsloth-nvfp4-mtp-gguf` on
+port 39196 and `qwen36-35b-a3b-unsloth-nvfp4-mtp-gguf` on port 39197.
+
+Download the converted native GGUFs from Hugging Face, not GitHub:
+
+- [neko-legends/Qwen3.6-27B-NVFP4-MTP-GGUF](https://huggingface.co/neko-legends/Qwen3.6-27B-NVFP4-MTP-GGUF)
+- [neko-legends/Qwen3.6-35B-A3B-NVFP4-MTP-GGUF](https://huggingface.co/neko-legends/Qwen3.6-35B-A3B-NVFP4-MTP-GGUF)
+
 ### Qwopus3.6 35B A3B Coder MTP GGUF
 
 Native llama.cpp support for
@@ -324,6 +374,23 @@ separately. Docker/vLLM and manual UI observations are kept in
 `results/rtx-5090/README.md`.
 
 ![RTX 5090 native llama.cpp long-context comparison](assets/images/rtx-5090-qwen35-moe-vs-qwopus.png)
+
+Fresh native Windows source comparison for NVIDIA and Unsloth NVFP4 checkpoints:
+
+![NVIDIA versus Unsloth Qwen3.6 NVFP4 native GGUF comparison](assets/images/qwen36-unsloth-nvfp4-native-comparison.png)
+
+- RTX 5090, Windows 11, llama.cpp b9851, `ctx=200000`, `draft-mtp n=2`,
+  no-thinking, q4_0 target/draft KV, one 1024-token measured completion.
+- Both rows in each panel use the same BookContext source input: 8,907 actual
+  prompt tokens for the 10k target and 174,590 for the 200k target.
+- Unsloth 27B was **59.5 vs 56.1 wall tok/s** at 10k and **6.79 vs 6.55** at
+  200k, while using **26.1 vs 30.8 GiB** after request. It also finished at
+  **46 C vs 52 C** at 10k and **60 C vs 61 C** at 200k.
+- The 35B A3B variants were effectively tied, with a slight Unsloth edge:
+  **110.3 vs 110.0** at 10k and **16.52 vs 16.18** at 200k. Unsloth used
+  about 2.1 GiB more VRAM but finished **3 C lower** at 10k and **2 C lower**
+  at 200k.
+- Curated results: `results/rtx-5090/qwen36-unsloth-nvfp4-native-comparison-20260710.csv`.
 
 llama.cpp build check for `neko-legends/Qwen3.6-35B-A3B-NVFP4-MTP-GGUF`:
 

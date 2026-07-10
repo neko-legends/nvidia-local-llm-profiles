@@ -1,0 +1,74 @@
+diff --git a/conversion/base.py b/conversion/base.py
+index 08fd374..8d86bc1 100644
+--- a/conversion/base.py
++++ b/conversion/base.py
+@@ -483,10 +483,30 @@ class ModelBase:
+                     and bool(groups)
+                     and all(g.get("format") == "nvfp4-pack-quantized" for g in groups.values() if isinstance(g, dict))
+                 )
++                mixed_nvfp4_compressed_tensors = (
++                    quant_format == "mixed-precision"
++                    and bool(groups)
++                    and any(g.get("format") == "nvfp4-pack-quantized" for g in groups.values() if isinstance(g, dict))
++                )
+ 
+-                if len(groups) > 1 and not nvfp4_compressed_tensors:
++                if len(groups) > 1 and not (nvfp4_compressed_tensors or mixed_nvfp4_compressed_tensors):
+                     raise NotImplementedError("Can't handle multiple config groups for compressed-tensors yet")
+-                weight_config = tuple(groups.values())[0]["weights"]
++                if mixed_nvfp4_compressed_tensors:
++                    float_groups = [
++                        group
++                        for group in groups.values()
++                        if isinstance(group, dict) and group.get("format") in {
++                            "float-quantized",
++                            "int-quantized",
++                            "naive-quantized",
++                        }
++                    ]
++                    if len(float_groups) != 1:
++                        raise NotImplementedError("Can't identify the non-NVFP4 compressed-tensors group")
++                    quant_format = float_groups[0]["format"]
++                    weight_config = float_groups[0]["weights"]
++                else:
++                    weight_config = tuple(groups.values())[0]["weights"]
+ 
+                 if quant_format == "float-quantized" or quant_format == "int-quantized" or quant_format == "naive-quantized":
+                     block_size = weight_config.get("block_structure", None)
+@@ -706,8 +726,10 @@ class ModelBase:
+             weight = LazyTorchTensor.to_eager(self.model_tensors[name]())
+             scale = LazyTorchTensor.to_eager(self.model_tensors[scale_name]())
+ 
+-            # Skip non-NVFP4 tensors (e.g. FP8 with per-channel 1D scales)
+-            if scale.ndim < 2:
++            # Compressed-tensors mixed checkpoints keep FP8 weights as float8
++            # with [out_features, 1] scales. Only packed uint8 weights belong
++            # to the NVFP4 repacker.
++            if weight.dtype != torch.uint8 or scale.ndim < 2:
+                 continue
+ 
+             scale2 = LazyTorchTensor.to_eager(self.model_tensors.get(scale2_name, lambda: torch.tensor(1.0))())
+@@ -815,8 +837,13 @@ class ModelBase:
+             and bool(quant_groups)
+             and all(g.get("format") == "nvfp4-pack-quantized" for g in quant_groups.values() if isinstance(g, dict))
+         )
++        mixed_nvfp4_compressed_tensors = quant_method == "compressed-tensors" and (
++            quant_format == "mixed-precision"
++            and bool(quant_groups)
++            and any(g.get("format") == "nvfp4-pack-quantized" for g in quant_groups.values() if isinstance(g, dict))
++        )
+         if quant_algo != "NVFP4":
+-            if nvfp4_compressed_tensors:
++            if nvfp4_compressed_tensors or mixed_nvfp4_compressed_tensors:
+                 quant_algo = "NVFP4"
+             elif any(str(v.get("quant_algo")).endswith("NVFP4") for v in quant_layers.values() if isinstance(v, dict)):
+                 quant_algo = "NVFP4"
+@@ -828,7 +855,7 @@ class ModelBase:
+         # This must run before dequant_model so NVFP4 tensors are removed
+         # from model_tensors, leaving only non-NVFP4 (e.g. FP8) for dequant.
+         if self._is_nvfp4:
+-            if nvfp4_compressed_tensors:
++            if nvfp4_compressed_tensors or mixed_nvfp4_compressed_tensors:
+                 # Convert compressed-tensors 'global' scales into the reciprocal
+                 def inverse_scale(gen):
+                     def load():

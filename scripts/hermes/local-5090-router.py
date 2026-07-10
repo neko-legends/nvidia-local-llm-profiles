@@ -43,6 +43,8 @@ ORNITH_MODEL = "ornith-1.0-35b-q4-k-m"
 ORNITH_Q5_MODEL = "ornith-1.0-35b-q5-k-m"
 AEON_ORNITH_NVFP4_MODEL = "aeon-ornith-1.0-35b-nvfp4"
 QWEN36_27B_NVFP4_MODEL = "qwen36-27b-nvfp4-mtp-gguf"
+UNSLOTH_QWEN36_27B_NVFP4_MODEL = "qwen36-27b-unsloth-nvfp4-mtp-gguf"
+UNSLOTH_QWEN36_35B_NVFP4_MODEL = "qwen36-35b-a3b-unsloth-nvfp4-mtp-gguf"
 QWEN36_27B_NVFP4_ALIASES = frozenset(
     {
         QWEN36_27B_NVFP4_MODEL,
@@ -61,6 +63,26 @@ QWEN36_27B_NVFP4_ALIASES = frozenset(
         "neko-legends/qwen3.6-27b-nvfp4-mtp-gguf",
     }
 )
+UNSLOTH_QWEN36_27B_NVFP4_ALIASES = frozenset(
+    {
+        UNSLOTH_QWEN36_27B_NVFP4_MODEL,
+        "unsloth-qwen36-27b-nvfp4",
+        "unsloth-qwen3.6-27b-nvfp4",
+        "unsloth/qwen3.6-27b-nvfp4",
+        "qwen36-27b-unsloth",
+        "qwen3.6-27b-unsloth-nvfp4",
+    }
+)
+UNSLOTH_QWEN36_35B_NVFP4_ALIASES = frozenset(
+    {
+        UNSLOTH_QWEN36_35B_NVFP4_MODEL,
+        "unsloth-qwen36-35b-a3b-nvfp4",
+        "unsloth-qwen3.6-35b-a3b-nvfp4",
+        "unsloth/qwen3.6-35b-a3b-nvfp4",
+        "qwen36-35b-unsloth",
+        "qwen3.6-35b-a3b-unsloth-nvfp4",
+    }
+)
 
 
 def parse_args() -> argparse.Namespace:
@@ -75,6 +97,8 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--ornith-q5-base-url", default="http://127.0.0.1:39189/v1")
     parser.add_argument("--aeon-ornith-nvfp4-base-url", default="http://127.0.0.1:39187/v1")
     parser.add_argument("--qwen36-27b-nvfp4-base-url", default="http://127.0.0.1:39195/v1")
+    parser.add_argument("--unsloth-qwen36-27b-nvfp4-base-url", default="http://127.0.0.1:39196/v1")
+    parser.add_argument("--unsloth-qwen36-35b-nvfp4-base-url", default="http://127.0.0.1:39197/v1")
     return parser.parse_args()
 
 
@@ -93,6 +117,8 @@ class Local5090Router(BaseHTTPRequestHandler):
     ornith_q5_base_url: str
     aeon_ornith_nvfp4_base_url: str
     qwen36_27b_nvfp4_base_url: str
+    unsloth_qwen36_27b_nvfp4_base_url: str
+    unsloth_qwen36_35b_nvfp4_base_url: str
 
     def _models_response(self) -> bytes:
         return json.dumps(
@@ -155,6 +181,20 @@ class Local5090Router(BaseHTTPRequestHandler):
                         "owned_by": "Local 5090",
                         "context_length": 200000,
                     },
+                    {
+                        "id": UNSLOTH_QWEN36_27B_NVFP4_MODEL,
+                        "object": "model",
+                        "created": 0,
+                        "owned_by": "Local 5090",
+                        "context_length": 200000,
+                    },
+                    {
+                        "id": UNSLOTH_QWEN36_35B_NVFP4_MODEL,
+                        "object": "model",
+                        "created": 0,
+                        "owned_by": "Local 5090",
+                        "context_length": 200000,
+                    },
                 ],
             },
             separators=(",", ":"),
@@ -197,10 +237,21 @@ class Local5090Router(BaseHTTPRequestHandler):
         aliases.update({alias: self.qwopus35_base_url for alias in QWOPUS35_Q5_ALIASES})
         aliases.update({alias: self.qwopus35_q4_base_url for alias in QWOPUS35_Q4_ALIASES})
         aliases.update({alias: self.qwen36_27b_nvfp4_base_url for alias in QWEN36_27B_NVFP4_ALIASES})
+        aliases.update(
+            {alias: self.unsloth_qwen36_27b_nvfp4_base_url for alias in UNSLOTH_QWEN36_27B_NVFP4_ALIASES}
+        )
+        aliases.update(
+            {alias: self.unsloth_qwen36_35b_nvfp4_base_url for alias in UNSLOTH_QWEN36_35B_NVFP4_ALIASES}
+        )
         return aliases.get(normalize_model(model))
 
     def _apply_model_request_defaults(self, payload: dict[str, Any]) -> None:
-        no_think_aliases = QWOPUS35_NO_THINK_ALIASES | QWEN36_27B_NVFP4_ALIASES
+        no_think_aliases = (
+            QWOPUS35_NO_THINK_ALIASES
+            | QWEN36_27B_NVFP4_ALIASES
+            | UNSLOTH_QWEN36_27B_NVFP4_ALIASES
+            | UNSLOTH_QWEN36_35B_NVFP4_ALIASES
+        )
         if normalize_model(payload.get("model")) not in no_think_aliases:
             return
 
@@ -324,6 +375,8 @@ def main() -> int:
     Local5090Router.ornith_q5_base_url = args.ornith_q5_base_url
     Local5090Router.aeon_ornith_nvfp4_base_url = args.aeon_ornith_nvfp4_base_url
     Local5090Router.qwen36_27b_nvfp4_base_url = args.qwen36_27b_nvfp4_base_url
+    Local5090Router.unsloth_qwen36_27b_nvfp4_base_url = args.unsloth_qwen36_27b_nvfp4_base_url
+    Local5090Router.unsloth_qwen36_35b_nvfp4_base_url = args.unsloth_qwen36_35b_nvfp4_base_url
 
     server = ThreadingHTTPServer((args.host, args.port), Local5090Router)
     print(f"Local 5090 router listening at http://{args.host}:{args.port}/v1", flush=True)

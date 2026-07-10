@@ -14,6 +14,8 @@ ORNITH_MODEL = "ornith-1.0-35b-q4-k-m"
 ORNITH_Q5_MODEL = "ornith-1.0-35b-q5-k-m"
 AEON_ORNITH_NVFP4_MODEL = "aeon-ornith-1.0-35b-nvfp4"
 QWEN36_27B_NVFP4_MODEL = "qwen36-27b-nvfp4-mtp-gguf"
+UNSLOTH_QWEN36_27B_NVFP4_MODEL = "qwen36-27b-unsloth-nvfp4-mtp-gguf"
+UNSLOTH_QWEN36_35B_NVFP4_MODEL = "qwen36-35b-a3b-unsloth-nvfp4-mtp-gguf"
 
 
 def parse_args() -> argparse.Namespace:
@@ -28,6 +30,8 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--ornith-q5-base-url", default="http://127.0.0.1:39189/v1")
     parser.add_argument("--aeon-ornith-nvfp4-base-url", default="http://127.0.0.1:39187/v1")
     parser.add_argument("--qwen36-27b-nvfp4-base-url", default="http://127.0.0.1:39195/v1")
+    parser.add_argument("--unsloth-qwen36-27b-nvfp4-base-url", default="http://127.0.0.1:39196/v1")
+    parser.add_argument("--unsloth-qwen36-35b-nvfp4-base-url", default="http://127.0.0.1:39197/v1")
     return parser.parse_args()
 
 
@@ -81,6 +85,14 @@ def provider_config(name: str, router_port: str) -> dict:
                 "context_length": 200000,
                 "supports_vision": False,
             },
+            UNSLOTH_QWEN36_27B_NVFP4_MODEL: {
+                "context_length": 200000,
+                "supports_vision": False,
+            },
+            UNSLOTH_QWEN36_35B_NVFP4_MODEL: {
+                "context_length": 200000,
+                "supports_vision": False,
+            },
         },
         "name": name,
     }
@@ -108,6 +120,8 @@ def should_remove_provider(provider: object, name: str) -> bool:
         "qwen36-27b-local",
         "qwen36-27b-nvfp4-local",
         "qwen36-27b-nvfp4-mtp-local",
+        "unsloth-qwen36-27b-nvfp4-local",
+        "unsloth-qwen36-35b-nvfp4-local",
     }
     base_urls = {
         "http://127.0.0.1:39190/v1",
@@ -119,6 +133,8 @@ def should_remove_provider(provider: object, name: str) -> bool:
         "http://127.0.0.1:39189/v1",
         "http://127.0.0.1:39187/v1",
         "http://127.0.0.1:39195/v1",
+        "http://127.0.0.1:39196/v1",
+        "http://127.0.0.1:39197/v1",
     }
     models = {
         QWOPUS_MODEL,
@@ -162,6 +178,10 @@ def should_remove_provider(provider: object, name: str) -> bool:
         "qwen3.6-27b-nvfp4",
         "nvidia-qwen36-27b-nvfp4",
         "nvidia/qwen3.6-27b-nvfp4",
+        UNSLOTH_QWEN36_27B_NVFP4_MODEL,
+        UNSLOTH_QWEN36_35B_NVFP4_MODEL,
+        "unsloth-qwen36-27b-nvfp4",
+        "unsloth-qwen36-35b-a3b-nvfp4",
     }
 
     return provider_name in names or base_url in base_urls or model in models
