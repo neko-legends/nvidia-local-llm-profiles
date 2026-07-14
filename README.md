@@ -234,6 +234,21 @@ Download the converted native GGUFs from Hugging Face, not GitHub:
 - [neko-legends/Qwen3.6-27B-NVFP4-MTP-GGUF](https://huggingface.co/neko-legends/Qwen3.6-27B-NVFP4-MTP-GGUF)
 - [neko-legends/Qwen3.6-35B-A3B-NVFP4-MTP-GGUF](https://huggingface.co/neko-legends/Qwen3.6-35B-A3B-NVFP4-MTP-GGUF)
 
+### ThinkingCap Qwen3.6 27B Q4_K_M
+
+Native Windows llama.cpp profile for [bottlecapai/ThinkingCap-Qwen3.6-27B-GGUF](https://huggingface.co/bottlecapai/ThinkingCap-Qwen3.6-27B-GGUF), using the upstream `ThinkingCap-Qwen3.6-27B-Q4_K_M.gguf`. The GGUF already includes an MTP head, so no conversion or separate draft model is needed.
+
+```bat
+cd scripts\localai\thinkingcap-qwen36-27b-gguf
+download-thinkingcap-qwen36-27b-q4-k-m.bat
+install-hermes-thinkingcap-qwen36-27b-q4-k-m.bat
+
+set LLAMA_DIR=C:\path\to\llama.cpp-cuda-build
+start-thinkingcap-qwen36-27b-q4-k-m-server.bat
+```
+
+The launcher uses 200k context, q4_0 target/draft KV caches, `draft-mtp n=4`, and no-thinking by default. Hermes model alias: `thinkingcap-qwen36-27b-q4-k-m` on port `39198`.
+
 ### Qwopus3.6 35B A3B Coder MTP GGUF
 
 Native llama.cpp support for
@@ -365,7 +380,7 @@ Most scripts also accept environment overrides such as `MODEL_DIR`,
 ## RTX 5090 Benchmark Results
 
 **GPU:** RTX 5090 32GB - **Driver:** 610.62 - **Dates:** 2026-06-22 to
-2026-07-03
+2026-07-14
 
 Headline chart: native Windows llama.cpp GGUF endpoints only, using the checked-in
 BookContext 10k and 200k prompts with 1024 generated tokens. Bars are llama.cpp
@@ -374,6 +389,24 @@ separately. Docker/vLLM and manual UI observations are kept in
 `results/rtx-5090/README.md`.
 
 ![RTX 5090 native llama.cpp long-context comparison](assets/images/rtx-5090-qwen35-moe-vs-qwopus.png)
+
+ThinkingCap Qwen3.6 27B Q4_K_M against the full native GGUF field, benchmark snapshot dated July 14, 2026:
+
+![ThinkingCap Qwen3.6 27B Q4_K_M versus RTX 5090 native llama.cpp field, July 14 2026](assets/images/thinkingcap-qwen36-27b-vs-rtx-5090-field-20260714.png)
+
+- RTX 5090, Windows 11, llama.cpp b9851, `ctx=200000`, q4_0 target/draft KV,
+  no-thinking, `draft-mtp n=4`, and one 1024-token measured completion.
+- The upstream Q4_K_M GGUF already exposes its MTP block (`nextn_predict_layers=1`);
+  it decoded at **90.9 tok/s** for the 8,907-token fixture and **49.4 tok/s**
+  for the 174,590-token fixture.
+- MTP acceptance was **49.9%** / mean length **2.99** at 10k and **46.9%** /
+  **2.87** at 200k. The model used **22.0 GiB** after each request and finished
+  at **52 C** / **70 C**.
+- A fresh isolated 200k rerun of Qwopus3.6 27B Coder Q5 on the same BookContext
+  fixture measured **48.0 tok/s** with `ngram-mod,draft-mtp n=2`, narrowly behind
+  ThinkingCap's **49.4 tok/s**. This replaces the prior approximate **70.2 tok/s**
+  Qwopus 27B chart row.
+- Curated results: `results/rtx-5090/thinkingcap-qwen36-27b-q4-k-m-benchmark-20260714.csv`.
 
 Fresh native Windows source comparison for NVIDIA and Unsloth NVFP4 checkpoints:
 
@@ -668,6 +701,7 @@ scripts/
     qwopus3.6-27b-coder-mtp-gguf/   launchers, download, install
     qwopus3.6-35b-a3b-coder-mtp-gguf/  Qwopus 35B Coder GGUF launcher
     qwen36-27b-nvfp4-gguf/          NVIDIA Qwen 27B NVFP4 MTP GGUF launcher
+    thinkingcap-qwen36-27b-gguf/    ThinkingCap 27B Q4_K_M MTP GGUF launcher
     qwen36-35b-a3b-mtp-gguf/        Unsloth Qwen 35B GGUF launcher
     qwen36-35b-a3b-nvfp4-mtp-gguf/  NVIDIA Qwen 35B NVFP4 MTP GGUF launcher
     ornith-1.0-35b-gguf/            Ornith 35B GGUF launcher

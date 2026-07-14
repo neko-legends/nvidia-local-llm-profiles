@@ -15,6 +15,9 @@ OUTPUT_DIR = ROOT / "assets" / "images"
 OUTPUT_SVG_PATH = OUTPUT_DIR / "rtx-5090-qwen35-moe-vs-qwopus.svg"
 OUTPUT_PNG_PATH = OUTPUT_DIR / "rtx-5090-qwen35-moe-vs-qwopus.png"
 TIMING_CSV = RESULTS_DIR / "generation-timing-breakdowns-20260624.csv"
+CHART_TITLE = "RTX 5090 Native llama.cpp Long-Context Comparison"
+CHART_SUBTITLE = "Bars are generation/decode speed only; prompt prefill seconds are shown separately."
+CHART_NOTE = "Native GGUF endpoints only. Docker/vLLM and UI-observed rows are intentionally left out of this headline chart."
 
 
 @dataclass(frozen=True)
@@ -219,9 +222,9 @@ def render_svg(rows: list[dict[str, object]], scale_max: int) -> Path:
         f'<rect x="{left - 28}" y="{panel_top}" width="{plot_w + 56}" height="{panel_bottom - panel_top}" rx="10" fill="#181e25"/>',
     ]
 
-    parts.append(svg_text(72, 76, "RTX 5090 Native llama.cpp Long-Context Comparison", class_="title"))
-    parts.append(svg_text(72, 118, "Bars are generation/decode speed only; prompt prefill seconds are shown separately.", class_="subtitle"))
-    parts.append(svg_text(72, 150, "Native GGUF endpoints only. Docker/vLLM and UI-observed rows are intentionally left out of this headline chart.", class_="small"))
+    parts.append(svg_text(72, 76, CHART_TITLE, class_="title"))
+    parts.append(svg_text(72, 118, CHART_SUBTITLE, class_="subtitle"))
+    parts.append(svg_text(72, 150, CHART_NOTE, class_="small"))
 
     for tick in range(0, scale_max + 1, 25):
         x = left + (tick / scale_max) * plot_w
@@ -290,9 +293,9 @@ def render_png(rows: list[dict[str, object]], scale_max: int) -> Path:
     small_font = font("segoeui.ttf", 16)
 
     draw.rounded_rectangle([left - 28, panel_top, left - 28 + plot_w + 56, panel_bottom], radius=10, fill="#181e25")
-    draw.text((72, 42), "RTX 5090 Native llama.cpp Long-Context Comparison", fill="#edf3f7", font=title_font)
-    draw.text((72, 100), "Bars are generation/decode speed only; prompt prefill seconds are shown separately.", fill="#b5bec8", font=subtitle_font)
-    draw.text((72, 138), "Native GGUF endpoints only. Docker/vLLM and UI-observed rows are intentionally left out of this headline chart.", fill="#9aa5b1", font=small_font)
+    draw.text((72, 42), CHART_TITLE, fill="#edf3f7", font=title_font)
+    draw.text((72, 100), CHART_SUBTITLE, fill="#b5bec8", font=subtitle_font)
+    draw.text((72, 138), CHART_NOTE, fill="#9aa5b1", font=small_font)
 
     for tick in range(0, scale_max + 1, 25):
         x = left + (tick / scale_max) * plot_w
