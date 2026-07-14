@@ -1,0 +1,5 @@
+mode,server_context,prompt_tokens,completion_tokens,prompt_eval_seconds,generation_tps,draft_acceptance,memory_after_mib,temp_after_c,source_log
+DSpark Q4_1 n=4,16384,8907,741,3.37885,76.52,25.1%,13934,54,logs/ternary-bonsai-27b-q2-0-dspark-q4-1-prism-b9591-ctx16k-n4-nothink-bench-server-20260714-142437.err.log
+Target only,262144,8907,1024,2.89503,83.47,,13196,55,logs/ternary-bonsai-27b-q2-0-target-only-prism-b9591-ctx262k-nothink-bench-server-20260714-142505.err.log
+Target only,262144,174590,1024,125.17821,19.85,,13194,66,logs/ternary-bonsai-27b-q2-0-target-only-prism-b9591-ctx262k-nothink-bench-server-20260714-142536.err.log
+Target-only isolated confirmation,262144,174590,1024,125.21661,19.90,,13194,66,logs/ternary-bonsai-27b-q2-0-target-only-prism-62061f9-sm120a-ctx262k-nothink-rerun-bench-server-20260714-144721.err.log

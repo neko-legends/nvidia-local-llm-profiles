@@ -234,6 +234,24 @@ Download the converted native GGUFs from Hugging Face, not GitHub:
 - [neko-legends/Qwen3.6-27B-NVFP4-MTP-GGUF](https://huggingface.co/neko-legends/Qwen3.6-27B-NVFP4-MTP-GGUF)
 - [neko-legends/Qwen3.6-35B-A3B-NVFP4-MTP-GGUF](https://huggingface.co/neko-legends/Qwen3.6-35B-A3B-NVFP4-MTP-GGUF)
 
+### Ternary-Bonsai 27B with DSpark Q4_1
+
+Native Windows CUDA profile for [prism-ml/Ternary-Bonsai-27B-gguf](https://huggingface.co/prism-ml/Ternary-Bonsai-27B-gguf). It uses the quality-oriented `Ternary-Bonsai-27B-Q2_0.gguf` target and the recommended `Ternary-Bonsai-27B-dspark-Q4_1.gguf` speculative drafter.
+
+```bat
+cd scripts\localai\ternary-bonsai-27b-gguf
+build-prism-llamacpp-sm120-runtime.bat
+download-ternary-bonsai-27b-dspark-q4-1.bat
+install-hermes-ternary-bonsai-27b-dspark-q4-1.bat
+start-ternary-bonsai-27b-dspark-q4-1-server.bat
+```
+
+The RTX 5090 build compiles PrismML commit `62061f9` for Blackwell `120a`. DSpark mode uses a 16,384-token server context, q4_0 target/draft KV caches, `draft-dspark n=4`, and no reasoning output. The included target-only launcher supports the full 262,144-token context; current DSpark staging is not practical at 200K on a 32 GB GPU. Hermes model alias: `ternary-bonsai-27b-dspark-q4-1` on port `39199`.
+
+Here, **target-only** means that `Ternary-Bonsai-27B-Q2_0.gguf`, the actual language model, generates every token normally. `Ternary-Bonsai-27B-dspark-Q4_1.gguf` is only an optional drafter: it proposes four-token blocks for the Q2_0 target to verify and cannot run by itself.
+
+DSpark did not load at 200K because the current PrismML server stages intermediate target states for the entire configured context in one physical draft batch. At `ctx=262144`, that path raised the draft batch to 262,148 positions and attempted a roughly **161 GB CUDA compute allocation**. The target, weights, and q4_0 KV cache themselves fit in about **13.2 GiB**, so this is a DSpark staging implementation limit rather than the model running out of ordinary KV-cache VRAM. The provided full-context launcher therefore disables DSpark.
+
 ### ThinkingCap Qwen3.6 27B Q4_K_M
 
 Native Windows llama.cpp profile for [bottlecapai/ThinkingCap-Qwen3.6-27B-GGUF](https://huggingface.co/bottlecapai/ThinkingCap-Qwen3.6-27B-GGUF), using the upstream `ThinkingCap-Qwen3.6-27B-Q4_K_M.gguf`. The GGUF already includes an MTP head, so no conversion or separate draft model is needed.
@@ -369,6 +387,7 @@ D:\forPublic\.local-model-cache\nvidia\Qwen3.6-27B-NVFP4-MTP-GGUF\qwen3.6-27b-nv
 D:\forPublic\.local-model-cache\nvidia\Qwen3.6-35B-A3B-NVFP4-MTP-GGUF\qwen3.6-35b-a3b-nvfp4-mtp.gguf
 D:\forPublic\.local-model-cache\Jackrong\Qwopus3.6-35B-A3B-Coder-MTP-GGUF\
 D:\forPublic\.local-model-cache\deepreinforce-ai\Ornith-1.0-35B-GGUF\
+D:\forPublic\.local-model-cache\prism-ml\Ternary-Bonsai-27B-gguf\
 ```
 
 Most scripts also accept environment overrides such as `MODEL_DIR`,
@@ -389,6 +408,17 @@ separately. Docker/vLLM and manual UI observations are kept in
 `results/rtx-5090/README.md`.
 
 ![RTX 5090 native llama.cpp long-context comparison](assets/images/rtx-5090-qwen35-moe-vs-qwopus.png)
+
+Ternary-Bonsai 27B target and Q4_1 DSpark comparison against the full native field, benchmark snapshot dated July 14, 2026:
+
+![Ternary-Bonsai 27B and DSpark versus RTX 5090 native llama.cpp field, July 14 2026](assets/images/ternary-bonsai-27b-vs-rtx-5090-field-20260714.png)
+
+- RTX 5090, Windows 11, PrismML llama.cpp commit `62061f9`, locally compiled for CUDA 12.8 `sm_120a`, q4_0 KV, reasoning budget 0.
+- Target-only decoded at **83.5 tok/s** for the 8,907-token fixture and **19.9 tok/s** for the 174,590-token fixture. Prefill took **2.9s** and **125.2s** respectively.
+- A fresh isolated 200K confirmation measured **19.90 tok/s** after the original **19.85 tok/s** run. Both figures use llama.cpp's 1,024-token `eval time`; the separate 125.2-second prompt prefill is not included.
+- DSpark Q4_1 at `ctx=16384`, `n=4` decoded at **76.5 tok/s** for 741 generated tokens, with **25.1%** token acceptance. It was about 8% slower than target-only on this workload.
+- Current DSpark server code stages the full context in one physical batch. A 262K attempt requested a 161 GB CUDA buffer, so the 200K result is target-only; the DSpark launcher conservatively advertises 16,384 tokens to Hermes.
+- Curated results: `results/rtx-5090/ternary-bonsai-27b-benchmark-20260714.csv`.
 
 ThinkingCap Qwen3.6 27B Q4_K_M against the full native GGUF field, benchmark snapshot dated July 14, 2026:
 
@@ -702,6 +732,7 @@ scripts/
     qwopus3.6-35b-a3b-coder-mtp-gguf/  Qwopus 35B Coder GGUF launcher
     qwen36-27b-nvfp4-gguf/          NVIDIA Qwen 27B NVFP4 MTP GGUF launcher
     thinkingcap-qwen36-27b-gguf/    ThinkingCap 27B Q4_K_M MTP GGUF launcher
+    ternary-bonsai-27b-gguf/     Ternary-Bonsai 27B Q2_0 + DSpark launcher
     qwen36-35b-a3b-mtp-gguf/        Unsloth Qwen 35B GGUF launcher
     qwen36-35b-a3b-nvfp4-mtp-gguf/  NVIDIA Qwen 35B NVFP4 MTP GGUF launcher
     ornith-1.0-35b-gguf/            Ornith 35B GGUF launcher

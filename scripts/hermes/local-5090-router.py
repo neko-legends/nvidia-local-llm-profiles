@@ -46,6 +46,7 @@ QWEN36_27B_NVFP4_MODEL = "qwen36-27b-nvfp4-mtp-gguf"
 UNSLOTH_QWEN36_27B_NVFP4_MODEL = "qwen36-27b-unsloth-nvfp4-mtp-gguf"
 UNSLOTH_QWEN36_35B_NVFP4_MODEL = "qwen36-35b-a3b-unsloth-nvfp4-mtp-gguf"
 THINKINGCAP_QWEN36_27B_MODEL = "thinkingcap-qwen36-27b-q4-k-m"
+TERNARY_BONSAI_27B_MODEL = "ternary-bonsai-27b-dspark-q4-1"
 QWEN36_27B_NVFP4_ALIASES = frozenset(
     {
         QWEN36_27B_NVFP4_MODEL,
@@ -95,6 +96,15 @@ THINKINGCAP_QWEN36_27B_ALIASES = frozenset(
         "bottlecapai/thinkingcap-qwen3.6-27b-gguf:q4_k_m",
     }
 )
+TERNARY_BONSAI_27B_ALIASES = frozenset(
+    {
+        TERNARY_BONSAI_27B_MODEL,
+        "ternary-bonsai-27b",
+        "ternary-bonsai-27b-q2-0",
+        "prism-ml/ternary-bonsai-27b-gguf",
+        "prism-ml/ternary-bonsai-27b-gguf:q2_0",
+    }
+)
 
 
 def parse_args() -> argparse.Namespace:
@@ -112,6 +122,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--unsloth-qwen36-27b-nvfp4-base-url", default="http://127.0.0.1:39196/v1")
     parser.add_argument("--unsloth-qwen36-35b-nvfp4-base-url", default="http://127.0.0.1:39197/v1")
     parser.add_argument("--thinkingcap-qwen36-27b-base-url", default="http://127.0.0.1:39198/v1")
+    parser.add_argument("--ternary-bonsai-27b-base-url", default="http://127.0.0.1:39199/v1")
     return parser.parse_args()
 
 
@@ -133,6 +144,7 @@ class Local5090Router(BaseHTTPRequestHandler):
     unsloth_qwen36_27b_nvfp4_base_url: str
     unsloth_qwen36_35b_nvfp4_base_url: str
     thinkingcap_qwen36_27b_base_url: str
+    ternary_bonsai_27b_base_url: str
 
     def _models_response(self) -> bytes:
         return json.dumps(
@@ -216,6 +228,13 @@ class Local5090Router(BaseHTTPRequestHandler):
                         "owned_by": "Local 5090",
                         "context_length": 200000,
                     },
+                    {
+                        "id": TERNARY_BONSAI_27B_MODEL,
+                        "object": "model",
+                        "created": 0,
+                        "owned_by": "Local 5090",
+                        "context_length": 16384,
+                    },
                 ],
             },
             separators=(",", ":"),
@@ -267,6 +286,7 @@ class Local5090Router(BaseHTTPRequestHandler):
         aliases.update(
             {alias: self.thinkingcap_qwen36_27b_base_url for alias in THINKINGCAP_QWEN36_27B_ALIASES}
         )
+        aliases.update({alias: self.ternary_bonsai_27b_base_url for alias in TERNARY_BONSAI_27B_ALIASES})
         return aliases.get(normalize_model(model))
 
     def _apply_model_request_defaults(self, payload: dict[str, Any]) -> None:
@@ -276,6 +296,7 @@ class Local5090Router(BaseHTTPRequestHandler):
             | UNSLOTH_QWEN36_27B_NVFP4_ALIASES
             | UNSLOTH_QWEN36_35B_NVFP4_ALIASES
             | THINKINGCAP_QWEN36_27B_ALIASES
+            | TERNARY_BONSAI_27B_ALIASES
         )
         if normalize_model(payload.get("model")) not in no_think_aliases:
             return
@@ -345,7 +366,8 @@ class Local5090Router(BaseHTTPRequestHandler):
                         "message": "Unknown local model. Use diffusiongemma or "
                         f"{QWOPUS_MODEL}, {QWOPUS35_Q5_MODEL}, {QWOPUS35_Q4_MODEL}, "
                         f"{ORNITH_MODEL}, {ORNITH_Q5_MODEL}, "
-                        f"{AEON_ORNITH_NVFP4_MODEL}, {QWEN36_27B_NVFP4_MODEL}, or {THINKINGCAP_QWEN36_27B_MODEL}."
+                        f"{AEON_ORNITH_NVFP4_MODEL}, {QWEN36_27B_NVFP4_MODEL}, "
+                        f"{THINKINGCAP_QWEN36_27B_MODEL}, or {TERNARY_BONSAI_27B_MODEL}."
                     }
                 },
             )
@@ -403,6 +425,7 @@ def main() -> int:
     Local5090Router.unsloth_qwen36_27b_nvfp4_base_url = args.unsloth_qwen36_27b_nvfp4_base_url
     Local5090Router.unsloth_qwen36_35b_nvfp4_base_url = args.unsloth_qwen36_35b_nvfp4_base_url
     Local5090Router.thinkingcap_qwen36_27b_base_url = args.thinkingcap_qwen36_27b_base_url
+    Local5090Router.ternary_bonsai_27b_base_url = args.ternary_bonsai_27b_base_url
 
     server = ThreadingHTTPServer((args.host, args.port), Local5090Router)
     print(f"Local 5090 router listening at http://{args.host}:{args.port}/v1", flush=True)

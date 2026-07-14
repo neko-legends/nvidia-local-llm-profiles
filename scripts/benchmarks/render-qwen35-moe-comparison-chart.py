@@ -18,6 +18,7 @@ TIMING_CSV = RESULTS_DIR / "generation-timing-breakdowns-20260624.csv"
 CHART_TITLE = "RTX 5090 Native llama.cpp Long-Context Comparison"
 CHART_SUBTITLE = "Bars are generation/decode speed only; prompt prefill seconds are shown separately."
 CHART_NOTE = "Native GGUF endpoints only. Docker/vLLM and UI-observed rows are intentionally left out of this headline chart."
+CHART_FOOTER = "Same BookContext prompt fixtures, 1024 generated tokens, temperature 0 unless noted in timing CSV."
 
 
 @dataclass(frozen=True)
@@ -248,7 +249,7 @@ def render_svg(rows: list[dict[str, object]], scale_max: int) -> Path:
         parts.append(svg_text(left + bar_w + 12, ypos - 1, fmt_one(value), class_="value"))
         parts.append(svg_text(left + bar_w + 72, ypos - 1, "tok/s", class_="small"))
 
-    parts.append(svg_text(72, height - 50, "Same BookContext prompt fixtures, 1024 generated tokens, temperature 0 unless noted in timing CSV.", class_="small"))
+    parts.append(svg_text(72, height - 50, CHART_FOOTER, class_="small"))
     parts.append(svg_text(width - 72, height - 50, "neko-legends/nvidia-local-llm-profiles", class_="small", text_anchor="end"))
     parts.append("</svg>")
 
@@ -325,7 +326,7 @@ def render_png(rows: list[dict[str, object]], scale_max: int) -> Path:
         draw.text((left + bar_w + 12, ypos - 25), fmt_one(value), fill="#edf3f7", font=value_font)
         draw.text((left + bar_w + 72, ypos - 20), "tok/s", fill="#9aa5b1", font=small_font)
 
-    draw.text((72, height - 62), "Same BookContext prompt fixtures, 1024 generated tokens, temperature 0 unless noted in timing CSV.", fill="#9aa5b1", font=small_font)
+    draw.text((72, height - 62), CHART_FOOTER, fill="#9aa5b1", font=small_font)
     repo = "neko-legends/nvidia-local-llm-profiles"
     bbox = draw.textbbox((0, 0), repo, font=small_font)
     draw.text((width - 72 - (bbox[2] - bbox[0]), height - 62), repo, fill="#9aa5b1", font=small_font)

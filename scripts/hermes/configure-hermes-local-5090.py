@@ -16,6 +16,8 @@ AEON_ORNITH_NVFP4_MODEL = "aeon-ornith-1.0-35b-nvfp4"
 QWEN36_27B_NVFP4_MODEL = "qwen36-27b-nvfp4-mtp-gguf"
 UNSLOTH_QWEN36_27B_NVFP4_MODEL = "qwen36-27b-unsloth-nvfp4-mtp-gguf"
 UNSLOTH_QWEN36_35B_NVFP4_MODEL = "qwen36-35b-a3b-unsloth-nvfp4-mtp-gguf"
+THINKINGCAP_QWEN36_27B_MODEL = "thinkingcap-qwen36-27b-q4-k-m"
+TERNARY_BONSAI_27B_MODEL = "ternary-bonsai-27b-dspark-q4-1"
 
 
 def parse_args() -> argparse.Namespace:
@@ -93,6 +95,14 @@ def provider_config(name: str, router_port: str) -> dict:
                 "context_length": 200000,
                 "supports_vision": False,
             },
+            THINKINGCAP_QWEN36_27B_MODEL: {
+                "context_length": 200000,
+                "supports_vision": False,
+            },
+            TERNARY_BONSAI_27B_MODEL: {
+                "context_length": 16384,
+                "supports_vision": False,
+            },
         },
         "name": name,
     }
@@ -135,6 +145,8 @@ def should_remove_provider(provider: object, name: str) -> bool:
         "http://127.0.0.1:39195/v1",
         "http://127.0.0.1:39196/v1",
         "http://127.0.0.1:39197/v1",
+        "http://127.0.0.1:39198/v1",
+        "http://127.0.0.1:39199/v1",
     }
     models = {
         QWOPUS_MODEL,
@@ -180,6 +192,8 @@ def should_remove_provider(provider: object, name: str) -> bool:
         "nvidia/qwen3.6-27b-nvfp4",
         UNSLOTH_QWEN36_27B_NVFP4_MODEL,
         UNSLOTH_QWEN36_35B_NVFP4_MODEL,
+        THINKINGCAP_QWEN36_27B_MODEL,
+        TERNARY_BONSAI_27B_MODEL,
         "unsloth-qwen36-27b-nvfp4",
         "unsloth-qwen36-35b-a3b-nvfp4",
     }
