@@ -1,0 +1,15 @@
+diff --git a/ggml/src/ggml-cuda/fattn.cu b/ggml/src/ggml-cuda/fattn.cu
+--- a/ggml/src/ggml-cuda/fattn.cu
++++ b/ggml/src/ggml-cuda/fattn.cu
+@@ -2248,7 +2248,10 @@ void ggml_cuda_flash_attn_ext(ggml_backend_cuda_context & ctx, ggml_tensor * dst
+         // turbo2/3 K uses simple dequant (rotated domain, Q pre-rotated). V un-rotation at graph level.
+         ggml_cuda_turbo_prefill_attend(ctx, dst);
+     } else {
+-        load_tcq_decode_alpha(ctx.device);
++        if (K->type == GGML_TYPE_TURBO3_TCQ || K->type == GGML_TYPE_TURBO2_TCQ || K->type == GGML_TYPE_TURBO1_TCQ ||
++            V->type == GGML_TYPE_TURBO3_TCQ || V->type == GGML_TYPE_TURBO2_TCQ || V->type == GGML_TYPE_TURBO1_TCQ) {
++            load_tcq_decode_alpha(ctx.device); // TCQ alpha constants are irrelevant for ordinary KV types.
++        }
+ 
+         // Update VEC/materialize __constant__ alpha. Context-adaptive alpha would re-push every
+         // token, but a synchronous cudaMemcpyToSymbol during graph capture is illegal (ROCm:

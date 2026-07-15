@@ -1,0 +1,9 @@
+section,stage,prompt_tokens,generated_tokens,decode_tps,draft_acceptance,mean_accepted,placement,server_log,notes
+headline,Before: diagnostic placement,8907,1024,22.50,0.12342,2.84,draft ngl=1; CPU-heavy,logs/qwen36-27b-dflash-bench-20260714-175609.err.log,Historical compatibility run before the draft-device diagnosis
+headline,After: full GPU adaptive,8907,1024,57.53,0.15385,3.00,target 65/65 + draft 6/6 on CUDA0,logs/qwen36-27b-dflash-bench-20260714-184748.err.log,Adaptive bypass after four low-acceptance DFlash cycles
+tuning,Initial full-GPU DFlash,1174,1024,37.45,0.09959,2.48,target and draft on CUDA0,logs/qwen36-27b-dflash-bench-20260714-181340.err.log,Full 15-token horizon was slower than target-only on prose
+tuning,Adaptive bypass: 8-cycle probe,1174,1024,55.33,0.12444,2.47,target and draft on CUDA0,logs/qwen36-27b-dflash-bench-20260714-182520.err.log,Stop drafting for the request when acceptance remains low
+tuning,Adaptive bypass: 4-cycle probe,1174,1024,56.14,0.12376,2.79,target and draft on CUDA0,logs/qwen36-27b-dflash-bench-20260714-182744.err.log,Earlier decision reduces wasted draft and verification work
+tuning,Final capture fast gate,1174,1024,61.61,0.15385,3.00,target and draft on CUDA0,logs/qwen36-27b-dflash-bench-20260714-184549.err.log,Disable hidden-state capture and the whole speculative chain after bypass
+tuning,Target-only reference,1174,1024,66.13,,,target 65/65 on CUDA0,logs/qwen36-27b-q4-targetonly-1k.err.log,Reference ceiling for a low-acceptance request
+control,Short Python BST coding probe,37,400,149.51,0.73737,11.74,target and draft on CUDA0,logs/dflash-fullgpu-bst-probe-adaptive.err.log,Separate workload control; not comparable to the 10K BookContext bars

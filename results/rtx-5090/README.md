@@ -2,7 +2,7 @@
 
 - **GPU:** NVIDIA GeForce RTX 5090 32GB
 - **Driver:** 610.62
-- **Dates:** 2026-06-22 to 2026-07-03
+- **Dates:** 2026-06-22 to 2026-07-14
 - **Prompt style:** BookContext (synthetic long-document with continuity sections)
 - **Generation:** 1024 tokens, temperature=0, seed=1234. Full ladders use 3
   measured runs per context; two-point smoke tests may use 1 measured run.
@@ -15,6 +15,10 @@
 
 ![RTX 5090 native llama.cpp long-context comparison](../../assets/images/rtx-5090-qwen35-moe-vs-qwopus.png)
 
+![Qwen3.6 27B DFlash versus RTX 5090 native llama.cpp field](../../assets/images/qwen36-27b-dflash-vs-rtx-5090-field-20260714.png)
+
+![Qwen3.6 27B DFlash Windows before and after runtime fixes](../../assets/images/qwen36-27b-dflash-windows-before-after-20260714.png)
+
 ![llama.cpp b9761 vs b9851 Qwen3.6 NVFP4 MTP GGUF decode comparison](../../assets/images/qwen36-llamacpp-b9761-vs-b9851.png)
 
 ![Qwen3.6 27B NVFP4 on RTX 5090 Windows, native GGUF versus Docker vLLM](../../assets/images/qwen36-27b-nvfp4-mtp-vs-no-mtp.png)
@@ -24,6 +28,48 @@
 ---
 
 ## Results
+
+### Qwen3.6 27B Q4_K_M + DFlash Q8_0
+
+The corrected CUDA0-only adaptive build measured **57.53 decode tok/s** on the
+8,907-token fixture at `ctx=200000`, with **5.39s** prefill and **43.87
+full-request tok/s**. Loader verification reported all **65/65 target layers**
+and **6/6 draft layers** offloaded to CUDA0. Low BookContext acceptance caused
+the runtime to stop speculative work after four probes and continue target-only
+on the GPU. A short Python coding control retained DFlash and reproduced
+**149.51 decode tok/s** at **73.74% acceptance**.
+
+The directly comparable 10K before/after result is **22.50 -> 57.53 tok/s**,
+a **2.56x (+156%)** increase. The 1K tuning fixture progressed from **37.45**
+tok/s with initial full-GPU DFlash to **55.33** with an eight-cycle adaptive
+bypass, **56.14** with a four-cycle bypass, and **61.61** after the hidden
+capture fast gate. The target-only reference was **66.13 tok/s**. The 149.51
+tok/s coding result is a separate prompt and must not be compared directly to
+the long-context bars.
+
+The corrected runtime and harness make six material changes:
+
+1. Pin target and draft to CUDA0 and require complete `65/65` and `6/6` layer offload.
+2. Route verification callbacks to the slot-owned DFlash state.
+3. Exclude unrelated speculative callbacks from DFlash acceptance accounting.
+4. Stop speculative work after four low-acceptance DFlash cycles while keeping generation on the GPU.
+5. Disable unused hidden-state GPU-to-host capture after bypass and restore it for each new request.
+6. Abort before prompting when partial offload or CUDA1 placement is detected.
+
+The complete optimization ladder is in
+`qwen36-27b-dflash-tuning-20260714.csv`; regenerate the chart with
+`scripts/benchmarks/render-qwen36-27b-dflash-before-after-chart.py`.
+
+#### Historical failed-placement baseline
+
+The DFlash target decoded at **22.50 tok/s** for 8,907 prompt tokens and
+**14.05 tok/s** for 174,590 prompt tokens. Acceptance was only **12.34%** and
+**10.31%**. The drafter had selected CUDA1 on this mixed-GPU host while the
+runtime was compiled for CUDA0's `sm_120a`, producing CUDA `no kernel image`.
+These preserved diagnostic results used `--gpu-layers-draft 1`; the corrected
+launcher pins `--device-draft CUDA0` and requires full draft offload. See
+`qwen36-27b-dflash-benchmark-20260714.csv`. The old 200K diagnostic was not
+rerun during the staged 1K and 10K fix validation.
 
 ### NVIDIA Qwen3.6 35B A3B NVFP4 MTP GGUF - llama.cpp b9761 vs b9851
 

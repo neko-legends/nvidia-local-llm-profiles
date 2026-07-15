@@ -1,0 +1,99 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1800" height="1840" viewBox="0 0 1800 1840">
+<style>
+text{font-family:Segoe UI,Arial,sans-serif;letter-spacing:0}
+.title{fill:#edf3f7;font-size:48px;font-weight:750}.subtitle{fill:#9aa6b2;font-size:23px}
+.section{fill:#edf3f7;font-size:30px;font-weight:750}.label{fill:#edf3f7;font-size:22px;font-weight:700}
+.body{fill:#edf3f7;font-size:19px}.detail{fill:#9aa6b2;font-size:16px}.value{fill:#edf3f7;font-size:28px;font-weight:750}
+.huge{fill:#49d6c8;font-size:58px;font-weight:800}
+</style>
+<rect width="1800" height="1840" fill="#101317"/>
+<text x="70" y="86" class="title" text-anchor="start">DFlash on Windows: 2.56x Faster After the Runtime Fixes</text>
+<text x="70" y="128" class="subtitle" text-anchor="start">RTX 5090, native llama.cpp, July 14 2026. Decode speed excludes prompt prefill.</text>
+<rect x="60" y="170" width="1680" height="330" rx="8" fill="#171d24"/>
+<text x="90" y="225" class="section" text-anchor="start">Comparable 10K BookContext before / after</text>
+<text x="90" y="264" class="subtitle" text-anchor="start">Same 8,907-token prompt, 1,024 generated tokens, temperature 0, ctx=200000</text>
+<line x1="480.0" y1="286" x2="480.0" y2="452" stroke="#303944"/>
+<text x="480" y="476" class="detail" text-anchor="middle">0</text>
+<line x1="620.0" y1="286" x2="620.0" y2="452" stroke="#303944"/>
+<text x="620" y="476" class="detail" text-anchor="middle">10</text>
+<line x1="760.0" y1="286" x2="760.0" y2="452" stroke="#303944"/>
+<text x="760" y="476" class="detail" text-anchor="middle">20</text>
+<line x1="900.0" y1="286" x2="900.0" y2="452" stroke="#303944"/>
+<text x="900" y="476" class="detail" text-anchor="middle">30</text>
+<line x1="1040.0" y1="286" x2="1040.0" y2="452" stroke="#303944"/>
+<text x="1040" y="476" class="detail" text-anchor="middle">40</text>
+<line x1="1180.0" y1="286" x2="1180.0" y2="452" stroke="#303944"/>
+<text x="1180" y="476" class="detail" text-anchor="middle">50</text>
+<line x1="1320.0" y1="286" x2="1320.0" y2="452" stroke="#303944"/>
+<text x="1320" y="476" class="detail" text-anchor="middle">60</text>
+<line x1="1460.0" y1="286" x2="1460.0" y2="452" stroke="#303944"/>
+<text x="1460" y="476" class="detail" text-anchor="middle">70</text>
+<text x="90" y="341" fill="#ff5a5f" font-size="22" font-weight="700">Before: diagnostic placement</text>
+<rect x="480" y="315" width="315.0" height="38" rx="5" fill="#ff5a5f"/>
+<text x="809" y="344" class="value" text-anchor="start">22.50 tok/s</text>
+<text x="90" y="423" fill="#49d6c8" font-size="22" font-weight="700">After: full GPU adaptive</text>
+<rect x="480" y="397" width="805.4" height="38" rx="5" fill="#49d6c8"/>
+<text x="1299" y="426" class="value" text-anchor="start">57.53 tok/s</text>
+<text x="1500" y="343" class="huge" text-anchor="start">2.56x</text>
+<text x="1510" y="385" class="value" text-anchor="start">+156%</text>
+<text x="1498" y="426" class="detail" text-anchor="start">decode throughput</text>
+<text x="70" y="580" class="section" text-anchor="start">How the 1K tuning progressed</text>
+<text x="70" y="618" class="subtitle" text-anchor="start">All bars below use the same 1,174-token prose prompt and 1,024 generated tokens.</text>
+<rect x="60" y="635" width="1680" height="403" rx="8" fill="#171d24"/>
+<line x1="610.0" y1="680" x2="610.0" y2="982" stroke="#303944"/>
+<text x="610" y="1010" class="detail" text-anchor="middle">0</text>
+<line x1="806.0" y1="680" x2="806.0" y2="982" stroke="#303944"/>
+<text x="806" y="1010" class="detail" text-anchor="middle">15</text>
+<line x1="1002.0" y1="680" x2="1002.0" y2="982" stroke="#303944"/>
+<text x="1002" y="1010" class="detail" text-anchor="middle">30</text>
+<line x1="1198.0" y1="680" x2="1198.0" y2="982" stroke="#303944"/>
+<text x="1198" y="1010" class="detail" text-anchor="middle">45</text>
+<line x1="1394.0" y1="680" x2="1394.0" y2="982" stroke="#303944"/>
+<text x="1394" y="1010" class="detail" text-anchor="middle">60</text>
+<line x1="1590.0" y1="680" x2="1590.0" y2="982" stroke="#303944"/>
+<text x="1590" y="1010" class="detail" text-anchor="middle">75</text>
+<text x="90" y="725" class="label" text-anchor="start">Initial full-GPU DFlash</text>
+<rect x="610" y="700" width="489.3" height="30" rx="4" fill="#ff5a5f"/>
+<text x="1111" y="725" class="label" text-anchor="start">37.45</text>
+<text x="90" y="787" class="label" text-anchor="start">Adaptive bypass: 8-cycle probe</text>
+<rect x="610" y="762" width="723.0" height="30" rx="4" fill="#6d9ff2"/>
+<text x="1344" y="787" class="label" text-anchor="start">55.33</text>
+<text x="90" y="849" class="label" text-anchor="start">Adaptive bypass: 4-cycle probe</text>
+<rect x="610" y="824" width="733.6" height="30" rx="4" fill="#6d9ff2"/>
+<text x="1355" y="849" class="label" text-anchor="start">56.14</text>
+<text x="90" y="911" class="label" text-anchor="start">Final capture fast gate</text>
+<rect x="610" y="886" width="805.0" height="30" rx="4" fill="#49d6c8"/>
+<text x="1427" y="911" class="label" text-anchor="start">61.61</text>
+<text x="90" y="973" class="label" text-anchor="start">Target-only reference</text>
+<rect x="610" y="948" width="864.1" height="30" rx="4" fill="#f2bc4b"/>
+<text x="1486" y="973" class="label" text-anchor="start">66.13</text>
+<rect x="60" y="1085" width="1680" height="170" rx="8" fill="#15252a" stroke="#49d6c8" stroke-width="2"/>
+<text x="90" y="1145" fill="#49d6c8" font-size="30" font-weight="750">Separate coding control</text>
+<text x="90" y="1190" class="label" text-anchor="start">Short Python BST prompt</text>
+<text x="440" y="1180" class="huge" text-anchor="start">149.51 tok/s</text>
+<text x="860" y="1165" class="body" text-anchor="start">73.74% acceptance | mean accepted length 11.74</text>
+<text x="860" y="1200" class="detail" text-anchor="start">Not comparable to long-context bars; shows upside when predictions match.</text>
+<text x="70" y="1340" class="section" text-anchor="start">What changed</text>
+<rect x="70" y="1360" width="46" height="46" rx="5" fill="#49d6c8"/>
+<text x="93" y="1392" fill="#101317" font-size="22" font-weight="750" text-anchor="middle">1</text>
+<text x="140" y="1382" class="label" text-anchor="start">Correct device placement</text>
+<text x="140" y="1408" class="detail" text-anchor="start">Pinned both models to CUDA0; verified 65/65 target and 6/6 draft layers on the RTX 5090.</text>
+<rect x="70" y="1444" width="46" height="46" rx="5" fill="#49d6c8"/>
+<text x="93" y="1476" fill="#101317" font-size="22" font-weight="750" text-anchor="middle">2</text>
+<text x="140" y="1466" class="label" text-anchor="start">Acceptance feedback fix</text>
+<text x="140" y="1492" class="detail" text-anchor="start">Routed verification results to the per-slot DFlash state so adaptation receives real acceptance data.</text>
+<rect x="70" y="1528" width="46" height="46" rx="5" fill="#49d6c8"/>
+<text x="93" y="1560" fill="#101317" font-size="22" font-weight="750" text-anchor="middle">3</text>
+<text x="140" y="1550" class="label" text-anchor="start">GPU-only adaptive bypass</text>
+<text x="140" y="1576" class="detail" text-anchor="start">After four cycles below mean accepted length 3, stop speculative work for that request.</text>
+<rect x="70" y="1612" width="46" height="46" rx="5" fill="#49d6c8"/>
+<text x="93" y="1644" fill="#101317" font-size="22" font-weight="750" text-anchor="middle">4</text>
+<text x="140" y="1634" class="label" text-anchor="start">Hidden-capture fast gate</text>
+<text x="140" y="1660" class="detail" text-anchor="start">Stop unused hidden-state GPU-to-host copies after bypass; re-enable before the next request.</text>
+<rect x="70" y="1696" width="46" height="46" rx="5" fill="#49d6c8"/>
+<text x="93" y="1728" fill="#101317" font-size="22" font-weight="750" text-anchor="middle">5</text>
+<text x="140" y="1718" class="label" text-anchor="start">Fail-fast placement check</text>
+<text x="140" y="1744" class="detail" text-anchor="start">Abort before benchmarking if either model is partial or the draft lands on CUDA1.</text>
+<text x="70" y="1805" class="detail" text-anchor="start">Before used draft ngl=1 and was CPU-heavy. After remains GPU-only; low-acceptance requests bypass DFlash, not CUDA.</text>
+<text x="1730" y="1805" class="detail" text-anchor="end">neko-legends/nvidia-local-llm-profiles</text>
+</svg>

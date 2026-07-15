@@ -1,0 +1,24 @@
+diff --git a/ggml/src/ggml-cuda/fattn.cu b/ggml/src/ggml-cuda/fattn.cu
+--- a/ggml/src/ggml-cuda/fattn.cu
++++ b/ggml/src/ggml-cuda/fattn.cu
+@@ -2070,14 +2070,17 @@ size_t ggml_cuda_flash_attn_ext_get_buffer_size(const ggml_tensor * dst) {
+ 
+ void ggml_cuda_flash_attn_ext(ggml_backend_cuda_context & ctx, ggml_tensor * dst) {
+     ggml_cuda_set_device(ctx.device);
+-    turbo_vanilla_cb_load_fattn();  // TURBO_CB_T2/3/4/8 vanilla-book override (this TU's copies)
+-    turbo1_tcq_load_cb_fattn();  // E7: turbo1_tcq K/V decode codebooks (TURBO1_TCQ_CB_K/_V, cold-start = turbo2 anchor)
+-
+ 
+     cert_dump_q(ctx, dst);
+ 
+     const ggml_tensor * Q = dst->src[0];
+     const ggml_tensor * K = dst->src[1];
+     const ggml_tensor * V = dst->src[2];
++    if (ggml_is_turbo_kv_type(K->type) || ggml_is_turbo_kv_type(V->type)) {
++        // Turbo codebooks are irrelevant for ordinary q4_0/q8/f16 KV and
++        // should not be staged on every Flash Attention invocation.
++        turbo_vanilla_cb_load_fattn();
++        turbo1_tcq_load_cb_fattn();
++    }
+ 
+     // Turbo prefill: dequant to fp16 and use tensor core MMA for batched attention.

@@ -1,0 +1,17 @@
+diff --git a/tools/server/server-context.cpp b/tools/server/server-context.cpp
+--- a/tools/server/server-context.cpp
++++ b/tools/server/server-context.cpp
+@@ -4999,8 +4999,11 @@ void server_context::update_slots() {
+                 slot.n_accepted_per_pos[i]++;
+             }
+ 
+-            // notify the shared (upstream) speculative state, if this slot uses it
+-            if (!slot.spec && spec) {
++            // Per-slot DFlash owns its speculative state. It must receive the
++            // acceptance callback too, otherwise adaptive drafting never runs.
++            if (slot.spec) {
++                common_speculative_accept(slot.spec.get(), ids.size() - 1);
++            } else if (spec) {
+                 common_speculative_accept(spec.get(), slot.id, ids.size() - 1);
+             }
+ 

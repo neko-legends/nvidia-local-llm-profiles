@@ -1,0 +1,74 @@
+diff --git a/common/speculative.cpp b/common/speculative.cpp
+--- a/common/speculative.cpp
++++ b/common/speculative.cpp
+@@ -2644,6 +2644,9 @@ struct common_speculative_impl_dflash : public common_speculative_impl {
+     int n_low_accept = 0;
+     int n_draft_last = 0;
+     int adaptive_n_draft = -1; // -1 = use default
++    int accept_probe_cycles = 0;
++    int accept_probe_tokens = 0;
++    bool gpu_bypass_for_request = false;
+ 
+     // build interleaved cross-attention data from ring buffer (GPU or CPU path)
+     int build_cross_data(llama_context * ctx) {
+@@ -2750,6 +2753,12 @@ struct common_speculative_impl_dflash : public common_speculative_impl {
+     // called after initial prefill — extract hidden states from target
+     void begin(llama_seq_id /*seq_id*/, const llama_tokens & prompt) override {
+         GGML_UNUSED(prompt);
++        n_low_accept = 0;
++        n_draft_last = 0;
++        adaptive_n_draft = -1;
++        accept_probe_cycles = 0;
++        accept_probe_tokens = 0;
++        gpu_bypass_for_request = false;
+         if (prefill_flushed) {
+             // ring was already populated incrementally by flush_prefill() calls
+             // during checkpoint-split prefill — nothing to do
+@@ -2886,6 +2895,11 @@ struct common_speculative_impl_dflash : public common_speculative_impl {
+                 continue;
+             }
+ 
++            if (gpu_bypass_for_request) {
++                n_draft_last = 0;
++                continue;
++            }
++
+             llama_tokens & result = *dp.result;
+             const llama_token id_last = dp.id_last;
+             const int32_t n_max_eff = dp.n_max > 0 ? dp.n_max : (block_size - 1);
+@@ -2968,6 +2982,26 @@ struct common_speculative_impl_dflash : public common_speculative_impl {
+ 
+-    void accept(llama_seq_id /*seq_id*/, uint16_t n_accepted, bool /*is_other*/) override {
++    void accept(llama_seq_id /*seq_id*/, uint16_t n_accepted, bool is_other) override {
++        if (is_other) {
++            return;
++        }
++
+         if (n_draft_last > 0) {
++            // A drafter that accepts only a token or two per invocation is slower than
++            // target-only decode on a 5090, even when every layer is on CUDA. Probe the
++            // request briefly, then stop drafting without moving any work to the CPU.
++            accept_probe_cycles++;
++            accept_probe_tokens += n_accepted;
++            if (accept_probe_cycles >= 4) {
++                const float mean_accepted = (float) accept_probe_tokens / (float) accept_probe_cycles;
++                if (mean_accepted < 3.0f) {
++                    gpu_bypass_for_request = true;
++                    LOG_INF("dflash: GPU-only low-acceptance bypass (mean accepted %.2f over %d cycles)\n",
++                            mean_accepted, accept_probe_cycles);
++                    n_draft_last = 0;
++                    return;
++                }
++            }
++
+             float f_acc = (float) n_accepted / (float) n_draft_last;
+             if (f_acc < 0.3f) {
+                 n_low_accept++;
+@@ -2986,5 +3020,7 @@ struct common_speculative_impl_dflash : public common_speculative_impl {
+                     adaptive_n_draft = std::min(block_size - 1, adaptive_n_draft + 1);
+                 }
+             }
++
++            n_draft_last = 0;
+         }
+     }

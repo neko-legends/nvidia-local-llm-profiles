@@ -1,0 +1,95 @@
+diff --git a/common/speculative.cpp b/common/speculative.cpp
+--- a/common/speculative.cpp
++++ b/common/speculative.cpp
+@@ -2744,6 +2744,7 @@ struct common_speculative_impl_dflash : public common_speculative_impl {
+         accept_probe_cycles = 0;
+         accept_probe_tokens = 0;
+         gpu_bypass_for_request = false;
++        llama_set_dflash_hidden_capture(ctx_tgt, true);
+     }
+ 
+     // prepare cross-attention data for batched draft decode.
+@@ -3006,6 +3007,7 @@ struct common_speculative_impl_dflash : public common_speculative_impl {
+                 const float mean_accepted = (float) accept_probe_tokens / (float) accept_probe_cycles;
+                 if (mean_accepted < 3.0f) {
+                     gpu_bypass_for_request = true;
++                    llama_set_dflash_hidden_capture(ctx_tgt, false);
+                     LOG_INF("dflash: GPU-only low-acceptance bypass (mean accepted %.2f over %d cycles)\n",
+                             mean_accepted, accept_probe_cycles);
+                     n_draft_last = 0;
+diff --git a/include/llama.h b/include/llama.h
+--- a/include/llama.h
++++ b/include/llama.h
+@@ -1120,6 +1120,7 @@ extern "C" {
+     // layer_ids: array of layer indices, n_layers: number of layers
+     // Pass n_layers=0 to disable capture
+     LLAMA_API void llama_set_dflash_capture(struct llama_context * ctx, const int32_t * layer_ids, int32_t n_layers);
++    LLAMA_API void llama_set_dflash_hidden_capture(struct llama_context * ctx, bool enable);
+ 
+     // DFlash: set drafter sampling temperature (Gumbel-max trick)
+     // temp=0: greedy argmax (default), temp>0: sample from softmax(logits/temp)
+diff --git a/src/llama-context.cpp b/src/llama-context.cpp
+--- a/src/llama-context.cpp
++++ b/src/llama-context.cpp
+@@ -1187,13 +1187,17 @@ static void dflash_read_tensor(struct ggml_tensor * t, std::vector<float> & dst,
+ // without modifying the compute graph (zero FP impact on model computation)
+ static bool dflash_eval_callback(struct ggml_tensor * t, bool ask, void * user_data) {
+     auto * cap = (dflash_capture_data *) user_data;
++    if (!cap->hidden_capture_enabled && !cap->tape_enabled) {
++        return false;
++    }
++
+     const llama_ubatch * ub = cap->ubatch;
+     const uint32_t n_seqs_unq = ub ? ub->n_seqs_unq : 0;
+ 
+     auto h_it = cap->hidden_name_idx.find(t->name);
+ 
+     if (ask) {
+-        if (h_it != cap->hidden_name_idx.end()) {
++        if (cap->hidden_capture_enabled && h_it != cap->hidden_name_idx.end()) {
+             return true;
+         }
+         if (cap->tape_enabled && cap->tape_name_map.count(t->name)) {
+@@ -1387,6 +1391,12 @@ void llama_context::set_dflash_capture(const int32_t * layer_ids, int32_t n_laye
+     }
+ }
+ 
++void llama_context::set_dflash_hidden_capture(bool enable) {
++    if (dflash_capture) {
++        dflash_capture->hidden_capture_enabled = enable;
++    }
++}
++
+ void llama_context::dflash_reset_hidden_capture() {
+     if (!dflash_capture) {
+         return;
+@@ -5401,6 +5411,10 @@ void llama_set_dflash_capture(llama_context * ctx, const int32_t * layer_ids, in
+     ctx->set_dflash_capture(layer_ids, n_layers);
+ }
+ 
++void llama_set_dflash_hidden_capture(llama_context * ctx, bool enable) {
++    ctx->set_dflash_hidden_capture(enable);
++}
++
+ void llama_set_dflash_sample_temp(llama_context * ctx, float temp) {
+     ctx->set_dflash_sample_temp(temp);
+ }
+diff --git a/src/llama-context.h b/src/llama-context.h
+--- a/src/llama-context.h
++++ b/src/llama-context.h
+@@ -102,6 +102,7 @@ struct llama_tree_mask {
+ // DFlash: eval callback data for hidden state capture + tape recording
+ struct dflash_capture_data {
+     // hidden state capture (for drafter conditioning)
++    bool hidden_capture_enabled = true;
+     std::vector<int32_t> layer_ids;           // layer indices to capture
+     std::vector<std::string> tensor_names;    // pre-formatted "l_out-{id}" names
+     std::unordered_map<std::string, size_t> hidden_name_idx; // name → index for O(1) lookup
+@@ -538,6 +539,7 @@ public:
+     int32_t get_n_layer_hiddens() const;
+ 
+     void set_dflash_capture(const int32_t * layer_ids, int32_t n_layers);
++    void set_dflash_hidden_capture(bool enable);
+     void set_dflash_sample_temp(float temp);
+     void set_dflash_topk(int k);
+     void set_dflash_n_slots(int n);

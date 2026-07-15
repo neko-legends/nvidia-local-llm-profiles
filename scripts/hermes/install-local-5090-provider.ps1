@@ -13,6 +13,7 @@ param(
   [string]$UnslothQwen36_35bNvfp4BaseUrl = "http://127.0.0.1:39197/v1",
   [string]$ThinkingCapQwen36_27bBaseUrl = "http://127.0.0.1:39198/v1",
   [string]$TernaryBonsai27bBaseUrl = "http://127.0.0.1:39199/v1",
+  [string]$Qwen36_27bDflashBaseUrl = "http://127.0.0.1:39201/v1",
   [switch]$NoStartRouter
 )
 
@@ -106,7 +107,8 @@ if (-not $NoStartRouter) {
         "--unsloth-qwen36-27b-nvfp4-base-url", $UnslothQwen36_27bNvfp4BaseUrl,
         "--unsloth-qwen36-35b-nvfp4-base-url", $UnslothQwen36_35bNvfp4BaseUrl,
         "--thinkingcap-qwen36-27b-base-url", $ThinkingCapQwen36_27bBaseUrl,
-        "--ternary-bonsai-27b-base-url", $TernaryBonsai27bBaseUrl
+        "--ternary-bonsai-27b-base-url", $TernaryBonsai27bBaseUrl,
+        "--qwen36-27b-dflash-base-url", $Qwen36_27bDflashBaseUrl
       ) `
       -WorkingDirectory $RouterDir `
       -RedirectStandardOutput $OutLog `
@@ -133,6 +135,7 @@ Write-Host "  - qwen36-27b-unsloth-nvfp4-mtp-gguf -> $UnslothQwen36_27bNvfp4Base
 Write-Host "  - qwen36-35b-a3b-unsloth-nvfp4-mtp-gguf -> $UnslothQwen36_35bNvfp4BaseUrl"
 Write-Host "  - thinkingcap-qwen36-27b-q4-k-m -> $ThinkingCapQwen36_27bBaseUrl"
 Write-Host "  - ternary-bonsai-27b-dspark-q4-1 -> $TernaryBonsai27bBaseUrl"
+Write-Host "  - qwen36-27b-q4-k-m-dflash-q8-0 -> $Qwen36_27bDflashBaseUrl"
 Write-Host ""
 Write-Host "Restart Hermes Desktop, then open the model menu and choose '$ProviderName'."
 Write-Host "Start the model servers separately before using them."

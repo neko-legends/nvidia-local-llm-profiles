@@ -1,0 +1,138 @@
+diff --git a/common/speculative.cpp b/common/speculative.cpp
+--- a/common/speculative.cpp
++++ b/common/speculative.cpp
+@@ -169,6 +169,8 @@ struct common_speculative_impl {
+ 
+     virtual ~common_speculative_impl() = default;
+ 
++    virtual void start_request(llama_seq_id /*seq_id*/) {}
++
+     virtual void begin(llama_seq_id seq_id, const llama_tokens & prompt) = 0;
+ 
+     virtual bool process(const llama_batch & batch) = 0;
+@@ -186,6 +188,8 @@ struct common_speculative_impl {
+ 
+     // true if this implementation requires the target context to extract pre-norm embeddings
+     virtual bool need_embd_nextn() const { return false; }
++
++    virtual bool bypass_request() const { return false; }
+ };
+ 
+ struct common_speculative_impl_draft_simple : public common_speculative_impl {
+@@ -2737,6 +2741,12 @@ struct common_speculative_impl_dflash : public common_speculative_impl {
+         seq_id = seq_id_;
+     }
+ 
++    void start_request(llama_seq_id /*seq_id*/) override {
++        accept_probe_cycles = 0;
++        accept_probe_tokens = 0;
++        gpu_bypass_for_request = false;
++    }
++
+     // prepare cross-attention data for batched draft decode.
+     // Returns cross_len (position offset for tokens), or -1 if no committed tokens.
+     int prepare_batch_draft(llama_context * ctx_dft_ext) {
+@@ -3167,8 +3177,12 @@ struct common_speculative_impl_dflash : public common_speculative_impl {
+     }
+ 
+     bool need_embd() const override {
+-        return true;
++        return !gpu_bypass_for_request;
+     }
++
++    bool bypass_request() const override {
++        return gpu_bypass_for_request;
++    }
+ 
+ private:
+     // write n_tokens into ring buffer from captured hidden states
+@@ -3556,6 +3570,16 @@ common_speculative_draft_params & common_speculative_get_draft_params(
+     return spec->dparams[seq_id];
+ }
+ 
++void common_speculative_start_request(common_speculative * spec, llama_seq_id seq_id) {
++    if (spec == nullptr) {
++        return;
++    }
++
++    for (auto & impl : spec->impls) {
++        impl->start_request(seq_id);
++    }
++}
++
+ void common_speculative_begin(common_speculative * spec, llama_seq_id seq_id, const llama_tokens & prompt) {
+     if (spec == nullptr) {
+         return;
+@@ -3628,6 +3652,20 @@ bool common_speculative_need_embd_nextn(common_speculative * spec) {
+ 
+     return false;
+ }
++
++bool common_speculative_is_bypassed(common_speculative * spec) {
++    if (spec == nullptr) {
++        return false;
++    }
++
++    for (auto & impl : spec->impls) {
++        if (impl->bypass_request()) {
++            return true;
++        }
++    }
++
++    return false;
++}
+ 
+ void common_speculative_draft(common_speculative * spec) {
+     if (spec == nullptr) {
+diff --git a/common/speculative.h b/common/speculative.h
+--- a/common/speculative.h
++++ b/common/speculative.h
+@@ -50,6 +50,9 @@ struct common_speculative_draft_params {
+ 
+ common_speculative_draft_params & common_speculative_get_draft_params(common_speculative * spec, llama_seq_id seq_id);
+ 
++// call before prompt processing starts for a new request
++void common_speculative_start_request(common_speculative * spec, llama_seq_id seq_id);
++
+ // optionally call once at the beginning of a new generation
+ void common_speculative_begin(common_speculative * spec, llama_seq_id seq_id, const llama_tokens & prompt);
+ 
+@@ -66,6 +69,9 @@ bool common_speculative_need_embd(common_speculative * spec);
+ // true if any implementation requires target nextn embeddings to be extracted
+ bool common_speculative_need_embd_nextn(common_speculative * spec);
+ 
++// true when an implementation has disabled speculative decoding for this request
++bool common_speculative_is_bypassed(common_speculative * spec);
++
+ // generate drafts for the sequences specified with `common_speculative_get_draft_params`
+ void common_speculative_draft(common_speculative * spec);
+ 
+diff --git a/tools/server/server-context.cpp b/tools/server/server-context.cpp
+--- a/tools/server/server-context.cpp
++++ b/tools/server/server-context.cpp
+@@ -479,6 +479,10 @@ struct server_slot {
+             return 0;
+         }
+ 
++        if (common_speculative_is_bypassed(get_spec())) {
++            return 0;
++        }
++
+         if (common_sampler_grammar_is_active(smpl.get())) {
+             return 0;
+         }
+@@ -3998,6 +4002,14 @@ private:
+                         slot.t_start_process_prompt = ggml_time_us();
+                         slot.t_start_generation = 0;
+ 
++                        if (slot.can_speculate()) {
++                            if (slot.spec) {
++                                common_speculative_start_request(slot.get_spec(), 0);
++                            } else if (spec) {
++                                common_speculative_start_request(spec.get(), slot.id);
++                            }
++                        }
++
+                         slot.state = SLOT_STATE_PROCESSING_PROMPT;
+ 
+                         SLT_TRC(slot, "new prompt, n_ctx_slot = %d, n_keep = %d, task.n_tokens = %d\n",

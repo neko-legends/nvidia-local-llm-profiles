@@ -10,6 +10,39 @@ OpenAI-compatible endpoint, wire Hermes, run benchmarks, and collect the proof.
 llama.cpp, with Qwopus27, NVIDIA Qwen NVFP4, Ornith, AEON Ornith, and Unsloth
 Qwen35 kept as RTX 5090 comparison baselines.
 
+## Instructions for AI Agents
+
+Treat each folder under `scripts\localai\` as a self-contained model profile.
+The profile README and scripts are authoritative for that model; do not infer
+paths or reuse flags from a different architecture.
+
+| Requested model path | Profile folder |
+| --- | --- |
+| Qwopus 27B Coder MTP | `scripts\localai\qwopus3.6-27b-coder-mtp-gguf\` |
+| Qwopus 35B A3B Coder MTP | `scripts\localai\qwopus3.6-35b-a3b-coder-mtp-gguf\` |
+| NVIDIA Qwen3.6 27B NVFP4 MTP | `scripts\localai\qwen36-27b-nvfp4-gguf\` |
+| NVIDIA Qwen3.6 35B A3B NVFP4 MTP | `scripts\localai\qwen36-35b-a3b-nvfp4-mtp-gguf\` |
+| Qwen3.6 27B Q4_K_M + DFlash Q8_0 | `scripts\localai\qwen36-27b-dflash-gguf\` |
+| ThinkingCap Qwen3.6 27B | `scripts\localai\thinkingcap-qwen36-27b-gguf\` |
+| Ternary-Bonsai 27B + DSpark | `scripts\localai\ternary-bonsai-27b-gguf\` |
+| Ornith 1.0 35B | `scripts\localai\ornith-1.0-35b-gguf\` |
+
+Agent workflow:
+
+1. Read the selected profile's `README.md` before running anything.
+2. Install the shared Hermes provider once with `scripts\hermes\install-local-5090-provider.bat`.
+3. Run the profile's download or conversion and runtime-build scripts in its documented order.
+4. Run its Hermes installer, start its server, and select the matching model alias.
+5. Keep model files in the checkout-parent `.local-model-cache`; never add GGUFs or safetensors to Git.
+6. Confirm the advertised OpenAI-compatible endpoint and model alias before changing Hermes.
+7. Verify complete CUDA0 layer offload and stop on CPU fallback, CUDA1 placement, allocation failure, or an unexpected context cap.
+8. Use the checked-in benchmark fixtures and report prompt prefill separately from decode throughput.
+9. For MTP, DFlash, or DSpark, report acceptance and mean accepted length; compare throughput only when prompts and generation settings match.
+
+The regular user walkthrough remains in [Quick Start](#quick-start). This
+section is intentionally a guardrail and routing index, not a duplicate setup
+guide.
+
 ---
 
 ## Model
@@ -234,6 +267,45 @@ Download the converted native GGUFs from Hugging Face, not GitHub:
 - [neko-legends/Qwen3.6-27B-NVFP4-MTP-GGUF](https://huggingface.co/neko-legends/Qwen3.6-27B-NVFP4-MTP-GGUF)
 - [neko-legends/Qwen3.6-35B-A3B-NVFP4-MTP-GGUF](https://huggingface.co/neko-legends/Qwen3.6-35B-A3B-NVFP4-MTP-GGUF)
 
+### Qwen3.6 27B Q4_K_M with DFlash Q8_0
+
+Native Windows CUDA profile for [spiritbuun/Qwen3.6-27B-DFlash-GGUF](https://huggingface.co/spiritbuun/Qwen3.6-27B-DFlash-GGUF). The 1.85 GB `dflash-draft-3.6-q8_0.gguf` is a speculative drafter, not the full model; this profile pairs it with the base `Qwen3.6-27B-Q4_K_M.gguf` target.
+
+```bat
+cd scripts\localai\qwen36-27b-dflash-gguf
+download-qwen36-27b-q4-k-m-target.bat
+download-qwen36-27b-dflash-q8-0.bat
+bootstrap-cuda-13.3-portable.bat
+build-buun-dflash-sm120-runtime.bat
+install-hermes-qwen36-27b-q4-k-m-dflash-q8-0.bat
+start-qwen36-27b-q4-k-m-dflash-q8-0-server.bat
+```
+
+The launcher uses a 200,000-token target context, a 256-token draft context,
+q4_0 KV caches, no thinking, and the fork's tuned full 15-token DFlash
+horizon. It runs at `http://127.0.0.1:39201/v1`; the Hermes alias is
+`qwen36-27b-q4-k-m-dflash-q8-0`. The build is pinned to fork commit
+`34501c5` and CUDA 13.3 for Blackwell `120a`. The portable CUDA bootstrap
+uses NVIDIA's hash-verified redistributable archives and does not replace the
+installed display driver. Both the target and drafter are explicitly pinned
+to the RTX 5090 (`CUDA0`) and fully offloaded. This explicit draft-device pin
+is required on mixed-GPU hosts; otherwise the fork may initialize the drafter
+on another CUDA device. The benchmark script aborts before inference unless it
+sees complete `65/65` target and `6/6` draft layer offload on CUDA0. Its adaptive
+GPU-only policy disables unhelpful drafting and hidden capture per request;
+generation remains on the RTX 5090 and never falls back to CPU model layers.
+
+#### DFlash credits and provenance
+
+- Target GGUF: [unsloth/Qwen3.6-27B-GGUF](https://huggingface.co/unsloth/Qwen3.6-27B-GGUF), file `Qwen3.6-27B-Q4_K_M.gguf`.
+- DFlash drafter: [spiritbuun/Qwen3.6-27B-DFlash-GGUF](https://huggingface.co/spiritbuun/Qwen3.6-27B-DFlash-GGUF), file `dflash-draft-3.6-q8_0.gguf`.
+- Upstream runtime fork: [spiritbuun/buun-llama-cpp](https://github.com/spiritbuun/buun-llama-cpp), pinned here to commit `34501c5`.
+- This repository supplies the Windows CUDA 13.3 build automation, runtime patches, CUDA0 placement, adaptive bypass, Hermes integration, and reproducible benchmarks.
+
+The two GGUF files are downloaded unchanged from their original Hugging Face
+repositories. The performance work modifies the serving runtime and launch
+configuration, not the model weights.
+
 ### Ternary-Bonsai 27B with DSpark Q4_1
 
 Native Windows CUDA profile for [prism-ml/Ternary-Bonsai-27B-gguf](https://huggingface.co/prism-ml/Ternary-Bonsai-27B-gguf). It uses the quality-oriented `Ternary-Bonsai-27B-Q2_0.gguf` target and the recommended `Ternary-Bonsai-27B-dspark-Q4_1.gguf` speculative drafter.
@@ -388,6 +460,7 @@ D:\forPublic\.local-model-cache\nvidia\Qwen3.6-35B-A3B-NVFP4-MTP-GGUF\qwen3.6-35
 D:\forPublic\.local-model-cache\Jackrong\Qwopus3.6-35B-A3B-Coder-MTP-GGUF\
 D:\forPublic\.local-model-cache\deepreinforce-ai\Ornith-1.0-35B-GGUF\
 D:\forPublic\.local-model-cache\prism-ml\Ternary-Bonsai-27B-gguf\
+D:\forPublic\.local-model-cache\spiritbuun\Qwen3.6-27B-DFlash-GGUF\
 ```
 
 Most scripts also accept environment overrides such as `MODEL_DIR`,
@@ -408,6 +481,36 @@ separately. Docker/vLLM and manual UI observations are kept in
 `results/rtx-5090/README.md`.
 
 ![RTX 5090 native llama.cpp long-context comparison](assets/images/rtx-5090-qwen35-moe-vs-qwopus.png)
+
+Qwen3.6 27B Q4_K_M with the recommended Q8_0 DFlash drafter against the
+native Windows field, benchmark snapshot dated July 14, 2026:
+
+![Qwen3.6 27B DFlash versus RTX 5090 native llama.cpp field, July 14 2026](assets/images/qwen36-27b-dflash-vs-rtx-5090-field-20260714.png)
+
+The focused before/after view shows the effect of the Windows runtime and
+placement fixes. On the same 8,907-token BookContext fixture, decode increased
+from **22.50 tok/s** to **57.53 tok/s**: **2.56x faster (+156%)**.
+
+![Qwen3.6 27B DFlash Windows before and after runtime fixes, July 14 2026](assets/images/qwen36-27b-dflash-windows-before-after-20260714.png)
+
+- RTX 5090, Windows 11, buun llama.cpp commit `34501c5`, CUDA 13.3 `sm_120a`,
+  `ctx=200000`, q4_0 target/draft KV, no thinking, and DFlash horizon 15.
+- The corrected 8,907-token run measured **57.53 decode tok/s**, **5.39s**
+  prefill, and **43.87 full-request tok/s**. Both target (`65/65`) and draft
+  (`6/6`) were fully offloaded to CUDA0.
+- Low-acceptance BookContext triggered the GPU-only adaptive bypass after four
+  DFlash cycles. A 37-token Python coding probe stayed on DFlash and measured
+  **149.51 decode tok/s** with **73.74%** draft acceptance.
+- The speedup came from pinning both models to CUDA0, fully offloading all
+  target and draft layers, repairing per-slot acceptance feedback, bypassing
+  speculative work when acceptance is poor, and disabling unnecessary hidden
+  capture after that bypass. The benchmark now fails before prompting if it
+  detects partial offload or CUDA1 placement.
+- The 200K bar remains the historical **14.05 tok/s** `ngld=1` diagnostic. It
+  is labeled historical in the chart and was intentionally not rerun while
+  the staged 1K -> 10K validation was being completed.
+- Curated results: `results/rtx-5090/qwen36-27b-dflash-benchmark-20260714.csv`.
+- Tuning history: `results/rtx-5090/qwen36-27b-dflash-tuning-20260714.csv`.
 
 Ternary-Bonsai 27B target and Q4_1 DSpark comparison against the full native field, benchmark snapshot dated July 14, 2026:
 
@@ -731,6 +834,7 @@ scripts/
     qwopus3.6-27b-coder-mtp-gguf/   launchers, download, install
     qwopus3.6-35b-a3b-coder-mtp-gguf/  Qwopus 35B Coder GGUF launcher
     qwen36-27b-nvfp4-gguf/          NVIDIA Qwen 27B NVFP4 MTP GGUF launcher
+    qwen36-27b-dflash-gguf/         Qwen 27B Q4_K_M + DFlash Q8_0 launcher
     thinkingcap-qwen36-27b-gguf/    ThinkingCap 27B Q4_K_M MTP GGUF launcher
     ternary-bonsai-27b-gguf/     Ternary-Bonsai 27B Q2_0 + DSpark launcher
     qwen36-35b-a3b-mtp-gguf/        Unsloth Qwen 35B GGUF launcher
@@ -747,6 +851,8 @@ scripts/
     download-hf-artifact.py          HF download helper
     render-aeon-ornith-windows-comparison-chart.py  AEON Ornith chart
     render-qwen35-moe-comparison-chart.py     native llama.cpp 35B comparison chart
+    render-qwen36-27b-dflash-comparison-chart.py  DFlash field chart
+    render-qwen36-27b-dflash-before-after-chart.py  DFlash tuning chart
 docs/
   models/qwopus3.6-27b-coder-mtp-gguf.md   model notes
   models/aeon-qwen36-27b-multimodal-nvfp4-mtp-xs.md   AEON vLLM notes
