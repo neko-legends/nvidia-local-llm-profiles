@@ -33,6 +33,10 @@ powershell -ExecutionPolicy Bypass -File scripts\localai\manage-model-profile.ps
 powershell -ExecutionPolicy Bypass -File scripts\localai\manage-model-profile.ps1 -Action Install -Model laguna -Execute
 ```
 
+For example, a request such as **"Setup Laguna XS on my 5090"** maps to the
+original Poolside profile `laguna-xs-2.1-q4-k-m`. It must not select DFlash
+unless the request explicitly mentions DFlash or speculative decoding.
+
 | Requested model path | Profile folder |
 | --- | --- |
 | Qwopus 27B Coder MTP | `scripts\localai\qwopus3.6-27b-coder-mtp-gguf\` |

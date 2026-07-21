@@ -4,7 +4,7 @@
   "profiles": [
     {
       "id": "laguna-xs-2.1-q4-k-m",
-      "aliases": ["laguna", "poolside-laguna", "poolside/laguna-xs-2.1-gguf"],
+      "aliases": ["laguna", "laguna-xs", "laguna xs", "laguna-xs-2.1", "laguna xs 2.1", "poolside-laguna", "poolside/laguna-xs-2.1-gguf"],
       "name": "Poolside Laguna XS 2.1 Q4_K_M (original GGUF)",
       "profileDir": "scripts/localai/laguna-xs-2.1-gguf",
       "endpoint": "http://127.0.0.1:39203/v1",
