@@ -17,7 +17,7 @@ OUTPUT_PNG_PATH = OUTPUT_DIR / "rtx-5090-qwen35-moe-vs-qwopus.png"
 TIMING_CSV = RESULTS_DIR / "generation-timing-breakdowns-20260624.csv"
 CHART_TITLE = "RTX 5090 Native llama.cpp Long-Context Comparison"
 CHART_SUBTITLE = "Bars are generation/decode speed only; prompt prefill seconds are shown separately."
-CHART_NOTE = "Native GGUF endpoints only. Docker/vLLM and UI-observed rows are intentionally left out of this headline chart."
+CHART_NOTE = "Native GGUF endpoints only. Updated July 19, 2026; Docker/vLLM and UI-observed rows are intentionally excluded."
 CHART_FOOTER = "Same BookContext prompt fixtures, 1024 generated tokens, temperature 0 unless noted in timing CSV."
 
 
@@ -79,6 +79,12 @@ MODEL_SPECS = [
         "qwen3.6-35b-a3b-unsloth-nvfp4-mtp-gguf.gguf",
         "Unsloth Qwen3.6 35B A3B NVFP4 MTP",
         "#e7b84b",
+    ),
+    ModelSpec(
+        "unsloth/Qwen3.6-35B-A3B-NVFP4-Fast",
+        "qwen3.6-35b-a3b-unsloth-nvfp4-fast-mtp-gguf.gguf",
+        "Unsloth Qwen3.6 35B NVFP4 Fast MTP",
+        "#ff8a4c",
     ),
     ModelSpec(
         "nvidia/Qwen3.6-27B-NVFP4",

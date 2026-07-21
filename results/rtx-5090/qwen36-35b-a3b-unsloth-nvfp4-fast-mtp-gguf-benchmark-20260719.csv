@@ -1,0 +1,3 @@
+date,source_model,source_revision,gguf_file,llama_cpp,context_target,prompt_tokens,generated_tokens,decode_tps,prefill_seconds,wall_seconds,wall_completion_tps,draft_acceptance,mean_accepted_length,vram_after_mib
+2026-07-19,unsloth/Qwen3.6-35B-A3B-NVFP4-Fast,1c3f884bc99aac2524f6d49bcbac8c88401afd66,qwen3.6-35b-a3b-unsloth-nvfp4-fast-mtp-gguf.gguf,b10068,10000,8907,1024,135.23,2.15784,9.863,103.818,0.60714,2.21,25138
+2026-07-19,unsloth/Qwen3.6-35B-A3B-NVFP4-Fast,1c3f884bc99aac2524f6d49bcbac8c88401afd66,qwen3.6-35b-a3b-unsloth-nvfp4-fast-mtp-gguf.gguf,b10068,200000,174590,1024,84.08,52.84299,65.684,15.590,0.59721,2.19,25138

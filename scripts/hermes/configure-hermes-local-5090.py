@@ -16,6 +16,7 @@ AEON_ORNITH_NVFP4_MODEL = "aeon-ornith-1.0-35b-nvfp4"
 QWEN36_27B_NVFP4_MODEL = "qwen36-27b-nvfp4-mtp-gguf"
 UNSLOTH_QWEN36_27B_NVFP4_MODEL = "qwen36-27b-unsloth-nvfp4-mtp-gguf"
 UNSLOTH_QWEN36_35B_NVFP4_MODEL = "qwen36-35b-a3b-unsloth-nvfp4-mtp-gguf"
+UNSLOTH_QWEN36_35B_NVFP4_FAST_MODEL = "qwen36-35b-a3b-unsloth-nvfp4-fast-mtp-gguf"
 THINKINGCAP_QWEN36_27B_MODEL = "thinkingcap-qwen36-27b-q4-k-m"
 TERNARY_BONSAI_27B_MODEL = "ternary-bonsai-27b-dspark-q4-1"
 QWEN36_27B_DFLASH_MODEL = "qwen36-27b-q4-k-m-dflash-q8-0"
@@ -93,6 +94,10 @@ def provider_config(name: str, router_port: str) -> dict:
                 "supports_vision": False,
             },
             UNSLOTH_QWEN36_35B_NVFP4_MODEL: {
+                "context_length": 200000,
+                "supports_vision": False,
+            },
+            UNSLOTH_QWEN36_35B_NVFP4_FAST_MODEL: {
                 "context_length": 200000,
                 "supports_vision": False,
             },
@@ -197,6 +202,7 @@ def should_remove_provider(provider: object, name: str) -> bool:
         "nvidia/qwen3.6-27b-nvfp4",
         UNSLOTH_QWEN36_27B_NVFP4_MODEL,
         UNSLOTH_QWEN36_35B_NVFP4_MODEL,
+        UNSLOTH_QWEN36_35B_NVFP4_FAST_MODEL,
         THINKINGCAP_QWEN36_27B_MODEL,
         TERNARY_BONSAI_27B_MODEL,
         QWEN36_27B_DFLASH_MODEL,

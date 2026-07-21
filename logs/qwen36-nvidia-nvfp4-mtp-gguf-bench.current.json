@@ -1,0 +1,12 @@
+{
+  "pid": 14860,
+  "started": "2026-06-30T10:44:45.9892497-07:00",
+  "script": "D:\\forPublic\\nvidia-local-llm-profiles\\scripts\\localai\\qwen36-35b-a3b-nvfp4-mtp-gguf\\bench-with-server-qwen36-35b-a3b-nvfp4-mtp-gguf.ps1",
+  "llamaDir": "D:\\forPublic\\.llama-runtimes\\llama-b9761-bin-win-cuda-13.3-x64-extracted",
+  "stdout": "D:\\forPublic\\nvidia-local-llm-profiles\\logs\\qwen36-nvidia-nvfp4-mtp-gguf-bench-wrapper-20260630-104445.out.log",
+  "stderr": "D:\\forPublic\\nvidia-local-llm-profiles\\logs\\qwen36-nvidia-nvfp4-mtp-gguf-bench-wrapper-20260630-104445.err.log",
+  "port": 39194,
+  "spec": "draft-mtp",
+  "specDraftNMax": 2,
+  "contextSize": 200000
+}

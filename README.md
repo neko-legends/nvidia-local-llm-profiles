@@ -22,6 +22,7 @@ paths or reuse flags from a different architecture.
 | Qwopus 35B A3B Coder MTP | `scripts\localai\qwopus3.6-35b-a3b-coder-mtp-gguf\` |
 | NVIDIA Qwen3.6 27B NVFP4 MTP | `scripts\localai\qwen36-27b-nvfp4-gguf\` |
 | NVIDIA Qwen3.6 35B A3B NVFP4 MTP | `scripts\localai\qwen36-35b-a3b-nvfp4-mtp-gguf\` |
+| Unsloth Qwen3.6 35B A3B NVFP4 / Fast MTP | `scripts\localai\qwen36-35b-a3b-unsloth-nvfp4-mtp-gguf\` |
 | Qwen3.6 27B Q4_K_M + DFlash Q8_0 | `scripts\localai\qwen36-27b-dflash-gguf\` |
 | ThinkingCap Qwen3.6 27B | `scripts\localai\thinkingcap-qwen36-27b-gguf\` |
 | Ternary-Bonsai 27B + DSpark | `scripts\localai\ternary-bonsai-27b-gguf\` |
@@ -258,6 +259,33 @@ set LLAMA_DIR=C:\path\to\llama.cpp-cuda-build
 start-qwen36-35b-a3b-unsloth-nvfp4-mtp-gguf-server.bat
 ```
 
+35B A3B Fast quick path:
+
+```bat
+cd scripts\localai\qwen36-35b-a3b-unsloth-nvfp4-mtp-gguf
+download-qwen36-35b-a3b-unsloth-nvfp4-fast.bat
+convert-qwen36-35b-a3b-unsloth-nvfp4-fast-to-gguf.bat
+install-llama-b10068-win-cuda13.bat
+install-hermes-qwen36-35b-a3b-unsloth-nvfp4-fast-mtp-gguf.bat
+start-qwen36-35b-a3b-unsloth-nvfp4-fast-mtp-gguf-server.bat
+```
+
+The Fast source is
+[unsloth/Qwen3.6-35B-A3B-NVFP4-Fast](https://huggingface.co/unsloth/Qwen3.6-35B-A3B-NVFP4-Fast).
+Unlike the earlier mixed checkpoint, it stores every expert layer as native
+NVFP4. Its converted file is
+`qwen3.6-35b-a3b-unsloth-nvfp4-fast-mtp-gguf.gguf`; the Hermes alias is
+`qwen36-35b-a3b-unsloth-nvfp4-fast-mtp-gguf` on port 39202.
+
+On Windows 11, RTX 5090, llama.cpp b10068, 200k context, q4_0 target/draft KV,
+no-thinking, and `draft-mtp n=2`, the Fast GGUF decoded at **135.23 tok/s**
+for 8,907 prompt tokens and **84.08 tok/s** for 174,590 prompt tokens. Prefill
+took **2.16s** and **52.84s**; MTP acceptance was **60.7%** and **59.7%**.
+The loaded 200k server used about **25.1 GiB** of the 5090's 32 GB. The smaller
+all-NVFP4 conversion did not reproduce Unsloth's vLLM-oriented Fast throughput
+gain in native llama.cpp; the earlier mixed 35B GGUF remains faster in this
+specific single-request benchmark.
+
 Both launchers use 200k context, q4_0 target/draft KV caches, `draft-mtp n=2`,
 and no-thinking. Hermes aliases are `qwen36-27b-unsloth-nvfp4-mtp-gguf` on
 port 39196 and `qwen36-35b-a3b-unsloth-nvfp4-mtp-gguf` on port 39197.
@@ -457,6 +485,7 @@ Examples:
 D:\forPublic\.local-model-cache\nvidia\Qwen3.6-27B-NVFP4\
 D:\forPublic\.local-model-cache\nvidia\Qwen3.6-27B-NVFP4-MTP-GGUF\qwen3.6-27b-nvfp4-mtp-gguf.gguf
 D:\forPublic\.local-model-cache\nvidia\Qwen3.6-35B-A3B-NVFP4-MTP-GGUF\qwen3.6-35b-a3b-nvfp4-mtp.gguf
+D:\forPublic\.local-model-cache\unsloth\Qwen3.6-35B-A3B-NVFP4-Fast-MTP-GGUF\qwen3.6-35b-a3b-unsloth-nvfp4-fast-mtp-gguf.gguf
 D:\forPublic\.local-model-cache\Jackrong\Qwopus3.6-35B-A3B-Coder-MTP-GGUF\
 D:\forPublic\.local-model-cache\deepreinforce-ai\Ornith-1.0-35B-GGUF\
 D:\forPublic\.local-model-cache\prism-ml\Ternary-Bonsai-27B-gguf\
@@ -472,7 +501,7 @@ Most scripts also accept environment overrides such as `MODEL_DIR`,
 ## RTX 5090 Benchmark Results
 
 **GPU:** RTX 5090 32GB - **Driver:** 610.62 - **Dates:** 2026-06-22 to
-2026-07-14
+2026-07-19
 
 Headline chart: native Windows llama.cpp GGUF endpoints only, using the checked-in
 BookContext 10k and 200k prompts with 1024 generated tokens. Bars are llama.cpp

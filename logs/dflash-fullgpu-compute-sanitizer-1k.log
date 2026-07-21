@@ -1,0 +1,51 @@
+========= COMPUTE-SANITIZER
+========= Program hit cudaErrorNoKernelImageForDevice (error 209) due to "no kernel image is available for execution on the device" on CUDA API call to cudaLaunchKernel.
+=========     Saved host backtrace up to driver entry point at error
+=========         Host Frame: cuProfilerStop [0x7fff487a0bc2] in nvcuda64.dll
+=========         Host Frame: _cudaGetProcAddress [0x7fff3e9e4fc8] in nvcudart_hybrid64.dll
+=========         Host Frame: _cudaGetProcAddress [0x7fff3e9a8121] in nvcudart_hybrid64.dll
+=========         Host Frame: ggml_backend_cuda_vmm_pool_unmap [0x7ffe50f5da4a] in ggml-cuda.dll
+=========         Host Frame: ggml_backend_is_cuda [0x7ffe5011d91e] in ggml-cuda.dll
+=========         Host Frame: ggml_backend_is_cuda [0x7ffe5011fbb1] in ggml-cuda.dll
+=========         Host Frame: ggml_backend_is_cuda [0x7ffe5011f253] in ggml-cuda.dll
+=========         Host Frame:  [0x1bf192] in ggml-cuda.dll
+=========         Host Frame:  [0x1ba5ac] in ggml-cuda.dll
+=========         Host Frame:  [0x1ad810] in ggml-cuda.dll
+=========         Host Frame: ggml_tallocr_new [0x7fff525a6754] in ggml-base.dll
+=========         Host Frame: llama_set_nextn_layer_offset [0x7fff391bac05] in llama.dll
+=========         Host Frame: llama_chat_builtin_templates [0x7fff391b5ed3] in llama.dll
+=========         Host Frame: llama_chat_builtin_templates [0x7fff391b303e] in llama.dll
+=========         Host Frame: llama_decode [0x7fff391c092b] in llama.dll
+=========         Host Frame: common_speculative_create_ctx_dft [0x7fff2acb4f80] in llama-common.dll
+=========         Host Frame: subprocess_terminate [0x7fff022aa820] in llama-server-impl.dll
+=========         Host Frame: llama_server [0x7fff0220c4ec] in llama-server-impl.dll
+=========         Host Frame:  [0x11fc] in llama-server.exe
+=========         Host Frame: BaseThreadInitThunk [0x7fffbed3e957] in KERNEL32.DLL
+=========         Host Frame: RtlUserThreadStart [0x7fffc046ad6c] in ntdll.dll
+========= 
+========= Program hit cudaErrorNoKernelImageForDevice (error 209) due to "no kernel image is available for execution on the device" on CUDA API call to cudaFuncGetAttributes.
+=========     Saved host backtrace up to driver entry point at error
+=========         Host Frame: cuProfilerStop [0x7fff487a0bc2] in nvcuda64.dll
+=========         Host Frame: _cudaGetProcAddress [0x7fff3e9d491a] in nvcudart_hybrid64.dll
+=========         Host Frame: ggml_backend_is_cuda [0x7ffe50124923] in ggml-cuda.dll
+=========         Host Frame: ggml_backend_is_cuda [0x7ffe50123aea] in ggml-cuda.dll
+=========         Host Frame: ggml_backend_is_cuda [0x7ffe501257da] in ggml-cuda.dll
+=========         Host Frame: ggml_backend_is_cuda [0x7ffe50117fef] in ggml-cuda.dll
+=========         Host Frame:  [0x1bc3e2] in ggml-cuda.dll
+=========         Host Frame:  [0x1b954b] in ggml-cuda.dll
+=========         Host Frame:  [0x1ba708] in ggml-cuda.dll
+=========         Host Frame:  [0x1ad810] in ggml-cuda.dll
+=========         Host Frame: ggml_tallocr_new [0x7fff525a6754] in ggml-base.dll
+=========         Host Frame: llama_set_nextn_layer_offset [0x7fff391bac05] in llama.dll
+=========         Host Frame: llama_chat_builtin_templates [0x7fff391b5ed3] in llama.dll
+=========         Host Frame: llama_chat_builtin_templates [0x7fff391b303e] in llama.dll
+=========         Host Frame: llama_decode [0x7fff391c092b] in llama.dll
+=========         Host Frame: common_speculative_create_ctx_dft [0x7fff2acb4f80] in llama-common.dll
+=========         Host Frame: subprocess_terminate [0x7fff022aa820] in llama-server-impl.dll
+=========         Host Frame: llama_server [0x7fff0220c4ec] in llama-server-impl.dll
+=========         Host Frame:  [0x11fc] in llama-server.exe
+=========         Host Frame: BaseThreadInitThunk [0x7fffbed3e957] in KERNEL32.DLL
+=========         Host Frame: RtlUserThreadStart [0x7fffc046ad6c] in ntdll.dll
+========= 
+========= Target application returned an error
+========= ERROR SUMMARY: 2 errors

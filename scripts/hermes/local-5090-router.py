@@ -45,6 +45,7 @@ AEON_ORNITH_NVFP4_MODEL = "aeon-ornith-1.0-35b-nvfp4"
 QWEN36_27B_NVFP4_MODEL = "qwen36-27b-nvfp4-mtp-gguf"
 UNSLOTH_QWEN36_27B_NVFP4_MODEL = "qwen36-27b-unsloth-nvfp4-mtp-gguf"
 UNSLOTH_QWEN36_35B_NVFP4_MODEL = "qwen36-35b-a3b-unsloth-nvfp4-mtp-gguf"
+UNSLOTH_QWEN36_35B_NVFP4_FAST_MODEL = "qwen36-35b-a3b-unsloth-nvfp4-fast-mtp-gguf"
 THINKINGCAP_QWEN36_27B_MODEL = "thinkingcap-qwen36-27b-q4-k-m"
 TERNARY_BONSAI_27B_MODEL = "ternary-bonsai-27b-dspark-q4-1"
 QWEN36_27B_DFLASH_MODEL = "qwen36-27b-q4-k-m-dflash-q8-0"
@@ -84,6 +85,15 @@ UNSLOTH_QWEN36_35B_NVFP4_ALIASES = frozenset(
         "unsloth/qwen3.6-35b-a3b-nvfp4",
         "qwen36-35b-unsloth",
         "qwen3.6-35b-a3b-unsloth-nvfp4",
+    }
+)
+UNSLOTH_QWEN36_35B_NVFP4_FAST_ALIASES = frozenset(
+    {
+        UNSLOTH_QWEN36_35B_NVFP4_FAST_MODEL,
+        "unsloth-qwen36-35b-a3b-nvfp4-fast",
+        "unsloth-qwen3.6-35b-a3b-nvfp4-fast",
+        "unsloth/qwen3.6-35b-a3b-nvfp4-fast",
+        "qwen36-35b-unsloth-nvfp4-fast",
     }
 )
 THINKINGCAP_QWEN36_27B_ALIASES = frozenset(
@@ -131,6 +141,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--qwen36-27b-nvfp4-base-url", default="http://127.0.0.1:39195/v1")
     parser.add_argument("--unsloth-qwen36-27b-nvfp4-base-url", default="http://127.0.0.1:39196/v1")
     parser.add_argument("--unsloth-qwen36-35b-nvfp4-base-url", default="http://127.0.0.1:39197/v1")
+    parser.add_argument("--unsloth-qwen36-35b-nvfp4-fast-base-url", default="http://127.0.0.1:39202/v1")
     parser.add_argument("--thinkingcap-qwen36-27b-base-url", default="http://127.0.0.1:39198/v1")
     parser.add_argument("--ternary-bonsai-27b-base-url", default="http://127.0.0.1:39199/v1")
     parser.add_argument("--qwen36-27b-dflash-base-url", default="http://127.0.0.1:39201/v1")
@@ -154,6 +165,7 @@ class Local5090Router(BaseHTTPRequestHandler):
     qwen36_27b_nvfp4_base_url: str
     unsloth_qwen36_27b_nvfp4_base_url: str
     unsloth_qwen36_35b_nvfp4_base_url: str
+    unsloth_qwen36_35b_nvfp4_fast_base_url: str
     thinkingcap_qwen36_27b_base_url: str
     ternary_bonsai_27b_base_url: str
     qwen36_27b_dflash_base_url: str
@@ -234,6 +246,13 @@ class Local5090Router(BaseHTTPRequestHandler):
                         "context_length": 200000,
                     },
                     {
+                        "id": UNSLOTH_QWEN36_35B_NVFP4_FAST_MODEL,
+                        "object": "model",
+                        "created": 0,
+                        "owned_by": "Local 5090",
+                        "context_length": 200000,
+                    },
+                    {
                         "id": THINKINGCAP_QWEN36_27B_MODEL,
                         "object": "model",
                         "created": 0,
@@ -303,6 +322,9 @@ class Local5090Router(BaseHTTPRequestHandler):
             {alias: self.unsloth_qwen36_35b_nvfp4_base_url for alias in UNSLOTH_QWEN36_35B_NVFP4_ALIASES}
         )
         aliases.update(
+            {alias: self.unsloth_qwen36_35b_nvfp4_fast_base_url for alias in UNSLOTH_QWEN36_35B_NVFP4_FAST_ALIASES}
+        )
+        aliases.update(
             {alias: self.thinkingcap_qwen36_27b_base_url for alias in THINKINGCAP_QWEN36_27B_ALIASES}
         )
         aliases.update({alias: self.ternary_bonsai_27b_base_url for alias in TERNARY_BONSAI_27B_ALIASES})
@@ -315,6 +337,7 @@ class Local5090Router(BaseHTTPRequestHandler):
             | QWEN36_27B_NVFP4_ALIASES
             | UNSLOTH_QWEN36_27B_NVFP4_ALIASES
             | UNSLOTH_QWEN36_35B_NVFP4_ALIASES
+            | UNSLOTH_QWEN36_35B_NVFP4_FAST_ALIASES
             | THINKINGCAP_QWEN36_27B_ALIASES
             | TERNARY_BONSAI_27B_ALIASES
             | QWEN36_27B_DFLASH_ALIASES
@@ -388,7 +411,7 @@ class Local5090Router(BaseHTTPRequestHandler):
                         f"{QWOPUS_MODEL}, {QWOPUS35_Q5_MODEL}, {QWOPUS35_Q4_MODEL}, "
                         f"{ORNITH_MODEL}, {ORNITH_Q5_MODEL}, "
                         f"{AEON_ORNITH_NVFP4_MODEL}, {QWEN36_27B_NVFP4_MODEL}, "
-                        f"{THINKINGCAP_QWEN36_27B_MODEL}, {TERNARY_BONSAI_27B_MODEL}, "
+                        f"{UNSLOTH_QWEN36_35B_NVFP4_FAST_MODEL}, {THINKINGCAP_QWEN36_27B_MODEL}, {TERNARY_BONSAI_27B_MODEL}, "
                         f"or {QWEN36_27B_DFLASH_MODEL}."
                     }
                 },
@@ -446,6 +469,7 @@ def main() -> int:
     Local5090Router.qwen36_27b_nvfp4_base_url = args.qwen36_27b_nvfp4_base_url
     Local5090Router.unsloth_qwen36_27b_nvfp4_base_url = args.unsloth_qwen36_27b_nvfp4_base_url
     Local5090Router.unsloth_qwen36_35b_nvfp4_base_url = args.unsloth_qwen36_35b_nvfp4_base_url
+    Local5090Router.unsloth_qwen36_35b_nvfp4_fast_base_url = args.unsloth_qwen36_35b_nvfp4_fast_base_url
     Local5090Router.thinkingcap_qwen36_27b_base_url = args.thinkingcap_qwen36_27b_base_url
     Local5090Router.ternary_bonsai_27b_base_url = args.ternary_bonsai_27b_base_url
     Local5090Router.qwen36_27b_dflash_base_url = args.qwen36_27b_dflash_base_url

@@ -2,7 +2,7 @@
 
 - **GPU:** NVIDIA GeForce RTX 5090 32GB
 - **Driver:** 610.62
-- **Dates:** 2026-06-22 to 2026-07-14
+- **Dates:** 2026-06-22 to 2026-07-19
 - **Prompt style:** BookContext (synthetic long-document with continuity sections)
 - **Generation:** 1024 tokens, temperature=0, seed=1234. Full ladders use 3
   measured runs per context; two-point smoke tests may use 1 measured run.
@@ -28,6 +28,30 @@
 ---
 
 ## Results
+
+### Unsloth Qwen3.6 35B A3B NVFP4 Fast MTP GGUF - llama.cpp b10068
+
+The GGUF converted from `unsloth/Qwen3.6-35B-A3B-NVFP4-Fast` preserves the
+source checkpoint's bundled MTP layer and its all-NVFP4 expert layout. The
+artifact is `22,905,198,464` bytes with SHA256
+`ABE31A8082E44E5C03D0F08595715584AEADEA8C2A76C6F9F066A4ECBA64E78A`.
+
+| Context target | Prompt tokens | Generated | Decode tok/s | Prefill | MTP acceptance | Mean accepted length | VRAM after |
+| ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+| 10k | 8,907 | 1,024 | 135.23 | 2.16s | 60.7% | 2.21 | 25,138 MiB |
+| 200k | 174,590 | 1,024 | 84.08 | 52.84s | 59.7% | 2.19 | 25,138 MiB |
+
+- **Stack:** Windows 11, RTX 5090, driver 610.62, llama.cpp b10068
+  (`571d0d540`), official CUDA 13.3 Windows runtime.
+- **Flags:** 200,000 context, q4_0 target/draft KV, Flash Attention, all target
+  and MTP layers on CUDA0, no-thinking, pure `draft-mtp n=2`.
+- **Method:** same BookContext fixtures, temperature 0, seed 1234, one 1,024-token
+  completion per point. Decode excludes the separately reported prompt prefill.
+- **Finding:** this 22.9 GB all-NVFP4 Fast conversion fits more comfortably
+  than the earlier 26.1 GB mixed Unsloth file, but it did not transfer the
+  source card's vLLM/concurrency Fast advantage to this native llama.cpp test.
+  The earlier mixed GGUF measured 151.16 / 93.20 tok/s on its b9851 run.
+- **Curated CSV:** `qwen36-35b-a3b-unsloth-nvfp4-fast-mtp-gguf-benchmark-20260719.csv`.
 
 ### Qwen3.6 27B Q4_K_M + DFlash Q8_0
 

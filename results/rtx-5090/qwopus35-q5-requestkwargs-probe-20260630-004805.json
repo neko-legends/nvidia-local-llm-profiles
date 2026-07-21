@@ -1,0 +1,18 @@
+[
+  {
+    "name": "auto",
+    "content": "",
+    "has_think": false,
+    "reasoning_content": "The user wants me to solve the multiplication problem 1234 * 5678.\nI need to calculate the product of 1234 and 5678.\n\n1234 * 5678\n= 1234 * (5000 + 600 + 70 + 8)\n= 1234 * 5000 + 1234 * 600 + 1234 * 70 + 1234 * 8\n\n1234 * ",
+    "completion_tokens": 128,
+    "prompt_tokens": 30
+  },
+  {
+    "name": "request_kwargs_false",
+    "content": "699772",
+    "has_think": false,
+    "reasoning_content": null,
+    "completion_tokens": 7,
+    "prompt_tokens": 32
+  }
+]

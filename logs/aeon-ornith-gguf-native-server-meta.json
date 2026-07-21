@@ -1,0 +1,8 @@
+{
+  "pid": 11312,
+  "model": "D:\\forPublic\\.local-model-cache\\AEON-7\\Ornith-1.0-35B-AEON-Ultimate-Uncensored-NVFP4-GGUF\\aeon-ornith-1.0-35b-nvfp4.gguf",
+  "errLog": "D:\\forPublic\\nvidia-local-llm-profiles\\logs\\aeon-ornith-gguf-native-server-20260627-190118.err.log",
+  "port": 39192,
+  "startedAt": "2026-06-27T19:01:18.1489342-07:00",
+  "outLog": "D:\\forPublic\\nvidia-local-llm-profiles\\logs\\aeon-ornith-gguf-native-server-20260627-190118.out.log"
+}

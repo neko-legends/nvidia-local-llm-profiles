@@ -1,0 +1,8 @@
+{
+  "pid": 16512,
+  "started": "2026-06-30T10:49:35.0361979-07:00",
+  "script": "D:\\forPublic\\nvidia-local-llm-profiles\\scripts\\huggingface\\upload-qwen36-35b-a3b-nvfp4-mtp-gguf.py",
+  "repo": "neko-legends/Qwen3.6-35B-A3B-NVFP4-MTP-GGUF",
+  "stdout": "D:\\forPublic\\nvidia-local-llm-profiles\\logs\\qwen36-nvidia-nvfp4-mtp-gguf-hf-upload-20260630-104935.out.log",
+  "stderr": "D:\\forPublic\\nvidia-local-llm-profiles\\logs\\qwen36-nvidia-nvfp4-mtp-gguf-hf-upload-20260630-104935.err.log"
+}
