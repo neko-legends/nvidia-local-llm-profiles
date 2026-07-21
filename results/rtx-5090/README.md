@@ -500,6 +500,50 @@ Ornith Unsloth Studio long-context proof:
 
 ---
 
+### Poolside Laguna XS 2.1 Q4_K_M — original GGUF baseline
+
+Original, unmodified `poolside/Laguna-XS-2.1-GGUF` Q4_K_M served by the Laguna
+llama.cpp PR at commit `54f214a09`. No MTP, DFlash draft model, or Neko Legends
+model branding is present.
+
+| Context target | Prompt tokens | Full-request tok/s | Generation tok/s | Prompt eval | VRAM after |
+| ---: | ---: | ---: | ---: | ---: | ---: |
+| 10k | 9,379 | 106.603 | 136.25 | 1.763s | 24,195 MiB |
+
+- **File:** `Laguna-XS-2.1-Q4_K_M.gguf`
+- **Endpoint:** `http://127.0.0.1:39203/v1`; model `laguna-xs-2.1-q4-k-m`
+- **Flags:** `--gpu-layers all --ctx-size 210000 --cache-type-k q4_0 --cache-type-v q4_0 --flash-attn on --reasoning off`
+- **CSV:** `laguna-xs-2.1-q4-k-m-prompt10k-gen1024-20260721-151429.csv`
+- **Comparison note:** published 3090 claims around 158 tok/s used Laguna's
+  separate DFlash speculative drafter and additional cache optimizations; this
+  row is a plain GGUF baseline and is not directly comparable.
+
+### Laguna XS 2.1 — plain vs Lucebox DFlash CodeContext
+
+![Laguna XS 2.1 DFlash CodeContext comparison](../../assets/images/rtx-5090-laguna-dflash-code-context.png)
+
+Both runtimes received the exact same checked-in TypeScript prompt file at each
+size. Token counts differ because Lucebox and llama.cpp account for the Laguna
+prompt differently; the prompt SHA is identical within each A/B pair.
+
+| Fixture | Runtime | Prompt tokens | Output | Full request | Decode | Spec acceptance |
+| ---: | --- | ---: | ---: | ---: | ---: | ---: |
+| 10k | plain llama.cpp | 10,057 | 162 | 3.215s | 123.85 tok/s | — |
+| 10k | Lucebox DFlash + KVFlash | 9,351 | 168 | 4.184s | 126.1 tok/s | 56.2% |
+| 200k | plain llama.cpp | 199,455 | 164 | 89.632s | 28.18 tok/s | — |
+| 200k | Lucebox DFlash + KVFlash | 185,357 | 123 | 49.172s | 160.4 tok/s | 54.4% |
+
+The 10k response is too short for speculative decode to repay DFlash's pooled
+prefill and CUDA-graph setup. At the long fixture, the Lucebox combination cuts
+full-request wall time by 45.1% and raises decode speed 5.69x. That improvement
+is the combined DFlash + KVFlash + 2,048-token FA-window result, not a claim that
+the Poolside target GGUF itself contains MTP or DFlash tensors.
+
+- **Fixtures:** `benchmarks/prompts/10k_DFLASH.txt`, `benchmarks/prompts/200k_DFLASH.txt`
+- **Summary CSV:** `laguna-xs-2.1-dflash-comparison-20260721.csv`
+- **Raw endpoint CSVs:** `laguna-xs-2.1-q4-k-m-code-prompt{10k,200k}-gen1024-20260721.csv` and `laguna-xs-2.1-q4-k-m-dflash-prompt{10k,200k}-gen1024-20260721.csv`
+- **DFlash runtime:** Lucebox SM120 CUDA 13 build, separate `laguna-xs21-dflash-q4.gguf`, Qwen3-0.6B Q8 prefill drafter, `--kvflash 8192 --chunk 1024 --fa-window 2048`
+
 ## Key Findings
 
 **Qwopus3.6 35B A3B Coder Q5_K_M is a strong native no-thinking 35B coding-model result on the RTX 5090.**

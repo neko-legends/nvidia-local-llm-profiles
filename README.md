@@ -802,6 +802,8 @@ The installer updates Hermes Desktop with a single `Local 5090` provider:
 - `ornith-1.0-35b-q4-k-m` routes to `http://127.0.0.1:39188/v1`
 - `ornith-1.0-35b-q5-k-m` routes to `http://127.0.0.1:39189/v1`
 - `qwen36-27b-nvfp4-mtp-gguf` routes to `http://127.0.0.1:39195/v1`
+- `laguna-xs-2.1-q4-k-m` routes to `http://127.0.0.1:39203/v1`
+- `laguna-xs-2.1-q4-k-m-dflash` routes to `http://127.0.0.1:39204/v1`
 - Hermes talks to the local router at `http://127.0.0.1:39190/v1`
 - The script backs up `%LOCALAPPDATA%\hermes\config.yaml` before editing it.
 
@@ -866,6 +868,7 @@ scripts/
     qwen36-27b-dflash-gguf/         Qwen 27B Q4_K_M + DFlash Q8_0 launcher
     thinkingcap-qwen36-27b-gguf/    ThinkingCap 27B Q4_K_M MTP GGUF launcher
     ternary-bonsai-27b-gguf/     Ternary-Bonsai 27B Q2_0 + DSpark launcher
+    laguna-xs-2.1-gguf/          Original Poolside Laguna XS 2.1 Q4_K_M profile
     qwen36-35b-a3b-mtp-gguf/        Unsloth Qwen 35B GGUF launcher
     qwen36-35b-a3b-nvfp4-mtp-gguf/  NVIDIA Qwen 35B NVFP4 MTP GGUF launcher
     ornith-1.0-35b-gguf/            Ornith 35B GGUF launcher

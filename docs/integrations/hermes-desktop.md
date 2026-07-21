@@ -16,6 +16,8 @@ lists the local model servers:
 - `ornith-1.0-35b-q4-k-m`
 - `ornith-1.0-35b-q5-k-m`
 - `qwen36-27b-nvfp4-mtp-gguf`
+- `laguna-xs-2.1-q4-k-m`
+- `laguna-xs-2.1-q4-k-m-dflash`
 
 ![Hermes Desktop Local 5090 provider](../../assets/images/hermes-local-5090-provider.png)
 
@@ -80,6 +82,12 @@ custom_providers:
     qwen36-27b-nvfp4-mtp-gguf:
       context_length: 200000
       supports_vision: false
+    laguna-xs-2.1-q4-k-m:
+      context_length: 210000
+      supports_vision: false
+    laguna-xs-2.1-q4-k-m-dflash:
+      context_length: 262144
+      supports_vision: false
   name: Local 5090
 ```
 
@@ -95,10 +103,33 @@ Hermes -> http://127.0.0.1:39190/v1
   ornith-1.0-35b-q4-k-m              -> http://127.0.0.1:39188/v1
   ornith-1.0-35b-q5-k-m              -> http://127.0.0.1:39189/v1
   qwen36-27b-nvfp4-mtp-gguf          -> http://127.0.0.1:39195/v1
+  laguna-xs-2.1-q4-k-m               -> http://127.0.0.1:39203/v1
+  laguna-xs-2.1-q4-k-m-dflash        -> http://127.0.0.1:39204/v1
 ```
 
 Restart Hermes Desktop after running the installer so the model menu refreshes.
 Start the actual model server before selecting that model.
+
+## Poolside Laguna XS 2.1 Q4_K_M
+
+Start the original unmodified Poolside GGUF:
+
+```bat
+scripts\localai\laguna-xs-2.1-gguf\start-laguna-xs-2.1-q4-k-m-server.bat
+```
+
+Select `laguna-xs-2.1-q4-k-m` in the consolidated `Local 5090` provider, or
+connect directly to `http://127.0.0.1:39203/v1`. This is a standard Laguna
+profile and does not contain or claim MTP tensors.
+
+For the separate Lucebox speculative runtime, run
+`build-laguna-dflash-docker.ps1` once, start
+`start-laguna-xs-2.1-dflash-docker.ps1`, and select
+`laguna-xs-2.1-q4-k-m-dflash`. This route does not rebrand or modify the
+Poolside GGUF; it adds external DFlash/KVFlash runtime components.
+For Hermes tool calling, start the DFlash launcher with `-FaWindow 0`; the
+benchmark's `2048` window is faster but Lucebox warns that old system and tool
+definitions leave the attention window at long context.
 
 ## Qwopus3.6-27B-Coder-MTP Q5_K_M
 

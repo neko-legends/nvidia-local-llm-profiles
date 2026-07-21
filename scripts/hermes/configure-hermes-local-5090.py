@@ -20,6 +20,8 @@ UNSLOTH_QWEN36_35B_NVFP4_FAST_MODEL = "qwen36-35b-a3b-unsloth-nvfp4-fast-mtp-ggu
 THINKINGCAP_QWEN36_27B_MODEL = "thinkingcap-qwen36-27b-q4-k-m"
 TERNARY_BONSAI_27B_MODEL = "ternary-bonsai-27b-dspark-q4-1"
 QWEN36_27B_DFLASH_MODEL = "qwen36-27b-q4-k-m-dflash-q8-0"
+LAGUNA_XS_21_MODEL = "laguna-xs-2.1-q4-k-m"
+LAGUNA_XS_21_DFLASH_MODEL = "laguna-xs-2.1-q4-k-m-dflash"
 
 
 def parse_args() -> argparse.Namespace:
@@ -113,6 +115,14 @@ def provider_config(name: str, router_port: str) -> dict:
                 "context_length": 200000,
                 "supports_vision": False,
             },
+            LAGUNA_XS_21_MODEL: {
+                "context_length": 210000,
+                "supports_vision": False,
+            },
+            LAGUNA_XS_21_DFLASH_MODEL: {
+                "context_length": 262144,
+                "supports_vision": False,
+            },
         },
         "name": name,
     }
@@ -157,6 +167,8 @@ def should_remove_provider(provider: object, name: str) -> bool:
         "http://127.0.0.1:39197/v1",
         "http://127.0.0.1:39198/v1",
         "http://127.0.0.1:39199/v1",
+        "http://127.0.0.1:39203/v1",
+        "http://127.0.0.1:39204/v1",
     }
     models = {
         QWOPUS_MODEL,
@@ -206,8 +218,12 @@ def should_remove_provider(provider: object, name: str) -> bool:
         THINKINGCAP_QWEN36_27B_MODEL,
         TERNARY_BONSAI_27B_MODEL,
         QWEN36_27B_DFLASH_MODEL,
+        LAGUNA_XS_21_MODEL,
+        LAGUNA_XS_21_DFLASH_MODEL,
         "unsloth-qwen36-27b-nvfp4",
         "unsloth-qwen36-35b-a3b-nvfp4",
+        "laguna-local",
+        "laguna-dflash-local",
     }
 
     return provider_name in names or base_url in base_urls or model in models

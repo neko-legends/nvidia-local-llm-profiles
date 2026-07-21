@@ -9,6 +9,8 @@ param(
     [int]$WarmupRuns = 0,
     [double]$Temperature = 0.0,
     [int]$Seed = 1234,
+    [ValidateSet("BookContext", "CodeContext")]
+    [string]$PromptStyle = "BookContext",
     [switch]$DisableThinking
 )
 
@@ -77,7 +79,7 @@ foreach ($target in $PromptTokenTargets) {
         "-WarmupRuns", "$WarmupRuns",
         "-Temperature", "$Temperature",
         "-Seed", "$Seed",
-        "-PromptStyle", "BookContext",
+        "-PromptStyle", $PromptStyle,
         "-TargetPromptTokens", "$target",
         "-OutCsv", $outCsv
     )

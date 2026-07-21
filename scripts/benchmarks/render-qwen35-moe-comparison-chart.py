@@ -17,8 +17,8 @@ OUTPUT_PNG_PATH = OUTPUT_DIR / "rtx-5090-qwen35-moe-vs-qwopus.png"
 TIMING_CSV = RESULTS_DIR / "generation-timing-breakdowns-20260624.csv"
 CHART_TITLE = "RTX 5090 Native llama.cpp Long-Context Comparison"
 CHART_SUBTITLE = "Bars are generation/decode speed only; prompt prefill seconds are shown separately."
-CHART_NOTE = "Native GGUF endpoints only. Updated July 19, 2026; Docker/vLLM and UI-observed rows are intentionally excluded."
-CHART_FOOTER = "Same BookContext prompt fixtures, 1024 generated tokens, temperature 0 unless noted in timing CSV."
+CHART_NOTE = "Native GGUF endpoints only. Updated July 21, 2026; Docker/vLLM and UI-observed rows are intentionally excluded."
+CHART_FOOTER = "Same BookContext prompt family, up to 1024 generated tokens, temperature 0 unless noted in timing CSV."
 
 
 @dataclass(frozen=True)
@@ -28,9 +28,17 @@ class ModelSpec:
     label: str
     color: str
     highlight: bool = False
+    prompt_mode: str | None = None
 
 
 MODEL_SPECS = [
+    ModelSpec(
+        "poolside/Laguna-XS-2.1-GGUF",
+        "Laguna-XS-2.1-Q4_K_M.gguf",
+        "Poolside Laguna XS 2.1 Q4_K_M (base)",
+        "#ff5aa7",
+        prompt_mode="OpenAI-compatible endpoint; no draft model",
+    ),
     ModelSpec(
         "deepreinforce-ai/Ornith-1.0-35B-GGUF",
         "ornith-1.0-35b-Q4_K_M.gguf",
@@ -143,7 +151,9 @@ def latest_rows_by_spec() -> list[dict[str, object]]:
         matching = [
             row
             for row in timing_rows
-            if row["model"] == spec.model and row["file"] == spec.file
+            if row["model"] == spec.model
+            and row["file"] == spec.file
+            and (spec.prompt_mode is None or row["prompt_mode"] == spec.prompt_mode)
         ]
         for group in ("10K prompt", "200K prompt"):
             group_rows = [

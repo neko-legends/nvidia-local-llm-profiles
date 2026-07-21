@@ -15,7 +15,7 @@ param(
     [switch]$PromptOnly,
     [switch]$DisableThinking,
     [int]$TargetPromptTokens = 0,
-    [ValidateSet("Default", "BookContext")]
+    [ValidateSet("Default", "BookContext", "CodeContext")]
     [string]$PromptStyle = "Default"
 )
 
@@ -64,6 +64,42 @@ function New-BookBenchmarkPrompt {
     $builder.ToString()
 }
 
+function New-CodeBenchmarkPrompt {
+    param([int]$TargetTokens)
+
+    if ($TargetTokens -le 0) { $TargetTokens = 8192 }
+    # Laguna's tokenizer averages about 3.15 characters/token on this repeated
+    # TypeScript workload (measured at both 10k and 200k scales).
+    $targetChars = [math]::Max(2000, [int]($TargetTokens * 3.14))
+    $builder = [System.Text.StringBuilder]::new()
+    [void]$builder.AppendLine("You are completing a TypeScript repository. Study the modules below, preserve their conventions, and implement the requested final module. Return code only.")
+    [void]$builder.AppendLine("")
+
+    $module = 1
+    while ($builder.Length -lt $targetChars) {
+        $name = "packet{0:00000}" -f $module
+        $next = "packet{0:00000}" -f ($module + 1)
+        $factor = ($module % 17) + 3
+        [void]$builder.AppendLine(("// src/pipeline/{0}.ts" -f $name))
+        [void]$builder.AppendLine("export interface Packet { id: number; label: string; values: readonly number[]; }")
+        [void]$builder.AppendLine(("export const {0} = (packet: Packet): Packet => ({{" -f $name))
+        [void]$builder.AppendLine("  ...packet,")
+        [void]$builder.AppendLine(("  label: `${{packet.label}}:{0}`," -f $name))
+        [void]$builder.AppendLine(("  values: packet.values.map((value, index) => (value + index + {0}) % 65521)," -f $factor))
+        [void]$builder.AppendLine("});")
+        [void]$builder.AppendLine(("export const validate{0} = (packet: Packet): boolean =>" -f $module))
+        [void]$builder.AppendLine("  packet.id >= 0 && packet.label.length > 0 && packet.values.every(Number.isFinite);")
+        [void]$builder.AppendLine(("// The next stage is {0}; keep transforms immutable and deterministic." -f $next))
+        [void]$builder.AppendLine("")
+        $module++
+    }
+
+    [void]$builder.AppendLine("// TASK")
+    [void]$builder.AppendLine(("// Implement src/pipeline/packet{0:00000}.ts using the exact repository conventions above." -f $module))
+    [void]$builder.AppendLine("// Include the Packet interface, immutable transform, validator, and next-stage comment. Return TypeScript code only.")
+    $builder.ToString()
+}
+
 function Get-Sha256 {
     param([string]$Text)
 
@@ -95,7 +131,9 @@ if ($PromptFile) {
 }
 
 if (-not $Prompt) {
-    if ($PromptStyle -eq "BookContext" -or $TargetPromptTokens -gt 0) {
+    if ($PromptStyle -eq "CodeContext") {
+        $Prompt = New-CodeBenchmarkPrompt -TargetTokens $TargetPromptTokens
+    } elseif ($PromptStyle -eq "BookContext" -or $TargetPromptTokens -gt 0) {
         $Prompt = New-BookBenchmarkPrompt -TargetTokens $TargetPromptTokens
         $PromptStyle = "BookContext"
     } else {
