@@ -16,29 +16,49 @@ Treat each folder under `scripts\localai\` as a self-contained model profile.
 The profile README and scripts are authoritative for that model; do not infer
 paths or reuse flags from a different architecture.
 
+The machine-readable source of truth is
+`scripts\localai\model-profiles.json`. Agents must resolve a requested model
+through `manage-model-profile.ps1`, which accepts canonical IDs and documented
+aliases but never guesses. It is dry-run by default:
+
+```powershell
+# Discover every supported installable variant.
+powershell -ExecutionPolicy Bypass -File scripts\localai\manage-model-profile.ps1 -Action List
+
+# Inspect or plan an installation without downloading anything.
+powershell -ExecutionPolicy Bypass -File scripts\localai\manage-model-profile.ps1 -Action Show -Model laguna -Json
+powershell -ExecutionPolicy Bypass -File scripts\localai\manage-model-profile.ps1 -Action Install -Model laguna
+
+# After reviewing the plan, explicitly execute it.
+powershell -ExecutionPolicy Bypass -File scripts\localai\manage-model-profile.ps1 -Action Install -Model laguna -Execute
+```
+
 | Requested model path | Profile folder |
 | --- | --- |
 | Qwopus 27B Coder MTP | `scripts\localai\qwopus3.6-27b-coder-mtp-gguf\` |
 | Qwopus 35B A3B Coder MTP | `scripts\localai\qwopus3.6-35b-a3b-coder-mtp-gguf\` |
 | NVIDIA Qwen3.6 27B NVFP4 MTP | `scripts\localai\qwen36-27b-nvfp4-gguf\` |
+| Unsloth Qwen3.6 27B NVFP4 MTP | `scripts\localai\qwen36-27b-unsloth-nvfp4-mtp-gguf\` |
 | NVIDIA Qwen3.6 35B A3B NVFP4 MTP | `scripts\localai\qwen36-35b-a3b-nvfp4-mtp-gguf\` |
 | Unsloth Qwen3.6 35B A3B NVFP4 / Fast MTP | `scripts\localai\qwen36-35b-a3b-unsloth-nvfp4-mtp-gguf\` |
 | Qwen3.6 27B Q4_K_M + DFlash Q8_0 | `scripts\localai\qwen36-27b-dflash-gguf\` |
 | ThinkingCap Qwen3.6 27B | `scripts\localai\thinkingcap-qwen36-27b-gguf\` |
 | Ternary-Bonsai 27B + DSpark | `scripts\localai\ternary-bonsai-27b-gguf\` |
 | Ornith 1.0 35B | `scripts\localai\ornith-1.0-35b-gguf\` |
+| Poolside Laguna XS 2.1 Q4_K_M / DFlash | `scripts\localai\laguna-xs-2.1-gguf\` |
 
 Agent workflow:
 
-1. Read the selected profile's `README.md` before running anything.
-2. Install the shared Hermes provider once with `scripts\hermes\install-local-5090-provider.bat`.
-3. Run the profile's download or conversion and runtime-build scripts in its documented order.
-4. Run its Hermes installer, start its server, and select the matching model alias.
-5. Keep model files in the checkout-parent `.local-model-cache`; never add GGUFs or safetensors to Git.
-6. Confirm the advertised OpenAI-compatible endpoint and model alias before changing Hermes.
-7. Verify complete CUDA0 layer offload and stop on CPU fallback, CUDA1 placement, allocation failure, or an unexpected context cap.
-8. Use the checked-in benchmark fixtures and report prompt prefill separately from decode throughput.
-9. For MTP, DFlash, or DSpark, report acceptance and mean accepted length; compare throughput only when prompts and generation settings match.
+1. Run `manage-model-profile.ps1 -Action List`, then resolve the user's choice by canonical ID or documented alias.
+2. Run `-Action Show -Model <id> -Json` and read the selected profile's README or notes before running anything.
+3. Run `-Action Install -Model <id>` first to review the exact ordered plan; add `-Execute` only after checking prerequisites and disk space.
+4. Install the shared Hermes provider once with `scripts\hermes\install-local-5090-provider.bat`; profile-specific Hermes wrappers are optional compatibility shortcuts.
+5. Run `-Action Start -Model <id>` to review the launcher, then repeat with `-Execute` and select the cataloged model alias.
+6. Keep model files in the checkout-parent `.local-model-cache`; never add GGUFs or safetensors to Git.
+7. Confirm the cataloged OpenAI-compatible endpoint and model alias before changing Hermes.
+8. Verify complete CUDA0 layer offload and stop on CPU fallback, CUDA1 placement, allocation failure, or an unexpected context cap.
+9. Use `-Action Benchmark` or the checked-in benchmark fixtures and report prompt prefill separately from decode throughput.
+10. For MTP, DFlash, or DSpark, report acceptance and mean accepted length; compare throughput only when prompts and generation settings match.
 
 The regular user walkthrough remains in [Quick Start](#quick-start). This
 section is intentionally a guardrail and routing index, not a duplicate setup

@@ -8,6 +8,21 @@ Laguna support currently requires llama.cpp PR 25165. Run the included build,
 download, and start scripts, then select `laguna-xs-2.1-q4-k-m` in Hermes under
 the `Local 5090` provider. Direct endpoint: `http://127.0.0.1:39203/v1`.
 
+## Fresh install for an agent
+
+From the repository root, agents can use the validated catalog interface. The
+first command only prints the plan; the second performs the download and build:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File scripts\localai\manage-model-profile.ps1 -Action Install -Model laguna
+powershell -ExecutionPolicy Bypass -File scripts\localai\manage-model-profile.ps1 -Action Install -Model laguna -Execute
+scripts\hermes\install-local-5090-provider.bat
+powershell -ExecutionPolicy Bypass -File scripts\localai\manage-model-profile.ps1 -Action Start -Model laguna -Execute
+```
+
+The plain install downloads Poolside's original Q4_K_M GGUF and builds the
+required Laguna-compatible llama.cpp runtime. It does not modify the model.
+
 The benchmark wrapper defaults to the repository's standard 10k BookContext
 fixture on the RTX 5090 profile.
 
@@ -21,6 +36,19 @@ This baseline does not use Poolside's separate DFlash drafter or KVFlash/SWA
 cache optimizations.
 
 ## Optional Lucebox DFlash runtime
+
+The complete fresh-install sequence is cataloged under `laguna-dflash`:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File scripts\localai\manage-model-profile.ps1 -Action Install -Model laguna-dflash
+powershell -ExecutionPolicy Bypass -File scripts\localai\manage-model-profile.ps1 -Action Install -Model laguna-dflash -Execute
+powershell -ExecutionPolicy Bypass -File scripts\localai\manage-model-profile.ps1 -Action Start -Model laguna-dflash -Execute
+powershell -ExecutionPolicy Bypass -File scripts\localai\manage-model-profile.ps1 -Action Benchmark -Model laguna-dflash -Execute
+```
+
+This downloads the Poolside target, Lucebox's separate DFlash drafter, and the
+Qwen prefill drafter before building the Docker runtime. Docker Desktop with
+NVIDIA GPU support is required.
 
 Run `build-laguna-dflash-docker.ps1` once to compile the Linux SM120 server and
 copy the three weights into a native Docker volume. Then

@@ -1,0 +1,67 @@
+{
+  "schemaVersion": 1,
+  "sharedHermesInstaller": "scripts/hermes/install-local-5090-provider.bat",
+  "profiles": [
+    {
+      "id": "laguna-xs-2.1-q4-k-m",
+      "aliases": ["laguna", "poolside-laguna", "poolside/laguna-xs-2.1-gguf"],
+      "name": "Poolside Laguna XS 2.1 Q4_K_M (original GGUF)",
+      "profileDir": "scripts/localai/laguna-xs-2.1-gguf",
+      "endpoint": "http://127.0.0.1:39203/v1",
+      "modelAlias": "laguna-xs-2.1-q4-k-m",
+      "install": [
+        { "path": "scripts/localai/laguna-xs-2.1-gguf/download-laguna-xs-2.1-q4-k-m.bat" },
+        { "path": "scripts/localai/laguna-xs-2.1-gguf/build-laguna-llama-cpp.ps1" }
+      ],
+      "start": "scripts/localai/laguna-xs-2.1-gguf/start-laguna-xs-2.1-q4-k-m-server.bat",
+      "benchmark": "scripts/localai/laguna-xs-2.1-gguf/bench-with-server-laguna-xs-2.1-q4-k-m.ps1",
+      "notes": "Original Poolside GGUF; no MTP is added or claimed. The build needs Git, CMake, Visual Studio C++ tools, and CUDA."
+    },
+    {
+      "id": "laguna-xs-2.1-q4-k-m-dflash",
+      "aliases": ["laguna-dflash", "poolside-laguna-dflash"],
+      "name": "Poolside Laguna XS 2.1 Q4_K_M + Lucebox DFlash",
+      "profileDir": "scripts/localai/laguna-xs-2.1-gguf",
+      "endpoint": "http://127.0.0.1:39204/v1",
+      "modelAlias": "laguna-xs-2.1-q4-k-m-dflash",
+      "install": [
+        { "path": "scripts/localai/laguna-xs-2.1-gguf/download-laguna-xs-2.1-q4-k-m.bat" },
+        { "path": "scripts/localai/laguna-xs-2.1-gguf/download-laguna-dflash-dependencies.bat" },
+        { "path": "scripts/localai/laguna-xs-2.1-gguf/build-laguna-dflash-docker.ps1" }
+      ],
+      "start": "scripts/localai/laguna-xs-2.1-gguf/start-laguna-xs-2.1-dflash-docker.ps1",
+      "benchmark": "scripts/localai/laguna-xs-2.1-gguf/bench-laguna-xs-2.1-dflash.ps1",
+      "notes": "Uses separate unmodified DFlash/prefill drafter files and a Linux CUDA runtime in Docker Desktop; it does not modify or rebrand Poolside's GGUF."
+    },
+    {
+      "id": "qwopus3.6-27b-coder-mtp-q4-k-m", "aliases": ["qwopus27-q4"], "name": "Qwopus3.6 27B Coder MTP Q4_K_M", "profileDir": "scripts/localai/qwopus3.6-27b-coder-mtp-gguf", "endpoint": "http://127.0.0.1:39186/v1", "modelAlias": "qwopus3.6-27b-coder-mtp-q4-k-m", "install": [{"path":"scripts/localai/qwopus3.6-27b-coder-mtp-gguf/download-qwopus3.6-27B-Coder-MTP-Q4.bat"}], "start": "scripts/localai/qwopus3.6-27b-coder-mtp-gguf/start-qwopus3.6-27b-coder-mtp-q4-server.bat", "benchmark": "scripts/localai/qwopus3.6-27b-coder-mtp-gguf/bench-qwopus3.6-27b-coder-mtp-q4-two-point.bat", "notes": "Requires a recent CUDA llama.cpp runtime in LLAMA_DIR." },
+    {
+      "id": "qwopus3.6-27b-coder-mtp-q5-k-m", "aliases": ["qwopus27", "qwopus27-q5"], "name": "Qwopus3.6 27B Coder MTP Q5_K_M", "profileDir": "scripts/localai/qwopus3.6-27b-coder-mtp-gguf", "endpoint": "http://127.0.0.1:39182/v1", "modelAlias": "qwopus3.6-27b-coder-mtp-q5-k-m", "install": [{"path":"scripts/localai/qwopus3.6-27b-coder-mtp-gguf/download-qwopus3.6-27B-Coder-MTP-Q5.bat"}], "start": "scripts/localai/qwopus3.6-27b-coder-mtp-gguf/start-qwopus3.6-27b-coder-mtp-q5-server.bat", "benchmark": null, "notes": "Requires a recent CUDA llama.cpp runtime in LLAMA_DIR." },
+    {
+      "id": "qwopus3.6-35b-a3b-coder-mtp-q4-k-m", "aliases": ["qwopus35", "qwopus35-q4"], "name": "Qwopus3.6 35B A3B Coder MTP Q4_K_M", "profileDir": "scripts/localai/qwopus3.6-35b-a3b-coder-mtp-gguf", "endpoint": "http://127.0.0.1:39193/v1", "modelAlias": "qwopus3.6-35b-a3b-coder-mtp-q4-k-m", "install": [{"path":"scripts/localai/qwopus3.6-35b-a3b-coder-mtp-gguf/download-qwopus3.6-35b-a3b-coder-mtp-q4-k-m.bat"}], "start": "scripts/localai/qwopus3.6-35b-a3b-coder-mtp-gguf/start-qwopus3.6-35b-a3b-coder-mtp-q4-k-m-server.bat", "benchmark": "scripts/localai/qwopus3.6-35b-a3b-coder-mtp-gguf/bench-qwopus3.6-35b-a3b-coder-mtp-q4-k-m-two-point.bat", "notes": "Requires a recent CUDA llama.cpp runtime in LLAMA_DIR." },
+    {
+      "id": "qwopus3.6-35b-a3b-coder-mtp-q5-k-m", "aliases": ["qwopus35-q5"], "name": "Qwopus3.6 35B A3B Coder MTP Q5_K_M", "profileDir": "scripts/localai/qwopus3.6-35b-a3b-coder-mtp-gguf", "endpoint": "http://127.0.0.1:39191/v1", "modelAlias": "qwopus3.6-35b-a3b-coder-mtp-q5-k-m", "install": [{"path":"scripts/localai/qwopus3.6-35b-a3b-coder-mtp-gguf/download-qwopus3.6-35b-a3b-coder-mtp-q5-k-m.bat"}], "start": "scripts/localai/qwopus3.6-35b-a3b-coder-mtp-gguf/start-qwopus3.6-35b-a3b-coder-mtp-q5-k-m-server.bat", "benchmark": "scripts/localai/qwopus3.6-35b-a3b-coder-mtp-gguf/bench-qwopus3.6-35b-a3b-coder-mtp-q5-k-m-two-point.bat", "notes": "Requires a recent CUDA llama.cpp runtime in LLAMA_DIR." },
+    {
+      "id": "qwen36-27b-nvfp4-mtp-gguf", "aliases": ["nvidia-qwen27"], "name": "NVIDIA Qwen3.6 27B NVFP4 MTP GGUF", "profileDir": "scripts/localai/qwen36-27b-nvfp4-gguf", "endpoint": "http://127.0.0.1:39195/v1", "modelAlias": "qwen36-27b-nvfp4-mtp-gguf", "install": [{"path":"scripts/localai/qwen36-27b-nvfp4-gguf/download-qwen36-27b-nvfp4.bat"},{"path":"scripts/localai/qwen36-27b-nvfp4-gguf/convert-qwen36-27b-nvfp4-to-gguf.bat","requires":["LLAMA_CPP_SRC"]}], "start": "scripts/localai/qwen36-27b-nvfp4-gguf/start-qwen36-27b-nvfp4-gguf-server.bat", "benchmark": "scripts/localai/qwen36-27b-nvfp4-gguf/bench-qwen36-27b-nvfp4-gguf-two-point.bat", "notes": "Conversion requires LLAMA_CPP_SRC pointing to a compatible llama.cpp checkout." },
+    {
+      "id": "qwen36-27b-unsloth-nvfp4-mtp-gguf", "aliases": ["unsloth-qwen27"], "name": "Unsloth Qwen3.6 27B NVFP4 MTP GGUF", "profileDir": "scripts/localai/qwen36-27b-unsloth-nvfp4-mtp-gguf", "endpoint": "http://127.0.0.1:39196/v1", "modelAlias": "qwen36-27b-unsloth-nvfp4-mtp-gguf", "install": [{"path":"scripts/localai/qwen36-27b-unsloth-nvfp4-mtp-gguf/download-qwen36-27b-unsloth-nvfp4.bat"},{"path":"scripts/localai/qwen36-27b-unsloth-nvfp4-mtp-gguf/convert-qwen36-27b-unsloth-nvfp4-to-gguf.bat","requires":["LLAMA_CPP_SRC"]}], "start": "scripts/localai/qwen36-27b-unsloth-nvfp4-mtp-gguf/start-qwen36-27b-unsloth-nvfp4-mtp-gguf-server.bat", "benchmark": "scripts/localai/qwen36-27b-unsloth-nvfp4-mtp-gguf/bench-qwen36-27b-unsloth-nvfp4-mtp-gguf-two-point.bat", "notes": "Conversion requires LLAMA_CPP_SRC and may require the checked-in mixed-NVFP4 converter patch." },
+    {
+      "id": "qwen36-27b-q4-k-m-dflash-q8-0", "aliases": ["qwen27-dflash"], "name": "Qwen3.6 27B Q4_K_M + DFlash Q8_0", "profileDir": "scripts/localai/qwen36-27b-dflash-gguf", "endpoint": "http://127.0.0.1:39201/v1", "modelAlias": "qwen36-27b-q4-k-m-dflash-q8-0", "install": [{"path":"scripts/localai/qwen36-27b-dflash-gguf/download-qwen36-27b-q4-k-m-target.bat"},{"path":"scripts/localai/qwen36-27b-dflash-gguf/download-qwen36-27b-dflash-q8-0.bat"},{"path":"scripts/localai/qwen36-27b-dflash-gguf/bootstrap-cuda-13.3-portable.bat"},{"path":"scripts/localai/qwen36-27b-dflash-gguf/build-buun-dflash-sm120-runtime.bat"}], "start": "scripts/localai/qwen36-27b-dflash-gguf/start-qwen36-27b-q4-k-m-dflash-q8-0-server.bat", "benchmark": "scripts/localai/qwen36-27b-dflash-gguf/bench-qwen36-27b-dflash-q8-0-two-point.bat", "notes": "Builds a pinned Windows CUDA 13.3 DFlash runtime for Blackwell." },
+    {
+      "id": "qwen36-35b-a3b-mtp-ud-q4-k-xl", "aliases": ["qwen35-q4", "unsloth-qwen35-q4"], "name": "Unsloth Qwen3.6 35B A3B MTP UD-Q4_K_XL", "profileDir": "scripts/localai/qwen36-35b-a3b-mtp-gguf", "endpoint": "http://127.0.0.1:39185/v1", "modelAlias": "qwen36-35b-a3b-mtp-ud-q4-k-xl", "install": [{"path":"scripts/localai/qwen36-35b-a3b-mtp-gguf/download-qwen36-35b-a3b-ud-q4-k-xl.bat"}], "start": "scripts/localai/qwen36-35b-a3b-mtp-gguf/start-qwen36-35b-a3b-mtp-ud-q4-k-xl-server.bat", "benchmark": "scripts/localai/qwen36-35b-a3b-mtp-gguf/bench-qwen36-35b-a3b-mtp-ud-q4-k-xl-two-point.bat", "notes": "Requires a recent CUDA llama.cpp runtime in LLAMA_DIR." },
+    {
+      "id": "qwen36-35b-a3b-nvfp4-mtp-gguf", "aliases": ["nvidia-qwen35"], "name": "NVIDIA Qwen3.6 35B A3B NVFP4 MTP GGUF", "profileDir": "scripts/localai/qwen36-35b-a3b-nvfp4-mtp-gguf", "endpoint": "http://127.0.0.1:39194/v1", "modelAlias": "qwen36-35b-a3b-nvfp4-mtp-gguf", "install": [{"path":"scripts/localai/qwen36-35b-a3b-nvfp4-mtp-gguf/download-qwen36-35b-a3b-nvfp4.bat"},{"path":"scripts/localai/qwen36-35b-a3b-nvfp4-mtp-gguf/convert-qwen36-35b-a3b-nvfp4-mtp-to-gguf.bat","requires":["LLAMA_CPP_SRC"]}], "start": "scripts/localai/qwen36-35b-a3b-nvfp4-mtp-gguf/start-qwen36-35b-a3b-nvfp4-mtp-gguf-server.bat", "benchmark": "scripts/localai/qwen36-35b-a3b-nvfp4-mtp-gguf/bench-qwen36-35b-a3b-nvfp4-mtp-gguf-two-point.bat", "notes": "Conversion requires LLAMA_CPP_SRC pointing to a compatible llama.cpp checkout." },
+    {
+      "id": "qwen36-35b-a3b-unsloth-nvfp4-mtp-gguf", "aliases": ["unsloth-qwen35-nvfp4"], "name": "Unsloth Qwen3.6 35B A3B NVFP4 MTP GGUF", "profileDir": "scripts/localai/qwen36-35b-a3b-unsloth-nvfp4-mtp-gguf", "endpoint": "http://127.0.0.1:39197/v1", "modelAlias": "qwen36-35b-a3b-unsloth-nvfp4-mtp-gguf", "install": [{"path":"scripts/localai/qwen36-35b-a3b-unsloth-nvfp4-mtp-gguf/download-qwen36-35b-a3b-unsloth-nvfp4.bat"},{"path":"scripts/localai/qwen36-35b-a3b-unsloth-nvfp4-mtp-gguf/convert-qwen36-35b-a3b-unsloth-nvfp4-to-gguf.bat","requires":["LLAMA_CPP_SRC"]}], "start": "scripts/localai/qwen36-35b-a3b-unsloth-nvfp4-mtp-gguf/start-qwen36-35b-a3b-unsloth-nvfp4-mtp-gguf-server.bat", "benchmark": "scripts/localai/qwen36-35b-a3b-unsloth-nvfp4-mtp-gguf/bench-qwen36-35b-a3b-unsloth-nvfp4-mtp-gguf-two-point.bat", "notes": "Conversion requires LLAMA_CPP_SRC and may require the mixed-NVFP4 converter patch." },
+    {
+      "id": "qwen36-35b-a3b-unsloth-nvfp4-fast-mtp-gguf", "aliases": ["unsloth-qwen35-fast"], "name": "Unsloth Qwen3.6 35B A3B NVFP4 Fast MTP GGUF", "profileDir": "scripts/localai/qwen36-35b-a3b-unsloth-nvfp4-mtp-gguf", "endpoint": "http://127.0.0.1:39202/v1", "modelAlias": "qwen36-35b-a3b-unsloth-nvfp4-fast-mtp-gguf", "install": [{"path":"scripts/localai/qwen36-35b-a3b-unsloth-nvfp4-mtp-gguf/download-qwen36-35b-a3b-unsloth-nvfp4-fast.bat"},{"path":"scripts/localai/qwen36-35b-a3b-unsloth-nvfp4-mtp-gguf/convert-qwen36-35b-a3b-unsloth-nvfp4-fast-to-gguf.bat","requires":["LLAMA_CPP_SRC"]},{"path":"scripts/localai/qwen36-35b-a3b-unsloth-nvfp4-mtp-gguf/install-llama-b10068-win-cuda13.bat"}], "start": "scripts/localai/qwen36-35b-a3b-unsloth-nvfp4-mtp-gguf/start-qwen36-35b-a3b-unsloth-nvfp4-fast-mtp-gguf-server.bat", "benchmark": "scripts/localai/qwen36-35b-a3b-unsloth-nvfp4-mtp-gguf/bench-qwen36-35b-a3b-unsloth-nvfp4-fast-mtp-gguf-two-point.bat", "notes": "Conversion requires LLAMA_CPP_SRC; installs the profile's pinned llama.cpp runtime." },
+    {
+      "id": "thinkingcap-qwen36-27b-q4-k-m", "aliases": ["thinkingcap"], "name": "ThinkingCap Qwen3.6 27B Q4_K_M", "profileDir": "scripts/localai/thinkingcap-qwen36-27b-gguf", "endpoint": "http://127.0.0.1:39198/v1", "modelAlias": "thinkingcap-qwen36-27b-q4-k-m", "install": [{"path":"scripts/localai/thinkingcap-qwen36-27b-gguf/download-thinkingcap-qwen36-27b-q4-k-m.bat"}], "start": "scripts/localai/thinkingcap-qwen36-27b-gguf/start-thinkingcap-qwen36-27b-q4-k-m-server.bat", "benchmark": "scripts/localai/thinkingcap-qwen36-27b-gguf/bench-thinkingcap-qwen36-27b-q4-k-m-two-point.bat", "notes": "The upstream GGUF already contains its MTP head; requires a recent CUDA llama.cpp runtime." },
+    {
+      "id": "ternary-bonsai-27b-dspark-q4-1", "aliases": ["ternary-bonsai", "bonsai"], "name": "Ternary-Bonsai 27B + DSpark Q4_1", "profileDir": "scripts/localai/ternary-bonsai-27b-gguf", "endpoint": "http://127.0.0.1:39199/v1", "modelAlias": "ternary-bonsai-27b-dspark-q4-1", "install": [{"path":"scripts/localai/ternary-bonsai-27b-gguf/build-prism-llamacpp-sm120-runtime.bat"},{"path":"scripts/localai/ternary-bonsai-27b-gguf/download-ternary-bonsai-27b-dspark-q4-1.bat"}], "start": "scripts/localai/ternary-bonsai-27b-gguf/start-ternary-bonsai-27b-dspark-q4-1-server.bat", "benchmark": "scripts/localai/ternary-bonsai-27b-gguf/bench-ternary-bonsai-27b-dspark-q4-1-two-point.bat", "notes": "DSpark is limited to a 16,384-token serving context in this profile." },
+    {
+      "id": "ornith-1.0-35b-q4-k-m", "aliases": ["ornith-q4"], "name": "Ornith 1.0 35B Q4_K_M", "profileDir": "scripts/localai/ornith-1.0-35b-gguf", "endpoint": "http://127.0.0.1:39188/v1", "modelAlias": "ornith-1.0-35b-q4-k-m", "install": [{"path":"scripts/localai/ornith-1.0-35b-gguf/download-ornith-1.0-35b-q4-k-m.bat"}], "start": "scripts/localai/ornith-1.0-35b-gguf/start-ornith-1.0-35b-q4-k-m-server.bat", "benchmark": "scripts/localai/ornith-1.0-35b-gguf/bench-ornith-1.0-35b-q4-k-m-two-point.bat", "notes": "Reasoning is enabled by default; requires a recent CUDA llama.cpp runtime." },
+    {
+      "id": "ornith-1.0-35b-q5-k-m", "aliases": ["ornith", "ornith-q5"], "name": "Ornith 1.0 35B Q5_K_M", "profileDir": "scripts/localai/ornith-1.0-35b-gguf", "endpoint": "http://127.0.0.1:39189/v1", "modelAlias": "ornith-1.0-35b-q5-k-m", "install": [{"path":"scripts/localai/ornith-1.0-35b-gguf/download-ornith-1.0-35b-q5-k-m.bat"}], "start": "scripts/localai/ornith-1.0-35b-gguf/start-ornith-1.0-35b-q5-k-m-server.bat", "benchmark": "scripts/localai/ornith-1.0-35b-gguf/bench-ornith-1.0-35b-q5-k-m-two-point.bat", "notes": "Reasoning is enabled by default; requires a recent CUDA llama.cpp runtime." }
+  ]
+}
