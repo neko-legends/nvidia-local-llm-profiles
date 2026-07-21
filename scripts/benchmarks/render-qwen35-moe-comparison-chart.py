@@ -15,10 +15,10 @@ OUTPUT_DIR = ROOT / "assets" / "images"
 OUTPUT_SVG_PATH = OUTPUT_DIR / "rtx-5090-qwen35-moe-vs-qwopus.svg"
 OUTPUT_PNG_PATH = OUTPUT_DIR / "rtx-5090-qwen35-moe-vs-qwopus.png"
 TIMING_CSV = RESULTS_DIR / "generation-timing-breakdowns-20260624.csv"
-CHART_TITLE = "RTX 5090 Native llama.cpp Long-Context Comparison"
+CHART_TITLE = "RTX 5090 Local GGUF Long-Context Comparison"
 CHART_SUBTITLE = "Bars are generation/decode speed only; prompt prefill seconds are shown separately."
-CHART_NOTE = "Native GGUF endpoints only. Updated July 21, 2026; Docker/vLLM and UI-observed rows are intentionally excluded."
-CHART_FOOTER = "Same BookContext prompt family, up to 1024 generated tokens, temperature 0 unless noted in timing CSV."
+CHART_NOTE = "GGUF endpoints only. Updated July 21, 2026; vLLM and UI-observed rows are intentionally excluded."
+CHART_FOOTER = "BookContext except labeled Laguna DFlash CodeContext rows; up to 1024 generated tokens, temperature 0."
 
 
 @dataclass(frozen=True)
@@ -38,6 +38,13 @@ MODEL_SPECS = [
         "Poolside Laguna XS 2.1 Q4_K_M (base)",
         "#ff5aa7",
         prompt_mode="OpenAI-compatible endpoint; no draft model",
+    ),
+    ModelSpec(
+        "poolside/Laguna-XS-2.1-GGUF + Lucebox/Laguna-XS-2.1-DFlash-GGUF",
+        "Laguna-XS-2.1-Q4_K_M.gguf + laguna-xs21-dflash-q4.gguf",
+        "Laguna XS 2.1 + DFlash/KVFlash (CodeContext)",
+        "#5dd6ff",
+        prompt_mode="CodeContext; DFlash speculative drafter",
     ),
     ModelSpec(
         "deepreinforce-ai/Ornith-1.0-35B-GGUF",
