@@ -29,6 +29,7 @@ class ModelSpec:
     color: str
     highlight: bool = False
     prompt_mode: str | None = None
+    label_color: str | None = None
 
 
 MODEL_SPECS = [
@@ -36,15 +37,19 @@ MODEL_SPECS = [
         "poolside/Laguna-XS-2.1-GGUF",
         "Laguna-XS-2.1-Q4_K_M.gguf",
         "Poolside Laguna XS 2.1 Q4_K_M (base)",
-        "#ff5aa7",
+        "#ff8a2a",
+        highlight=True,
         prompt_mode="OpenAI-compatible endpoint; no draft model",
+        label_color="#ff8a2a",
     ),
     ModelSpec(
         "poolside/Laguna-XS-2.1-GGUF + Lucebox/Laguna-XS-2.1-DFlash-GGUF",
         "Laguna-XS-2.1-Q4_K_M.gguf + laguna-xs21-dflash-q4.gguf",
         "Laguna XS 2.1 + DFlash/KVFlash (CodeContext)",
-        "#5dd6ff",
+        "#ff8a2a",
+        highlight=True,
         prompt_mode="CodeContext; DFlash speculative drafter",
+        label_color="#ff8a2a",
     ),
     ModelSpec(
         "deepreinforce-ai/Ornith-1.0-35B-GGUF",
@@ -187,6 +192,7 @@ def latest_rows_by_spec() -> list[dict[str, object]]:
                     "color": spec.color,
                     "file": spec.file,
                     "highlight": spec.highlight,
+                    "label_color": spec.label_color,
                 }
             )
 
@@ -265,7 +271,8 @@ def render_svg(rows: list[dict[str, object]], scale_max: int) -> Path:
         value = float(row["tps"])
         bar_w = (value / scale_max) * plot_w
         label_class = "label-highlight" if row.get("highlight") else "label"
-        parts.append(svg_text(left - 30, ypos - 5, str(row["label"]), class_=label_class, text_anchor="end"))
+        label_style = f'fill:{row["label_color"]}' if row.get("label_color") else ""
+        parts.append(svg_text(left - 30, ypos - 5, str(row["label"]), class_=label_class, text_anchor="end", style=label_style))
         parts.append(svg_text(left - 30, ypos + 17, str(row["detail"]), class_="detail", text_anchor="end"))
         parts.append(f'<rect x="{left}" y="{ypos - 26}" width="{bar_w:.1f}" height="{bar_h}" rx="5" fill="{row["color"]}" opacity="0.95"/>')
         parts.append(f'<rect x="{left}" y="{ypos - 26}" width="{bar_w:.1f}" height="{bar_h}" rx="5" fill="none" stroke="#d9fff8" stroke-opacity="0.50"/>')
@@ -340,7 +347,7 @@ def render_png(rows: list[dict[str, object]], scale_max: int) -> Path:
         label = str(row["label"])
         detail = str(row["detail"])
         current_label_font = label_highlight_font if row.get("highlight") else label_font
-        label_fill = "#ff4d4d" if row.get("highlight") else "#edf3f7"
+        label_fill = str(row.get("label_color") or ("#ff4d4d" if row.get("highlight") else "#edf3f7"))
         bbox = draw.textbbox((0, 0), label, font=current_label_font)
         draw.text((left - 30 - (bbox[2] - bbox[0]), ypos - 31), label, fill=label_fill, font=current_label_font)
         bbox = draw.textbbox((0, 0), detail, font=detail_font)
