@@ -23,8 +23,9 @@ rem                Higher raw tok/s (structures text is easier for speculative
 rem                drafts to predict) but adds latency before useful output.
 rem ============================================================
 set "SCRIPT_DIR=%~dp0"
-set "LLAMA_DIR=D:\Tools\llama.cpp-b9267-cuda13.1"
-set "MODEL_PATH=%SCRIPT_DIR%models\Qwopus3.6-27B-Coder-MTP-Q5_K_M.gguf"
+for %%I in ("%SCRIPT_DIR%..\..\..\..") do set "CHECKOUT_PARENT=%%~fI"
+if not defined LLAMA_DIR set "LLAMA_DIR=D:\Tools\llama.cpp-b9267-cuda13.1"
+if not defined MODEL_PATH set "MODEL_PATH=%CHECKOUT_PARENT%\.local-model-cache\Jackrong\Qwopus3.6-27B-Coder-MTP-GGUF\Qwopus3.6-27B-Coder-MTP-Q5_K_M.gguf"
 set "MODEL_ALIAS=qwopus3.6-27b-coder-mtp-q5-k-m"
 set "HOST=0.0.0.0"
 set "PORT=39182"
